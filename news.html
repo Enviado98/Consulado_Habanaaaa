@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noticias — Consulado de La Habana</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header small">
+    <div class="container nav-wrapper">
+      <div class="logo-area">
+        <div class="flag">📰</div>
+        <div>
+          <h1>Noticias Consulares</h1>
+          <p>Últimas actualizaciones — portal de demostración</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="news.html" class="active">Noticias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="topbar">
+        <h2>Listado de Noticias</h2>
+        <div>
+          <button class="btn primary" id="addNews">+ Nueva Noticia</button>
+          <button class="btn" id="clearNews">Limpiar Todo</button>
+        </div>
+      </div>
+      <ul id="newsList" class="news-list"></ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 Consulado de La Habana — Portal Demo</p>
+    </div>
+  </footer>
+
+  <script src="news_script.js"></script>
+</body>
+</html>
