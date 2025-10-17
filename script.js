@@ -6,7 +6,7 @@ const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
 // ----------------------------------------------------
 
-// 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
+// 🚨 CREDENCIALES DE ADMINISTRADOR (¡CÁMBIALAS POR SEGURIDAD!) 🚨
 const ADMIN_USER = "Admin"; 
 const ADMIN_PASS = "54321"; 
 // ----------------------------------------------------
@@ -36,7 +36,7 @@ if (!userWebId) {
     localStorage.setItem('userWebId', userWebId);
 }
 
-// Elementos del DOM (Añadidos los elementos de Login)
+// Elementos del DOM (Simplificado)
 const DOMElements = {
     body: document.body,
     contenedor: document.getElementById('contenedor'),
@@ -48,20 +48,20 @@ const DOMElements = {
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
-    
     // ⭐ NUEVOS ELEMENTOS DE LOGIN ⭐
     loginFormContainer: document.getElementById('loginFormContainer'),
     adminUser: document.getElementById('adminUser'),
     adminPass: document.getElementById('adminPass'),
     loginAdminBtn: document.getElementById('loginAdminBtn'),
     loginMessage: document.getElementById('loginMessage'),
-    
+    // ⭐ FIN ELEMENTOS DE LOGIN ⭐
     statusMessage: document.getElementById('statusMessage'),
     toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
+    // ⭐ NUEVOS ELEMENTOS DEL PANEL DE ESTADO UNIFICADO ⭐
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
     lastEditedTime: document.getElementById('lastEditedTime')
@@ -111,67 +111,62 @@ function timeAgo(timestamp) {
 
 
 // ----------------------------------------------------
-// FUNCIONES DE LOGIN Y UI (MODIFICADAS)
+// FUNCIONES DE UI Y LOGIN (MODIFICADAS)
 // ----------------------------------------------------
 
 /**
- * Maneja el proceso de inicio de sesión verificando las credenciales.
+ * @function handleAdminLogin
+ * Maneja la lógica de inicio de sesión al presionar el botón de Login.
  */
-function handleLogin() {
-    const user = DOMElements.adminUser.value.trim();
-    const pass = DOMElements.adminPass.value.trim();
+function handleAdminLogin() {
+    const user = DOMElements.adminUser.value;
+    const pass = DOMElements.adminPass.value;
 
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        DOMElements.loginMessage.style.display = 'none';
-        DOMElements.adminUser.value = '';
-        DOMElements.adminPass.value = '';
-        DOMElements.loginFormContainer.style.display = 'none'; // Ocultar form
-        DOMElements.toggleAdminBtn.style.display = 'block'; // Mostrar botón SALIR
-        updateAdminUI(true);
+        DOMElements.loginMessage.style.display = "none";
+        DOMElements.loginFormContainer.style.display = "none";
+        DOMElements.toggleAdminBtn.style.display = "block"; // Muestra el botón de "ACTIVAR MODO EDICIÓN"
+        DOMElements.toggleAdminBtn.click(); // Simula el click para activar el modo edición (y mostrar los controles)
     } else {
         DOMElements.loginMessage.textContent = "Usuario o Contraseña incorrectos.";
-        DOMElements.loginMessage.style.display = 'block';
-        DOMElements.adminPass.value = ''; // Limpiar solo la contraseña
-        DOMElements.adminUser.focus();
+        DOMElements.loginMessage.style.display = "block";
+        DOMElements.adminPass.value = "";
     }
 }
 
-/**
- * Actualiza la interfaz de usuario al entrar o salir del modo administrador.
- */
+
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
-        
-        DOMElements.loginFormContainer.style.display = "none";
-        DOMElements.toggleAdminBtn.style.display = "block";
-        
+        // Oculta el formulario de login y muestra el panel de controles
+        DOMElements.loginFormContainer.style.display = "none"; 
         DOMElements.adminControlsPanel.style.display = "flex";
+        
         DOMElements.statusMessage.textContent = "✅ Modo de Edición Activado. ¡No olvides guardar!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
         DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
         DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
-        enableEditing(); 
+        DOMElements.toggleAdminBtn.style.display = "block"; // Asegura que esté visible
         
-        // Alerta solo después de la transición de la UI
-        alert("✅ Modo de Edición Activado. ¡No olvides guardar!");
+        enableEditing(); 
     } else {
         DOMElements.body.classList.remove('admin-mode');
         
-        DOMElements.loginFormContainer.style.display = "flex"; // Mostrar form
-        DOMElements.toggleAdminBtn.style.display = "none"; // Ocultar botón SALIR
-        DOMElements.loginMessage.style.display = 'none'; // Limpiar mensaje de error
-        
+        // Muestra el formulario de login y oculta el panel de controles
+        DOMElements.loginFormContainer.style.display = "flex";
+        DOMElements.toggleAdminBtn.style.display = "none"; // Oculta el botón de Salir/Activar
         DOMElements.adminControlsPanel.style.display = "none";
+        
         DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
         DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
         DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
+        
         disableEditing(); 
     }
     
-    // ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN
+    // ⭐ ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN ⭐
     if (isAdmin) {
         DOMElements.statusPanel.classList.add('admin-mode');
         renderStatusPanel(currentStatus, true); 
@@ -181,18 +176,33 @@ function updateAdminUI(isAdmin) {
     }
 }
 
-/**
- * Maneja el cierre de sesión (llamado al hacer clic en el botón "SALIR").
- */
+// Función de alternancia de modo de edición (Reemplaza login y logout)
 function toggleAdminMode() {
-    if (!admin) return; // Si no es admin, no hacemos nada (el botón debería estar oculto)
-    
-    if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición? Los cambios no guardados se perderán.")) {
-        return;
+    if (!admin) {
+        // Si no está logeado, el botón de "ACTIVAR" debe estar visible para que lo usen
+        // si ya pasaron la credencial (pero si no está logeado, este botón está oculto por defecto).
+        
+        // Nota: Con el nuevo flujo, este botón solo es clickeable una vez logeado,
+        // así que si se clickea y admin es false, es que el login falló o algo. 
+        
+        // Si el botón se clickea cuando admin es false, significa que el usuario ya pasó el login y quiere activar la edición.
+        // Pero en la implementación actual, `handleAdminLogin` hace el toggle inicial.
+        // Simplificaremos: Si llega aquí con `admin=false`, es porque el login fue exitoso y quiere entrar en edición.
+        if (DOMElements.loginFormContainer.style.display !== "none") {
+            alert("Por favor, inicia sesión primero.");
+            return;
+        }
+        
+        updateAdminUI(true);
+        alert("✅ Modo de Edición Activado. ¡No olvides guardar!");
+    } else {
+        if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición? Los cambios no guardados se perderán.")) {
+            return;
+        }
+        updateAdminUI(false);
+        loadData(); // Recargar datos para descartar cambios
+        loadStatusData(); // Recargar datos de estado para descartar cambios
     }
-    updateAdminUI(false);
-    loadData(); // Recargar datos para descartar cambios
-    loadStatusData(); // Recargar datos de estado para descartar cambios
 }
 
 function enableEditing() {
@@ -538,7 +548,7 @@ async function deleteNews() {
 // ----------------------------------------------------
 // LÓGICA DE COMENTARIOS, HILOS Y LIKES 
 // ----------------------------------------------------
-// (Omite detalle de funciones de comentarios, se asume que funcionan)
+// (Se omite el detalle de las funciones de comentarios, ya que se asume que funcionan)
 
 function generateColorByName(str) {
     let hash = 0;
@@ -729,7 +739,7 @@ async function publishComment() {
 
     } catch (error) {
         console.error("Error al publicar el comentario:", error);
-        alert("❌ Error al publicar en Supabase. Revisa RLS.");
+        alert("❌ Error al publicar en Supabase. Revisa RLS de INSERT.");
     } finally {
         DOMElements.publishCommentBtn.disabled = false;
         DOMElements.publishCommentBtn.textContent = "Publicar Comentario";
@@ -767,7 +777,7 @@ async function handlePublishReply(event) {
 
     } catch (error) {
         console.error("Error al publicar la respuesta:", error);
-        alert("❌ Error al publicar la respuesta. Revisa RLS.");
+        alert("❌ Error al publicar la respuesta. Revisa RLS de INSERT.");
     } finally {
         event.target.disabled = false;
         event.target.textContent = "Publicar Respuesta";
@@ -909,7 +919,7 @@ async function getAndDisplayViewCount() {
 }
 
 // ----------------------------------------------------
-// FUNCIONES DE CARGA Y RENDERIZADO DEL PANEL DE ESTADO 
+// FUNCIONES DE CARGA Y RENDERIZADO DEL PANEL DE ESTADO ⭐ MODIFICADO ⭐
 // ----------------------------------------------------
 
 function renderStatusPanel(status, isAdminMode) {
@@ -928,7 +938,7 @@ function renderStatusPanel(status, isAdminMode) {
     DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${latestTimeText}`;
     
     if (isAdminMode) {
-        // Modo Admin: Campos de Input (Estos se ven verticales o en grid dependiendo del CSS)
+        // Modo Admin: Campos de Input
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item">
                 <span class="label">Deficit Eléctrico (MW):</span>
@@ -944,7 +954,7 @@ function renderStatusPanel(status, isAdminMode) {
             </div>
         `;
     } else {
-        // Modo Público: Vista Estilizada (Esta DEBE verse horizontal si el styles.css es el correcto)
+        // Modo Público: Vista Estilizada
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item deficit">
                 <span class="label">🔌 Déficit Estimado:</span>
@@ -988,7 +998,7 @@ async function loadStatusData() {
 }
 
 // ----------------------------------------------------
-// FUNCIONES CLAVE DE PERSISTENCIA
+// FUNCIONES CLAVE DE PERSISTENCIA (Modificada para Edición Completa y Status)
 // ----------------------------------------------------
 
 async function loadData() {
@@ -1148,16 +1158,15 @@ function updateHeaderTime() {
 }
 
 
-// ----------------------------------------------------\
+// ----------------------------------------------------
 // MANEJO DE EVENTOS Y CARGA INICIAL
 // ----------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ⭐ NUEVO LISTENER PARA EL BOTÓN DE LOGIN ⭐
-    DOMElements.loginAdminBtn.addEventListener('click', handleLogin);
+    // ⭐ NUEVO EVENT LISTENER PARA EL LOGIN ⭐
+    DOMElements.loginAdminBtn.addEventListener('click', handleAdminLogin);
     
-    // Listener para el botón "SALIR DEL MODO EDICIÓN"
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     
     DOMElements.saveBtn.addEventListener('click', saveChanges);
