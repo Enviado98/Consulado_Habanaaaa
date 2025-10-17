@@ -34,26 +34,34 @@
     <div id="statusDataContainer" class="status-panel-data">
         Cargando datos de estado...
     </div>
-    <div class="status-panel-info">
-        La información aquí se actualizará de manera constante para actualizar la información
+</div>
+<div id="newsTicker" class="news-ticker-container" style="display:none;">
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+    <div class="news-ticker-wrap">
+        <div id="newsTickerContent" class="news-ticker-content">
+            </div>
     </div>
-    
-    <form id="adminLoginForm" class="admin-login-form">
-        <input type="text" id="adminUser" placeholder="Usuario" required aria-label="Usuario">
-        <input type="password" id="adminPass" placeholder="Contraseña" required aria-label="Contraseña">
-        <button type="submit" class="primary-admin-btn">🔑 ACCEDER (Modo Edición)</button>
-        <p id="loginMessage" style="color: var(--acento-rojo); margin-top: 5px; display: none; font-weight: 700;">Credenciales incorrectas.</p>
-    </form>
-    <div id="adminControlsPanel" style="display: none;"> <div class="admin-group">
-            <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
-        </div>
-        <div class="admin-group">
-            <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
-            <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
-        </div>
-        
-        <button id="exitAdminBtn" class="primary-admin-btn" style="margin-top: 10px;">❌ SALIR DEL MODO EDICIÓN </button>
+</div>
 
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
+            Accede a modo edición para actualizar la información
+  </div>
+  
+  <div id="adminLoginForm">
+      <input type="text" id="adminUsername" placeholder="Usuario" aria-label="Usuario Administrador" required>
+      <input type="password" id="adminPassword" placeholder="Contraseña" aria-label="Contraseña Administrador" required>
+      <button id="loginAdminBtn" class="primary-admin-btn">🛡️ ACCEDER AL MODO EDICIÓN</button>
+      <p id="loginError" style="color: red; margin-top: 10px; display:none;">Usuario o Contraseña incorrectos.</p>
+  </div>
+  <div id="adminControlsPanel" style="display:none;"> 
+    <div class="admin-group">
+        <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
+    </div>
+    <div class="admin-group">
+        <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
+        <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
+    </div>
     </div>
 </div>
 
@@ -77,9 +85,8 @@
 </section>
 
 <footer>
-    <div>© 2025 Consulado – Todos los derechos reservados.</div>
+  <div>© 2025 Consulado – Información actualizada periódicamente.</div>
 </footer>
-
 
 <script type="module" src="script.js"></script>
 
