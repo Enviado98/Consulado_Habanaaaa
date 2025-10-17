@@ -1,88 +1,649 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
+/* ----------------------------------------------------------------
+   ESTILOS BASE - FUSIONADOS Y OPTIMIZADOS
+   ---------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
-<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="styles.css"> 
-<style id="dynamicTickerStyles"></style>
-
-</head>
-<body>
-
-<header>
-  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
-  <p>Información de plazos y fechas aproximadas al <span id="fecha-actualizacion">Cargando...</span></p>
-  <div class="header-action-container">
-    <a href="news.html" class="news-btn-v2" role="button">🔴 Noticias aquí 👈🏻</a>
-  </div>
+:root {
+  --color-texto-principal: #2b2d42; /* Azul Oscuro */
+  --color-texto-secundario: #8d99ae; /* Gris Suave */
+  --acento-rojo: #ef233c; /* Rojo Consular */
+  --acento-verde: #0d9488; /* Verde Guardar */
   
-  <div id="viewCounter" class="view-counter" aria-live="polite">
-    </div>
+  /* ⭐ MODIFICADO: FONDO VERDE CLARO PARA LA WEB ⭐ */
+  --fondo-principal: #e6ffe6; 
+  --fondo-gradiente: var(--fondo-principal); 
+  
+  --sombra-fuerte: rgba(0, 0, 0, 0.25);
+  --sombra-suave: rgba(0, 0, 0, 0.1);
+  /* Glassmorphism settings - CLAVE PARA LA 'BELLEZA' */
+  --glass-bg: rgba(255, 255, 255, 0.4); 
+  --glass-border: rgba(255, 255, 255, 0.6); 
+  /* Nuevo color de acento cian */
+  --acento-cian: #00bcd4; 
+  /* Colores para el panel de tiempo */
+  --tiempo-panel-rojo: #f7a2ab; 
+  --tiempo-panel-cian: #a2d9e0; 
 
-</header>
+  /* NUEVOS COLORES PARA COMENTARIOS */
+  --color-comentario-fondo: #f8f9fa; /* Fondo Comentario Principal */
+  --color-respuesta-fondo: #f0f3f5; /* Fondo Respuesta */
+  --color-borde-hilo: #b3cdd1; /* Cian Suave para la línea del hilo */
+  
+  /* ⭐ MODIFICADO: Fondo Amarillo Intenso para el panel de estado ⭐ */
+  --fondo-panel-status: #FFD700; 
+  --borde-panel-status: #ff9800;
+}
 
-<div id="statusPanel" class="status-panel-container">
-    <div class="status-panel-header">
-        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
-        <span id="lastEditedTime">Última edición: ---</span>
-    </div>
-    <div id="statusDataContainer" class="status-data-container">
-        </div>
+body {
+  margin: 0;
+  padding: 0; 
+  font-family: 'Nunito', sans-serif;
+  background: var(--fondo-gradiente); /* Usa el nuevo color verde claro */
+  color: var(--color-texto-principal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden; 
+}
+
+/* --- HEADER --- */
+header {
+  width: 100%;
+  text-align: center;
+  padding: 1rem; 
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  color: white;
+  box-shadow: 0 4px 10px var(--sombra-fuerte);
+}
+header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
+header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
+#fecha-actualizacion { font-weight: 900; color: #ffd700; }
+
+/* ----------------------------------------------------------------
+   PANEL DE ESTADO DINÁMICO UNIFICADO (Horizontal Original)
+   ---------------------------------------------------------------- */
+.status-panel-container {
+    width: 95%;
+    max-width: 800px;
+    margin: 15px auto;
+    background-color: var(--fondo-panel-status);
+    border: 2px solid var(--borde-panel-status);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: var(--color-texto-principal);
+    font-weight: 700;
+    box-shadow: 0 4px 8px var(--sombra-suave);
+    padding: 10px 15px;
+    text-align: center; 
+}
+
+.status-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+    font-size: 0.8rem;
+    color: #555;
+}
+
+#lastEditedTime {
+    background-color: var(--acento-rojo); 
+    color: white; 
+    border-radius: 6px; 
+    padding: 3px 6px;
+    font-size: 0.7rem; 
+    font-weight: 700;
+    line-height: 1.1; 
+    display: inline-block;
+}
+
+/* ⭐ CLAVE: ESTE CONTENEDOR DEBE SER FLEX EN FILA PARA EL LAYOUT HORIZONTAL ⭐ */
+.status-data-container {
+    display: flex;
+    justify-content: space-around; /* Distribución uniforme */
+    align-items: flex-start;
+    flex-wrap: nowrap; /* Mantiene los ítems en una fila */
+    gap: 10px;
+    padding: 5px 0;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 8px;
+    border-radius: 8px;
+    min-width: 120px;
+    flex-grow: 1; 
+    flex-basis: 0; 
+}
+
+/* Estilos de valores específicos */
+.status-item .value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 900;
+    margin-top: 5px;
+}
+
+.status-item.deficit .value {
+    color: var(--acento-rojo); 
+}
+.status-item.divisa .value {
+    color: #008000; /* Verde para divisas */
+}
+
+.status-item .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 2px;
+}
+.status-message {
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+
+/* Modo Admin: Campos de edición (Aseguramos que se mantenga el Flex para la edición) */
+.status-panel-container.admin-mode {
+    border: 2px dashed var(--acento-rojo); 
+    padding: 15px;
+}
+/* ⭐ IMPORTANTE: El status-data-container en admin mode debe permitir envolver si es necesario pero mantener la estructura flex ⭐ */
+.status-panel-container.admin-mode .status-data-container {
+    flex-direction: row; 
+    flex-wrap: wrap; 
+    gap: 10px;
+}
+.status-panel-container.admin-mode .status-item {
+    width: 31%; /* Para que quepan 3 en fila */
+    flex-direction: column; 
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+.status-panel-container.admin-mode input {
+    border: 1px solid var(--acento-rojo);
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    width: 100%;
+    margin-top: 5px;
+}
+.status-panel-container.admin-mode .status-item .label {
+    color: var(--color-texto-principal);
+    font-size: 0.85rem;
+}
+
+
+/* ----------------------------------------------------------------
+   PANCARTA DE NOTICIAS (NEWS TICKER) 
+   ---------------------------------------------------------------- */
+.news-ticker-container {
+    width: 100%;
+    background: linear-gradient(90deg, #d90429 0%, var(--acento-rojo) 100%); 
+    color: white;
+    box-shadow: 0 2px 5px var(--sombra-fuerte);
+    overflow: hidden; 
+    padding: 5px 0;
+    margin-bottom: 15px; 
+    display: flex; 
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.5); 
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3); 
+    position: sticky;
+    top: 0;
+    z-index: 998; 
+}
+.news-ticker-fixed-label {
+    font-weight: 900; 
+    margin-right: 10px; 
+    padding: 0 10px; 
+    font-size: 0.8rem; 
+    background-color: rgba(0, 0, 0, 0.35); 
+    border-radius: 4px;
+    flex-shrink: 0;
+    line-height: 1.2;
+    z-index: 2; 
+}
+.news-ticker-wrap { overflow: hidden; flex-grow: 1; position: relative; height: 100%; }
+.news-ticker-content { white-space: nowrap; font-size: 0.9rem; display: inline-block; }
+.news-item { padding: 0 20px; display: inline-block; color: #f8f9fa; font-weight: 700; text-shadow: 0 0 2px rgba(0, 0, 0, 0.4); }
+.news-item small { font-weight: 600; opacity: 0.9; margin-left: 5px; font-size: 0.8rem; color: #1a1a1a; background-color: #ffc107; padding: 2px 5px; border-radius: 4px;}
+.news-item a { color: #ffcc00; text-decoration: underline; font-weight: 800; }
+@keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+
+/* ----------------------------------------------------------------
+   LOGIN Y ADMIN CONTROLES (AJUSTES PARA LA ORIGINALIDAD)
+   ---------------------------------------------------------------- */
+
+/* ⭐ NUEVO: Contenedor para inputs de login horizontales ⭐ */
+.login-input-row {
+    display: flex;
+    gap: 8px; /* Espacio entre los inputs */
+    width: 100%;
+}
+.login-input-row input {
+    flex-grow: 1; /* Ambos inputs ocupan el mismo espacio */
+    min-width: 0; /* Permite que el flexbox los reduzca */
+}
+
+/* Estilos para el formulario de Login */
+.login-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 350px;
+    margin: 5px auto 10px; 
+}
+.login-form-container input {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+
+/* ⭐ AJUSTES PARA BOTONES: Asegurar que primary-admin-btn sea consistente ⭐ */
+.primary-admin-btn {
+    background: #4f46e5; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    padding: 8px 10px; 
+    cursor: pointer;
+    font-size: 0.9rem; 
+    font-weight: 800; 
+    transition: all 0.3s ease; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra para resaltar */
+}
+.primary-admin-btn:hover {
+    background-color: #3b30ad;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Estilo para el botón de SALIR (es un primary-admin-btn con color rojo) */
+#toggleAdminBtn[style*="acento-rojo"] { 
+    background-color: var(--acento-rojo) !important; 
+}
+#toggleAdminBtn[style*="acento-rojo"]:hover {
+    background-color: #c71e30 !important;
+}
+
+
+/* ⭐ AJUSTES PARA LOS BOTONES ADMIN (Los de color blanco/gris) ⭐ */
+.admin-btn {
+    background-color: white; 
+    color: var(--color-texto-principal);
+    border: 1px solid #ccc; 
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.85rem; 
+    font-weight: 700;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.admin-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #aaa;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+/* Modificación del botón de activar/salir para que use el mismo estilo pero centrado */
+#toggleAdminBtn { 
+    width: 100%;
+    max-width: 350px; 
+    margin: 0 auto 10px; 
+    display: block; 
+}
+
+/* Panel de Administracion */
+#adminControlsPanel { 
+    display: none; justify-content: center; align-items: center; gap: 10px; padding: 10px 0 0; width: 100%; flex-wrap: wrap; 
+}
+#adminControlsPanel button { font-size: 0.85rem; padding: 8px 12px; flex-grow: 1; min-width: 130px; }
+
+/* El botón de Guardar es un admin-btn con color de fondo especial */
+#saveBtn { 
+    background-color: var(--acento-verde); 
+    color: white;
+    font-weight: 800;
+    min-width: 95%; 
+    padding: 12px 15px;
+    font-size: 0.95rem; 
+    border: none;
+} 
+#saveBtn:hover { 
+    background-color: #0c8075; 
+    border: none;
+} 
+
+/* NUEVO: Agrupación de botones para diseño */
+.admin-group {
+    display: flex;
+    gap: 10px;
+    width: 100%; 
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}
+.admin-group button {
+    flex-grow: 0;
+    flex-basis: auto; 
+    width: 48%; /* Para que dos quepan en una línea */
+    min-width: 150px;
+}
+.admin-group:first-child { margin-bottom: 10px; } 
+
+
+/* ----------------------------------------------------------------
+   TARJETAS (CARDS)
+   ---------------------------------------------------------------- */
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+  gap: 12px; 
+  width: 95%;
+  max-width: 800px; 
+  padding: 20px; 
+}
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); 
+  border: 1px solid var(--glass-border);
+  border-radius: 16px; 
+  box-shadow: 0 6px 15px var(--sombra-suave);
+  padding: 10px; 
+  padding-top: 20px; 
+  text-align: center;
+  color: var(--color-texto-principal);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, background 0.3s; 
+  min-height: 120px; 
+  display: flex;
+  flex-direction: column;
+  position: relative; 
+  cursor: pointer; 
+  overflow: hidden; 
+}
+
+/* --- ESTILOS DE ESTADO --- */
+.card-recent:not(.admin-mode) {
+    background: rgba(239, 35, 60, 0.1); 
+    box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
+    border: 1px solid rgba(239, 35, 60, 0.4); 
+}
+.card-old:not(.admin-mode) {
+    background: rgba(0, 188, 212, 0.1); 
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.4), 0 6px 15px var(--sombra-suave);
+    border: 1px solid rgba(0, 188, 212, 0.3); 
+}
+.card:hover:not(.admin-mode) {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.5); 
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+.card.show-time-panel {
+    transform: translateY(-8px); 
+    background: rgba(255, 255, 255, 0.5); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* *** LABEL DE RECIENTE *** */
+.card-label {
+    position: absolute; 
+    top: -1px; 
+    right: -1px; 
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 0 15px 0 15px; 
+    z-index: 10;
+    font-size: 0.6rem; 
+    line-height: 1;
+    display: none; 
+}
+.card-label[style*="acento-cian"] {
+    color: var(--color-texto-principal); 
+    font-weight: 700; 
+}
+
+.card span.emoji { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+.card h3 { margin: 0; font-size: 1rem; font-weight: 800; color: #1a1a1a; margin-top: 5px; }
+.card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+.card-content p { margin: 5px 0 0; font-size: 0.85rem; color: #333; white-space: pre-wrap; text-align: center; }
+
+/* --- CAMPOS DE EDICIÓN EN MODO ADMIN --- */
+.card .editable-content {
+    width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px;
+    font-size: 0.9rem; resize: vertical; min-height: 60px; margin-top: 5px;
+    font-family: 'Nunito', sans-serif; box-sizing: border-box;
+}
+.card .editable-title, .card .editable-emoji {
+    border: 1px solid #4f46e5; padding: 5px; border-radius: 6px; 
+    text-align: center; font-weight: 700; margin-bottom: 5px; 
+}
+.card .editable-emoji { width: 2rem; height: 2rem; font-size: 1.5rem; margin: 0 auto; display: block; }
+.card .editable-title { font-size: 0.95rem; }
+
+/* PANEL DESLIZABLE DE TIEMPO */
+.card-time-panel {
+    position: absolute; bottom: 0; left: 0; width: 100%; padding: 8px 10px; 
+    font-size: 0.75rem; font-weight: 700; color: #1a1a1a; font-family: 'Nunito', sans-serif; 
+    background: white; transition: transform 0.3s ease-out; transform: translateY(100%); 
+    border-radius: 0 0 16px 16px; text-align: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+.card.show-time-panel .card-time-panel { transform: translateY(0); }
+
+
+/* ----------------------------------------------------------------
+   COMENTARIOS Y HILOS (Web 2) - ESTILOS MEJORADOS
+   ---------------------------------------------------------------- */
+.comments-section {
+    width: 95%; max-width: 800px; padding: 25px; margin: 25px 0;
+    background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 4px 15px var(--sombra-suave);
+}
+.comments-section h2 { font-size: 1.5rem; margin-bottom: 20px; }
+.comments-display-wrap { max-height: 450px; padding: 15px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.85); overflow-y: auto; border-radius: 10px; border: 1px solid var(--color-borde-hilo); }
+
+/* Contenedor del Comentario Principal */
+.comment-item { 
+    border-bottom: 1px dashed #ccc; padding: 15px; margin-bottom: 12px; 
+    background-color: var(--color-comentario-fondo);
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.comment-item:last-child { border-bottom: none; }
+
+/* Nombre del Comentario Principal */
+.comment-item > strong.comment-name { 
+    font-size: 1.05rem; 
+    font-weight: 900; 
+    border-bottom: 2px solid #ddd; 
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+    color: var(--comment-color, #333); 
+    display: block; 
+}
+
+.comment-content { font-size: 0.9rem; color: #333; margin-left: 0; margin-top: 5px; white-space: pre-wrap; }
+.comment-date { font-size: 0.7rem; color: var(--color-texto-secundario); display: block; text-align: right; }
+.comment-form-container input, .comment-form-container textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+#publishCommentBtn { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.3s; width: 100%; }
+#publishCommentBtn:hover { background: #059669; }
+
+/* Likes y Respuestas */
+.comment-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 8px; font-size: 0.85rem; }
+.like-button { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 2px 5px; line-height: 1; transition: transform 0.1s ease; }
+.like-button:hover { transform: scale(1.1); }
+.like-button .heart { color: #ccc; }
+.like-button.liked .heart { color: var(--acento-rojo); }
+.like-count { font-weight: 700; color: var(--color-texto-principal); }
+.reply-form-toggle { display: inline-block; margin-left: 10px; font-size: 0.8rem; color: var(--acento-verde); cursor: pointer; font-weight: 700; }
+.reply-form { display: none; margin-top: 15px; padding: 12px; background: rgba(240, 240, 240, 0.8); border-radius: 8px; }
+.reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.8rem; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+.reply-form button { background: var(--acento-verde); color: white; border: none; padding: 8px 12px; font-size: 0.8rem; width: 100%; border-radius: 6px; cursor: pointer; }
+
+/* REGLAS PARA RESPUESTAS (HILOS) - MEJORA ESTÉTICA */
+.replies-container { 
+    padding-left: 20px; 
+    margin-top: 12px; 
+    border-left: 3px solid var(--color-borde-hilo); 
+}
+.reply-item { 
+    margin-top: 10px; 
+    padding: 10px; 
+    background-color: var(--color-respuesta-fondo); /* Fondo diferente para respuestas */
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.reply-item > span.comment-name { /* Estilo del nombre de la respuesta */
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--comment-color, #444);
+    display: inline;
+}
+.replies-container .reply-item:not(:first-child) { display: none; }
+.replies-container.expanded .reply-item { display: block; }
+
+.reply-toggle { 
+    display: block; 
+    margin: 10px 0; 
+    font-size: 0.8rem; 
+    color: var(--acento-cian); 
+    cursor: pointer; 
+    font-weight: 800; 
+    text-decoration: underline;
+}
+
+
+/* FOOTER */
+footer {
+    padding: 25px 20px; background: var(--glass-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-radius: 16px 16px 0 0; border-top: 1px solid var(--glass-border); margin-top: 30px; 
+    width: 100%; max-width: 800px; text-align: center; font-size: 0.85rem; color: var(--color-texto-principal);
+}
+
+/* MEDIA QUERIES (Ajustes para móviles) */
+@media (max-width: 600px) {
+    header h1 { font-size: 1.2rem; }
+    .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+    .card { min-height: 100px; padding: 8px; }
+    .card span.emoji { font-size: 1.5rem; }
+    .card h3 { font-size: 0.9rem; }
+    .card-content p { font-size: 0.8rem; }
     
-    <div id="statusMessage" class="status-message">
-        Accede a modo edición para actualizar la información
-    </div>
+    /* PANEL DE ESTADO */
+    .status-panel-container { padding: 8px 10px; }
+    .status-item { min-width: 90px; }
+    .status-item .value { font-size: 1rem; }
+    .status-item .label { font-size: 0.75rem; }
     
-    <div id="loginFormContainer" class="login-form-container">
-        <div class="login-input-row"> <input type="text" id="adminUser" placeholder="Usuario" aria-label="Usuario Administrador" required>
-            <input type="password" id="adminPass" placeholder="Contraseña" aria-label="Contraseña Administrador" required>
-        </div>
-        <button id="loginAdminBtn" class="primary-admin-btn">🔑 INICIAR SESIÓN</button>
-        <p id="loginMessage" style="color: var(--acento-rojo); font-size: 0.9em; text-align: center; margin-top: 5px; display: none;">Usuario o Contraseña incorrectos.</p>
-    </div>
-    <button id="toggleAdminBtn" class="primary-admin-btn" style="display: none;">🛡️ ACTIVAR EL MODO EDICIÓN </button>
-
+    /* LOGIN Y ADMIN CONTROLES EN MÓVIL */
+    .login-form-container { max-width: 100%; }
+    .login-input-row { flex-direction: column; gap: 5px; } /* En móvil se apilan */
+    #toggleAdminBtn { max-width: 100%; }
+    .login-form-container input, .login-form-container .primary-admin-btn, #toggleAdminBtn { font-size: 0.85rem; padding: 8px 10px; }
     
-    <div id="adminControlsPanel">
-        <div class="admin-group">
-            <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
-        </div>
-        <div class="admin-group">
-            <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
-            <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
-        </div>
-    </div>
-</div>
+    /* Botones de Administracion */
+    #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
+    #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 10px 10px; }
+    .admin-group button { width: 100%; min-width: auto; }
 
-<div class="container" id="contenedor">
-  </div>
 
-<section class="comments-section">
-    <h2>🗣️ Comentarios de la Comunidad</h2>
+    .comments-section h2 { font-size: 1.2rem; }
+    .comment-actions { font-size: 0.75rem; gap: 5px; }
+    .replies-container { padding-left: 10px; }
+}
+/* ----------------------------------------------------------------
+   ESTILO DEL BOTÓN DE NOTICIAS MEJORADO (index.html)
+   ---------------------------------------------------------------- */
+
+.news-btn-v2 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     
-    <div class="comments-display-wrap">
-        <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
-        </div>
-    </div>
+    /* Colores solicitados: Fondo verde y texto blanco */
+    background-color: var(--acento-verde, #0d9488); 
+    color: white;
+    
+    padding: 10px 20px;
+    margin: 10px auto 20px; 
+    border-radius: 8px; /* Borde cuadrado suave (minimalista) */
+    
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Sombra más fuerte para resaltar */
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    
+    /* Asegura que el contenedor del botón esté centrado */
+    width: auto; 
+    cursor: pointer;
+}
 
-    <div class="comment-form-container">
-        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
-        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
-        <button id="publishCommentBtn">Publicar Comentario</button>
-    </div>
-</section>
+.news-btn-v2:hover {
+    background-color: #0c8276; /* Tono más oscuro al pasar el ratón */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px); /* Pequeño levantamiento */
+}
 
-<footer>
-    <div>© 2025 Consulado – Todos los derechos reservados.</div>
-</footer>
+.news-btn-v2:active {
+    /* Efecto de pulsación */
+    transform: translateY(1px); 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background-color: #0b7060;
+}
 
-<script type="module" src="script.js"></script> 
+/* El contenedor del botón debe estar en index.html para asegurar el centrado */
+.header-action-container {
+    text-align: center;
+    padding: 10px 0;
+    /* Color de fondo igual que el header, si aplica, para minimalismo */
+    background-color: transparent; 
+}
 
-</body>
-</html>
+/* Si quieres que el texto sea aún más 'minimalista' */
+.news-btn-v2 .emoji {
+    margin-right: 8px;
+}
+/* --- NUEVOS ESTILOS PARA EL CONTADOR DE VISTAS (DISCRETO) --- */
+
+/* Asegurar que el header sea el contenedor de referencia para posicionamiento absoluto */
+header {
+    position: relative; 
+}
+
+/* Estilos para el contador de vistas */
+.view-counter {
+    position: absolute;
+    bottom: 5px; /* Ajuste a la esquina inferior */
+    left: 10px; /* Ajuste a la esquina izquierda */
+    color: white; /* Fuente blanca como se solicitó */
+    font-size: 0.8em; /* Pequeño y discreto */
+    font-weight: 600; 
+    opacity: 0.85; /* Ligeramente transparente para ser discreto */
+    z-index: 10; /* Asegurar que esté por encima de otros elementos del header */
+    padding: 2px 5px;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.4); /* Un fondo sutil para contraste */
+    white-space: nowrap; /* Evita que el texto se rompa */
+}
