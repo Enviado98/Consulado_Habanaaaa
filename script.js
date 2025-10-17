@@ -7,7 +7,6 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ----------------------------------------------------
 
 // 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
-// --- REINTRODUCIDAS PARA EL LOGIN ---
 const ADMIN_USER = "Admin"; 
 const ADMIN_PASS = "54321"; 
 // ----------------------------------------------------
@@ -37,7 +36,7 @@ if (!userWebId) {
     localStorage.setItem('userWebId', userWebId);
 }
 
-// Elementos del DOM (Simplificado)
+// Elementos del DOM (Añadidos los elementos de Login)
 const DOMElements = {
     body: document.body,
     contenedor: document.getElementById('contenedor'),
@@ -63,7 +62,6 @@ const DOMElements = {
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
-    // ⭐ NUEVOS ELEMENTOS DEL PANEL DE ESTADO UNIFICADO ⭐
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
     lastEditedTime: document.getElementById('lastEditedTime')
@@ -113,65 +111,67 @@ function timeAgo(timestamp) {
 
 
 // ----------------------------------------------------
-// FUNCIONES DE UI Y LOGIN (MODIFICADAS)
+// FUNCIONES DE LOGIN Y UI (MODIFICADAS)
 // ----------------------------------------------------
 
-// ⭐ NUEVA FUNCIÓN DE LOGIN ⭐
-function handleAdminLogin() {
+/**
+ * Maneja el proceso de inicio de sesión verificando las credenciales.
+ */
+function handleLogin() {
     const user = DOMElements.adminUser.value.trim();
     const pass = DOMElements.adminPass.value.trim();
-    const loginMessage = DOMElements.loginMessage;
-
-    loginMessage.style.display = 'none'; // Reset message
 
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        // Login exitoso: Ocultar el formulario y activar el modo admin
-        updateAdminUI(true);
-        DOMElements.loginFormContainer.style.display = 'none';
-        DOMElements.toggleAdminBtn.style.display = 'block'; // Mostrar botón de salida
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN";
-        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)";
-        
-        // Limpiar la contraseña (buena práctica)
+        DOMElements.loginMessage.style.display = 'none';
+        DOMElements.adminUser.value = '';
         DOMElements.adminPass.value = '';
-
+        DOMElements.loginFormContainer.style.display = 'none'; // Ocultar form
+        DOMElements.toggleAdminBtn.style.display = 'block'; // Mostrar botón SALIR
+        updateAdminUI(true);
     } else {
-        // Login fallido: Mostrar mensaje de error
-        loginMessage.textContent = 'Usuario o Contraseña incorrectos.';
-        loginMessage.style.display = 'block';
-        DOMElements.adminPass.value = ''; // Limpiar la contraseña
+        DOMElements.loginMessage.textContent = "Usuario o Contraseña incorrectos.";
+        DOMElements.loginMessage.style.display = 'block';
+        DOMElements.adminPass.value = ''; // Limpiar solo la contraseña
+        DOMElements.adminUser.focus();
     }
 }
 
-
+/**
+ * Actualiza la interfaz de usuario al entrar o salir del modo administrador.
+ */
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
-        // DOMElements.loginForm.style.display = "none"; // Eliminado
+        
+        DOMElements.loginFormContainer.style.display = "none";
+        DOMElements.toggleAdminBtn.style.display = "block";
+        
         DOMElements.adminControlsPanel.style.display = "flex";
         DOMElements.statusMessage.textContent = "✅ Modo de Edición Activado. ¡No olvides guardar!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
-        // DOMElements.toggleAdminBtn.textContent se actualiza en handleAdminLogin
-        // DOMElements.toggleAdminBtn.style.backgroundColor se actualiza en handleAdminLogin
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
         enableEditing(); 
-        alert("✅ Modo de Edición Activado. ¡No olvides guardar!"); 
+        
+        // Alerta solo después de la transición de la UI
+        alert("✅ Modo de Edición Activado. ¡No olvides guardar!");
     } else {
         DOMElements.body.classList.remove('admin-mode');
-        DOMElements.adminControlsPanel.style.display = "none";
-        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; // Texto ajustado
-        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; // Texto por defecto (aunque estará oculto)
-        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; // Color original
-        disableEditing(); 
         
-        // ⭐ Mostrar el formulario de login y ocultar el botón de salida ⭐
-        DOMElements.toggleAdminBtn.style.display = 'none';
-        DOMElements.loginFormContainer.style.display = 'block';
-        DOMElements.loginMessage.style.display = 'none'; 
+        DOMElements.loginFormContainer.style.display = "flex"; // Mostrar form
+        DOMElements.toggleAdminBtn.style.display = "none"; // Ocultar botón SALIR
+        DOMElements.loginMessage.style.display = 'none'; // Limpiar mensaje de error
+        
+        DOMElements.adminControlsPanel.style.display = "none";
+        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
+        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
+        disableEditing(); 
     }
     
-    // ⭐ ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN ⭐
+    // ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN
     if (isAdmin) {
         DOMElements.statusPanel.classList.add('admin-mode');
         renderStatusPanel(currentStatus, true); 
@@ -181,18 +181,18 @@ function updateAdminUI(isAdmin) {
     }
 }
 
-// Función de alternancia de modo de edición (MODIFICADA: AHORA SOLO MANEJA LA SALIDA)
+/**
+ * Maneja el cierre de sesión (llamado al hacer clic en el botón "SALIR").
+ */
 function toggleAdminMode() {
-    if (admin) { // Solo se ejecuta si admin es true (es el botón de SALIDA)
-        if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición?")) {
-            return;
-        }
-        updateAdminUI(false);
-        // loadData y loadStatusData se llaman dentro de updateAdminUI(false)
-        loadData(); // Recargar datos para descartar cambios
-        loadStatusData(); // Recargar datos de estado para descartar cambios
-    } 
-    // La activación ahora la maneja handleAdminLogin
+    if (!admin) return; // Si no es admin, no hacemos nada (el botón debería estar oculto)
+    
+    if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición? Los cambios no guardados se perderán.")) {
+        return;
+    }
+    updateAdminUI(false);
+    loadData(); // Recargar datos para descartar cambios
+    loadStatusData(); // Recargar datos de estado para descartar cambios
 }
 
 function enableEditing() {
@@ -538,7 +538,7 @@ async function deleteNews() {
 // ----------------------------------------------------
 // LÓGICA DE COMENTARIOS, HILOS Y LIKES 
 // ----------------------------------------------------
-// (Se omite el detalle de las funciones de comentarios, ya que se asume que funcionan)
+// (Omite detalle de funciones de comentarios, se asume que funcionan)
 
 function generateColorByName(str) {
     let hash = 0;
@@ -729,7 +729,7 @@ async function publishComment() {
 
     } catch (error) {
         console.error("Error al publicar el comentario:", error);
-        alert("❌ Error al publicar en Supabase. Revisa RLS de INSERT.");
+        alert("❌ Error al publicar en Supabase. Revisa RLS.");
     } finally {
         DOMElements.publishCommentBtn.disabled = false;
         DOMElements.publishCommentBtn.textContent = "Publicar Comentario";
@@ -767,7 +767,7 @@ async function handlePublishReply(event) {
 
     } catch (error) {
         console.error("Error al publicar la respuesta:", error);
-        alert("❌ Error al publicar la respuesta. Revisa RLS de INSERT.");
+        alert("❌ Error al publicar la respuesta. Revisa RLS.");
     } finally {
         event.target.disabled = false;
         event.target.textContent = "Publicar Respuesta";
@@ -909,7 +909,7 @@ async function getAndDisplayViewCount() {
 }
 
 // ----------------------------------------------------
-// FUNCIONES DE CARGA Y RENDERIZADO DEL PANEL DE ESTADO ⭐ MODIFICADO ⭐
+// FUNCIONES DE CARGA Y RENDERIZADO DEL PANEL DE ESTADO 
 // ----------------------------------------------------
 
 function renderStatusPanel(status, isAdminMode) {
@@ -928,7 +928,7 @@ function renderStatusPanel(status, isAdminMode) {
     DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${latestTimeText}`;
     
     if (isAdminMode) {
-        // Modo Admin: Campos de Input
+        // Modo Admin: Campos de Input (Estos se ven verticales o en grid dependiendo del CSS)
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item">
                 <span class="label">Deficit Eléctrico (MW):</span>
@@ -944,7 +944,7 @@ function renderStatusPanel(status, isAdminMode) {
             </div>
         `;
     } else {
-        // Modo Público: Vista Estilizada
+        // Modo Público: Vista Estilizada (Esta DEBE verse horizontal si el styles.css es el correcto)
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item deficit">
                 <span class="label">🔌 Déficit Estimado:</span>
@@ -988,7 +988,7 @@ async function loadStatusData() {
 }
 
 // ----------------------------------------------------
-// FUNCIONES CLAVE DE PERSISTENCIA (Modificada para Edición Completa y Status)
+// FUNCIONES CLAVE DE PERSISTENCIA
 // ----------------------------------------------------
 
 async function loadData() {
@@ -1148,16 +1148,16 @@ function updateHeaderTime() {
 }
 
 
-// ----------------------------------------------------
+// ----------------------------------------------------\
 // MANEJO DE EVENTOS Y CARGA INICIAL
 // ----------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ⭐ NUEVO: Listener para el botón de LOGIN ⭐
-    DOMElements.loginAdminBtn.addEventListener('click', handleAdminLogin);
-
-    // MANTENIDO: El botón original ahora es solo el botón de SALIDA
+    // ⭐ NUEVO LISTENER PARA EL BOTÓN DE LOGIN ⭐
+    DOMElements.loginAdminBtn.addEventListener('click', handleLogin);
+    
+    // Listener para el botón "SALIR DEL MODO EDICIÓN"
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     
     DOMElements.saveBtn.addEventListener('click', saveChanges);
