@@ -24,90 +24,736 @@
   --acento-cian: #00bcd4; 
   /* Colores para el panel de tiempo */
   --tiempo-panel-rojo: #f7a2ab; 
-  --tiempo-panel-cian: #99ffff; 
+  --tiempo-panel-cian: #b2ebf2; 
 }
 
-
 body {
-    font-family: 'Nunito', sans-serif;
-    color: var(--color-texto-principal);
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
-    background: var(--fondo-gradiente); 
-    transition: background-color 0.3s;
+  font-family: 'Nunito', sans-serif;
+  color: var(--color-texto-principal);
+  margin: 0;
+  padding: 0;
+  background: var(--fondo-gradiente); 
+  line-height: 1.6;
 }
 
 /* ----------------------------------------------------------------
-   ESTILOS DE HEADER
+   CONTENEDOR PRINCIPAL
    ---------------------------------------------------------------- */
 
 header {
-    background-color: #4f46e5; /* Un morado vibrante */
-    color: white;
-    padding: 30px 20px 15px;
-    text-align: center;
-    box-shadow: 0 4px 6px var(--sombra-fuerte);
-    position: relative; 
+  background-color: #4f46e5; 
+  color: white;
+  padding: 25px 20px 15px; 
+  text-align: center;
+  box-shadow: 0 4px 6px var(--sombra-suave);
+  position: relative; /* Necesario para posicionar el contador */
 }
 
 header h1 {
-    margin: 0 0 5px;
-    font-size: 2.2em;
-    font-weight: 800;
-    letter-spacing: -0.5px;
+  font-size: 2.2em;
+  margin: 0 0 5px 0;
+  font-weight: 900;
 }
 
 header p {
-    margin: 0;
-    font-size: 1.05em;
+  font-size: 1em;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 0 15px;
+  }
+  header h1 {
+    font-size: 1.8em;
+  }
+}
+
+/* ----------------------------------------------------------------
+   ESTILOS DE CARD DE TRÁMITE (GLASSMORPHISM)
+   ---------------------------------------------------------------- */
+.card {
+  background: var(--glass-bg); 
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--glass-border); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  position: relative;
+  overflow: hidden; 
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-recent {
+  border: 2px solid var(--acento-rojo); 
+  background: rgba(255, 240, 240, 0.7); 
+}
+
+.card-old {
+  border: 2px solid var(--acento-cian); 
+}
+
+.emoji {
+  font-size: 1.8em;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.card h3 {
+  font-size: 1.25em;
+  margin: 0 0 10px 0;
+  color: var(--acento-rojo);
+  font-weight: 800;
+}
+
+.card-content p {
+  font-size: 0.95em;
+  color: var(--color-texto-principal);
+  margin: 0;
+}
+
+.card-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 5px 10px;
+  font-size: 0.75em;
+  font-weight: 900;
+  border-bottom-right-radius: 8px;
+  z-index: 10;
+  display: none; /* Controlado por JS */
+}
+
+/* Panel de Tiempo Oculto */
+.card-time-panel {
+    position: absolute;
+    bottom: -50px; /* Inicia oculto */
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: 700;
+    transition: bottom 0.3s ease-in-out;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+}
+
+.card.show-time-panel .card-time-panel {
+    bottom: 0; /* Muestra el panel */
+}
+
+
+/* ----------------------------------------------------------------
+   ESTILOS DE ADMINISTRACIÓN (CONTROLES) ⭐ AÑADIDOS/MODIFICADOS ⭐
+   ---------------------------------------------------------------- */
+
+.login-controls {
+    text-align: center;
+    padding: 15px 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo claro para el área de control */
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.login-message {
+    font-size: 1em;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--color-texto-principal);
+}
+
+/* ⭐ ESTILOS DEL FORMULARIO DE LOGIN ⭐ */
+#adminLoginForm {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    max-width: 600px;
+    margin: 0 auto;
+    flex-wrap: wrap; /* Para móvil */
+}
+
+#adminUsername, #adminPassword {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.9em;
+    transition: border-color 0.3s;
+    width: 150px; /* Ancho fijo en desktop */
+}
+
+#adminUsername:focus, #adminPassword:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(79, 70, 229, 0.5);
+}
+
+#loginAdminBtn {
+    /* Mismo estilo que primary-admin-btn */
+    padding: 10px 15px;
+    font-size: 0.9em;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    background-color: #4f46e5;
+    color: white;
+}
+
+#loginAdminBtn:hover {
+    background-color: #3730a3;
+}
+
+#loginError {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 600;
+    color: var(--acento-rojo);
+    width: 100%;
+    display: none;
+}
+
+/* Media query para hacer los campos más grandes en móvil */
+@media (max-width: 600px) {
+    #adminLoginForm {
+        flex-direction: column;
+        gap: 8px;
+    }
+    #adminUsername, #adminPassword, #loginAdminBtn {
+        width: 90%;
+        max-width: 300px;
+    }
+}
+/* FIN ESTILOS DE LOGIN */
+
+
+#adminControlsPanel {
+  display: none; /* Oculto por defecto */
+  justify-content: center;
+  gap: 10px;
+  padding-top: 5px;
+  flex-wrap: wrap;
+}
+
+.admin-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.primary-admin-btn, .admin-btn {
+  padding: 10px 15px;
+  font-size: 0.9em;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.primary-admin-btn {
+  background-color: #4f46e5; 
+  color: white;
+}
+
+.admin-btn {
+  background-color: #e2e8f0; 
+  color: var(--color-texto-principal);
+}
+
+.admin-btn:hover {
+  background-color: #cbd5e1;
+}
+
+.primary-admin-btn:hover {
+  background-color: #3730a3;
+}
+
+.admin-mode .editable-emoji, .admin-mode .editable-title, .admin-mode .editable-content {
+    background: white;
+    border: 1px solid var(--acento-verde);
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+    color: var(--color-texto-principal);
+}
+
+.admin-mode .editable-emoji {
+    width: 40px;
+    font-size: 1.5em;
+    padding: 5px;
+    text-align: center;
+}
+
+.admin-mode .editable-title {
+    font-weight: 800;
+    font-size: 1.25em;
+    color: var(--acento-rojo);
+}
+
+.admin-mode .editable-content {
+    min-height: 100px;
+    resize: vertical;
+    font-size: 0.95em;
+}
+
+/* ----------------------------------------------------------------
+   PANEL DE ESTADO ECONÓMICO Y ENERGÉTICO (STATUS PANEL) ⭐ MODIFICADO ⭐
+   ---------------------------------------------------------------- */
+
+.status-panel-container {
+    max-width: 800px;
+    margin: 20px auto 0;
+    background: white; 
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+}
+
+.status-panel-header {
+    background-color: #4f46e5;
+    color: white;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    font-weight: 700;
+}
+
+.status-panel-header span:first-child {
+    font-size: 1.1em;
+}
+
+#lastEditedTime {
+    text-align: right;
+    font-size: 0.85em;
+    line-height: 1.2;
+}
+
+.status-panel-data {
+    padding: 15px;
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.status-item {
+    text-align: center;
+    flex: 1 1 150px;
+    padding: 8px 0;
+}
+
+.status-item .label {
+    display: block;
+    font-size: 0.85em;
+    color: var(--color-texto-secundario);
+    margin-bottom: 5px;
     font-weight: 600;
 }
 
-/* Rodillo de Noticias (Banner en la parte superior del header) */
-.ticker-container {
-    background-color: var(--acento-rojo); 
+.status-item .value {
+    display: block;
+    font-size: 1.5em;
+    font-weight: 900;
+    color: var(--acento-rojo);
+}
+
+.status-item.divisa .value {
+    color: #0d9488; /* Verde para divisas */
+}
+
+/* Estilos de inputs en modo Admin para Status Panel */
+.status-panel-container.admin-mode .status-panel-data {
+    flex-direction: column;
+}
+
+.status-panel-container.admin-mode .status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    padding: 5px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.status-panel-container.admin-mode .status-item:last-child {
+    border-bottom: none;
+}
+
+.status-panel-container.admin-mode .status-item .label {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: var(--color-texto-principal);
+    flex-shrink: 0;
+}
+
+.status-panel-container.admin-mode .status-item input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 150px;
+    text-align: right;
+    font-weight: 700;
+}
+
+/* ----------------------------------------------------------------
+   RODILLO DE NOTICIAS (NEWS TICKER)
+   ---------------------------------------------------------------- */
+
+.news-ticker-container {
+    max-width: 100%;
+    margin: 20px auto 0;
     overflow: hidden;
+    background-color: #fff3e0; /* Color claro para destacar */
+    border-top: 1px solid #ffcc80;
+    border-bottom: 1px solid #ffcc80;
     white-space: nowrap;
     position: relative;
-    padding: 5px 0; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 8px 0;
+    display: flex; /* Añadido */
+    align-items: center; /* Añadido */
 }
 
-.news-ticker {
-    display: inline-block;
-    padding-left: 100%; 
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-
-.ticker-item {
+.news-ticker-fixed-label {
+    background-color: #ff9800;
     color: white;
-    font-size: 1em;
-    font-weight: 700;
+    padding: 5px 15px;
+    font-weight: 800;
+    font-size: 0.85em;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    flex-shrink: 0; /* Asegura que no se encoja */
+    margin-right: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.news-ticker-wrap {
+    overflow: hidden;
+    flex-grow: 1; /* Permite que el contenido tome el espacio restante */
+}
+
+.news-ticker-content {
     display: inline-block;
-    padding: 0 20px;
+    padding-right: 100%; 
+}
+
+.news-item {
+    font-size: 0.9em;
+    color: #e53935; /* Un rojo vivo para la noticia */
+    font-weight: 600;
+    padding: 0 5px;
+}
+
+.news-item small {
+    color: #757575;
+    font-weight: 400;
+}
+
+.news-item a {
+    color: #1976d2; 
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* Animaciones para el ticker */
+@keyframes ticker-move-static {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } 
+}
+
+/* Dynamic Keyframes se inyectan en <style id="dynamicTickerStyles"> por script.js */
+
+/* ----------------------------------------------------------------
+   SECCIÓN DE COMENTARIOS
+   ---------------------------------------------------------------- */
+
+.comments-section {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white; 
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.comments-section h2 {
+    color: var(--color-texto-principal);
+    font-size: 1.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0;
+    font-weight: 800;
+}
+
+.comment-form-container {
+    background-color: #f7f7f7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 1px solid #eee;
+}
+
+.comment-form-container input[type="text"],
+.comment-form-container textarea {
+    width: 100%;
+    padding: 10px; 
+    font-size: 0.95em;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.comment-form-container textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+#publishCommentBtn {
+    padding: 12px 15px;
+    font-size: 1em;
+    background-color: var(--acento-verde);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 100%;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#publishCommentBtn:hover {
+    background-color: #087f71;
+}
+
+.comments-display-wrap {
+    max-height: 400px; /* Altura máxima para el scroll */
+    overflow-y: auto;
+    padding-right: 5px; /* Espacio para la barra de scroll */
+}
+
+/* Estilos de Comentarios */
+.comment-item {
+    border-left: 4px solid var(--comment-color, #ccc);
+    padding: 10px 15px 5px;
+    margin-bottom: 15px;
+    background-color: #fcfcfc;
+    border-radius: 0 6px 6px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.comment-item.reply-style {
+    margin-left: 20px; 
+    padding: 8px 12px 4px;
+    font-size: 0.95em;
+    border-left: 2px solid var(--comment-color, #ccc);
+}
+
+.comment-name {
+    display: block;
+    font-size: 0.9em;
+    color: var(--comment-color, #4f46e5);
+    margin-bottom: 3px;
+    font-weight: 700;
+}
+
+.comment-content {
+    font-size: 1em;
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    font-size: 0.75em;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.like-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 5px;
+    font-size: 1em;
+    line-height: 1;
+    color: #888;
+    transition: color 0.2s;
+}
+
+.like-button .heart {
+    color: #ccc;
+    font-size: 1.2em;
+    transition: color 0.2s;
+}
+
+.like-button:hover .heart {
+    color: #ef233c;
+}
+
+.like-button.liked .heart {
+    color: #ef233c; 
+}
+
+.like-count {
+    font-weight: 700;
+    margin-right: 15px;
+    color: #444;
+}
+
+.comment-date {
+    margin-left: auto;
+}
+
+.reply-form-toggle {
+    cursor: pointer;
+    color: #4f46e5;
+    font-weight: 600;
+    margin-right: 15px;
+    transition: color 0.2s;
+}
+
+.reply-form-toggle:hover {
+    color: #3730a3;
+    text-decoration: underline;
+}
+
+.reply-form {
+    display: none;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.reply-form input[type="text"],
+.reply-form textarea {
+    width: 100%;
+    padding: 8px; 
+    font-size: 0.85em;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.reply-form textarea {
+    min-height: 50px;
+    resize: vertical;
+}
+
+.publish-reply-btn {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.publish-reply-btn:hover {
+    background-color: #3730a3;
+}
+
+.replies-container {
+    padding-left: 20px;
+    border-left: 1px dashed #ccc;
+    margin-top: 10px;
+}
+
+.replies-container .reply-item:not(:first-child) {
+    display: none;
+}
+
+.replies-container.expanded .reply-item {
+    display: block;
+}
+
+.reply-toggle {
+    display: block;
+    margin-top: 5px;
+    text-align: center;
+    font-size: 0.8em;
+    color: #4f46e5;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.reply-toggle:hover {
+    text-decoration: underline;
+}
+
+/* ----------------------------------------------------------------
+   FOOTER
+   ---------------------------------------------------------------- */
+footer {
+    text-align: center;
+    padding: 20px 10px;
+    margin-top: 20px;
+    background-color: #3730a3; 
+    color: white;
+    font-size: 0.85em;
+}
+
+/* ----------------------------------------------------------------
+   BOTÓN DE NOTICIAS V2 (ACTUALIZADO)
+   ---------------------------------------------------------------- */
+
+.news-btn-v2 {
+    display: inline-block;
+    background-color: #0d9488; /* Verde para destacar */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease-in-out;
+    margin-top: 5px;
     letter-spacing: 0.5px;
 }
 
-/* Estilo para el botón de acceso a noticias V2 */
-.news-btn-v2 {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--acento-verde); /* Verde para contraste */
-    color: white;
-    font-weight: 800;
-    text-decoration: none;
-    border-radius: 8px; /* Bordes más redondeados */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Sombra más definida */
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    font-size: 1em;
-}
-
 .news-btn-v2:hover {
-    /* Efecto al pasar el ratón */
+    /* Efecto de 'levantamiento' al pasar el ratón */
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
     transform: translateY(-2px); /* Pequeño levantamiento */
 }
@@ -145,506 +791,6 @@ header {
     left: 10px; /* Ajuste a la esquina izquierda */
     color: white; /* Fuente blanca como se solicitó */
     font-size: 0.8em; /* Pequeño y discreto */
-    opacity: 0.7; /* Semi-transparente */
+    opacity: 0.7;
     font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-/* ----------------------------------------------------------------
-   CONTENEDOR PRINCIPAL Y DISEÑO GLASSMORPHISM
-   ---------------------------------------------------------------- */
-
-.container {
-    max-width: 900px;
-    margin: 25px auto;
-    padding: 0 15px;
-    display: grid;
-    gap: 25px;
-    /* Usar grid en móvil para evitar que los contenedores se desborden si son muy grandes */
-    grid-template-columns: 1fr;
-}
-
-/* Estilo para los contenedores de trámites (cajas de glassmorphism) */
-.card {
-    background: var(--glass-bg); /* Fondo semi-transparente */
-    border-radius: 16px;
-    box-shadow: 0 8px 32px var(--sombra-suave);
-    backdrop-filter: blur(8px); 
-    -webkit-backdrop-filter: blur(8px); 
-    border: 1px solid var(--glass-border); 
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: default;
-    overflow: hidden; /* Para contener la línea superior del título */
-    position: relative; /* Para el ::before del color */
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px var(--sombra-fuerte);
-}
-
-.card-title {
-    font-size: 1.5em;
-    font-weight: 800;
-    margin-top: 0;
-    margin-bottom: 10px;
-    position: relative;
-    padding-bottom: 5px; 
-    color: var(--color-texto-principal);
-}
-
-/* Línea de color debajo del título */
-.card-title::after {
-    content: '';
-    display: block;
-    width: 50px; /* Longitud de la línea */
-    height: 3px;
-    background-color: var(--acento-rojo); 
-    margin-top: 5px;
-    border-radius: 2px;
-}
-
-.card-content p {
-    margin-bottom: 10px;
-    font-size: 1em;
-    color: var(--color-texto-principal);
-}
-
-.card-content ul {
-    padding-left: 20px;
-    margin-top: 5px;
-    list-style-type: '👉 '; 
-}
-
-.card-content li {
-    margin-bottom: 5px;
-    font-size: 0.95em;
-}
-
-.card-note {
-    font-style: italic;
-    font-size: 0.9em;
-    color: var(--acento-rojo);
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--glass-border);
-}
-
-
-/* ----------------------------------------------------------------
-   ESTILOS ESPECÍFICOS POR TIPO DE CITA
-   ---------------------------------------------------------------- */
-
-.cita-roja .card-title::after {
-    background-color: var(--acento-rojo);
-}
-.cita-azul .card-title::after {
-    background-color: #007bff;
-}
-.cita-verde .card-title::after {
-    background-color: var(--acento-verde);
-}
-.cita-dorada .card-title::after {
-    background-color: gold;
-}
-
-
-/* ----------------------------------------------------------------
-   PANEL DE ESTADO Y ENERGÉTICO
-   ---------------------------------------------------------------- */
-
-.status-panel-container {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 15px 20px;
-    background-color: #fef08a; /* Amarillo pálido para llamar la atención */
-    border: 2px solid #f59e0b; 
-    border-radius: 12px;
-    box-shadow: 0 4px 10px var(--sombra-suave);
-    transition: all 0.3s;
-}
-
-.status-panel-container.admin-mode {
-    border-color: var(--acento-verde);
-    box-shadow: 0 0 15px rgba(13, 148, 136, 0.6); 
-}
-
-.status-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #fcd34d; 
-    padding-bottom: 5px;
-}
-
-.status-panel-header span:first-child {
-    font-weight: 800;
-    font-size: 1.1em;
-    color: var(--color-texto-principal);
-}
-
-#lastEditedTime {
-    font-size: 0.85em;
-    color: var(--color-texto-secundario);
-}
-
-.status-panel-content {
-    font-size: 1em;
-    color: var(--color-texto-principal);
-    white-space: pre-wrap; /* Mantiene saltos de línea y espacios */
-}
-
-/* ----------------------------------------------------------------
-   LOGIN Y ADMIN CONTROLES
-   ---------------------------------------------------------------- */
-
-.login-controls {
-    max-width: 400px;
-    margin: 25px auto 15px;
-    padding: 20px;
-    background: var(--glass-bg); 
-    border-radius: 16px;
-    box-shadow: 0 4px 15px var(--sombra-suave);
-    border: 1px solid var(--glass-border);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 15px; 
-}
-
-.status-message-container {
-    padding: 5px 0;
-    min-height: 25px; /* Para que no se mueva al cambiar de texto */
-}
-
-#statusMessage {
-    font-weight: 600;
-    font-size: 0.95em;
-    transition: color 0.3s;
-}
-
-.primary-admin-btn {
-    padding: 10px 15px;
-    font-size: 1em;
-    font-weight: 800;
-    color: white;
-    background-color: #4f46e5; /* Color principal */
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
-    width: 100%;
-}
-
-.primary-admin-btn:hover {
-    background-color: #4338ca;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.primary-admin-btn:active {
-    transform: translateY(1px);
-}
-
-
-#adminControlsPanel {
-    display: none; /* Oculto por defecto, visible solo en modo admin */
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--glass-border); 
-}
-
-.admin-group {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.admin-btn {
-    padding: 8px 12px;
-    font-size: 0.9em;
-    font-weight: 700;
-    color: white;
-    background-color: var(--acento-verde); /* Verde para guardar */
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    flex-grow: 1; 
-}
-
-#saveBtn {
-    background-color: #10b981; 
-}
-#saveBtn:hover {
-    background-color: #059669;
-}
-
-#addNewsBtn {
-    background-color: #00bcd4; /* Cian para añadir */
-}
-#addNewsBtn:hover {
-    background-color: #00a0b0;
-}
-
-#deleteNewsBtn {
-    background-color: #f97316; /* Naranja para eliminar */
-}
-#deleteNewsBtn:hover {
-    background-color: #ea580c;
-}
-
-.admin-btn:hover {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
-
-.admin-btn:active {
-    transform: translateY(1px);
-}
-
-/* ESTILOS AÑADIDOS PARA EL FORMULARIO DE LOGIN */
-.login-form-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%; 
-    gap: 8px;
-}
-.login-form-container input[type="text"],
-.login-form-container input[type="password"] {
-    padding: 10px 15px;
-    border: 1px solid var(--color-texto-secundario);
-    border-radius: 8px;
-    font-size: 1rem;
-    width: 100%;
-    box-sizing: border-box; 
-    transition: border-color 0.3s;
-}
-.login-form-container input:focus {
-    outline: none;
-    border-color: #4f46e5; /* Color del primary-admin-btn */
-}
-/* FIN: ESTILOS AÑADIDOS PARA EL FORMULARIO DE LOGIN */
-
-/* Modo Edición Visual */
-body.admin-mode {
-    border-top: 5px solid var(--acento-verde);
-    padding-top: 0;
-}
-body.admin-mode .editable:hover {
-    outline: 2px dashed var(--acento-rojo); 
-    cursor: text;
-}
-body.admin-mode .card {
-    box-shadow: 0 0 15px rgba(13, 148, 136, 0.4); 
-}
-
-/* ----------------------------------------------------------------
-   SECCIÓN DE COMENTARIOS
-   ---------------------------------------------------------------- */
-
-.comments-section {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 20px 15px;
-    background: var(--glass-bg); 
-    border-radius: 16px;
-    box-shadow: 0 8px 32px var(--sombra-suave);
-    backdrop-filter: blur(8px); 
-    border: 1px solid var(--glass-border); 
-}
-
-.comments-section h2 {
-    font-size: 1.8em;
-    font-weight: 800;
-    color: var(--color-texto-principal);
-    border-bottom: 2px solid var(--acento-rojo);
-    padding-bottom: 10px;
-    margin-top: 0;
-    margin-bottom: 20px;
-}
-
-.comment-form-container {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.comment-form-container input[type="text"],
-.comment-form-container textarea {
-    padding: 12px 15px;
-    border: 1px solid var(--color-texto-secundario);
-    border-radius: 8px;
-    font-size: 1em;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: white; 
-}
-
-.comment-form-container textarea {
-    min-height: 80px;
-    resize: vertical;
-}
-
-#publishCommentBtn {
-    padding: 12px 15px;
-    font-size: 1em;
-    font-weight: 700;
-    color: white;
-    background-color: #f97316; /* Naranja para publicar/acción social */
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-#publishCommentBtn:hover {
-    background-color: #ea580c;
-}
-
-.comments-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.comment-item {
-    background: rgba(255, 255, 255, 0.7); 
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 10px var(--sombra-suave);
-    position: relative;
-    overflow: hidden;
-}
-
-.comment-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.comment-name {
-    font-weight: 800;
-    color: var(--acento-rojo); 
-    font-size: 1.1em;
-}
-
-.comment-date {
-    font-size: 0.8em;
-    color: var(--color-texto-secundario);
-}
-
-.comment-text {
-    font-size: 1em;
-    color: var(--color-texto-principal);
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-.comment-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    border-top: 1px dashed var(--glass-border);
-    padding-top: 10px;
-}
-
-.like-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-texto-secundario);
-    font-size: 0.9em;
-    transition: color 0.2s;
-    font-weight: 600;
-}
-
-.like-btn:hover {
-    color: var(--acento-rojo);
-}
-
-.like-count.active {
-    color: var(--acento-rojo);
-    font-weight: 800;
-}
-
-.delete-comment-btn {
-    font-size: 0.8em;
-    color: var(--acento-rojo);
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-left: auto; /* Mueve el botón a la derecha */
-    display: none; /* Oculto por defecto */
-    font-weight: 700;
-}
-
-body.admin-mode .delete-comment-btn {
-    display: block; /* Visible en modo admin */
-}
-
-
-/* ----------------------------------------------------------------
-   FOOTER
-   ---------------------------------------------------------------- */
-
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 30px;
-    background-color: var(--color-texto-principal); 
-    color: white;
-    font-size: 0.85em;
-    box-shadow: 0 -4px 6px var(--sombra-suave);
-}
-
-
-/* ----------------------------------------------------------------
-   MEDIA QUERIES (RESPONSIVE)
-   ---------------------------------------------------------------- */
-
-@media (min-width: 768px) {
-    .container {
-        /* Dos columnas en tablet y desktop */
-        grid-template-columns: repeat(2, 1fr); 
-    }
-    
-    .status-panel-container {
-        padding: 20px 30px;
-    }
-    
-    header {
-        padding: 40px 20px 20px;
-    }
-    
-    header h1 {
-        font-size: 2.5em;
-    }
-    
-    .login-controls {
-        max-width: 500px;
-    }
-    
-    .admin-group {
-        flex-direction: row;
-    }
-    
-    /* Mostrar el formulario en línea en pantallas grandes */
-    .login-form-container {
-        flex-direction: row; 
-    }
-    .login-form-container input {
-        flex-grow: 1; /* Permite que los inputs tomen espacio */
-    }
-    .login-form-container button {
-        width: auto; /* El botón solo ocupa lo necesario */
-    }
 }
