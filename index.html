@@ -29,32 +29,31 @@
 <div id="statusPanel" class="status-panel-container">
     <div class="status-panel-header">
         <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
-        <span id="lastEditedTime">Última edición: Cargando...</span>
+        <span id="lastEditedTime">Última edición: Hace un rato...</span>
     </div>
-    <div id="statusContent" class="status-panel-content">
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
+    </div>
+    <div class="status-panel-info">
+        La información aquí se actualizará de manera constante para actualizar la información
+    </div>
+    
+    <form id="adminLoginForm" class="admin-login-form">
+        <input type="text" id="adminUser" placeholder="Usuario" required aria-label="Usuario">
+        <input type="password" id="adminPass" placeholder="Contraseña" required aria-label="Contraseña">
+        <button type="submit" class="primary-admin-btn">🔑 ACCEDER (Modo Edición)</button>
+        <p id="loginMessage" style="color: var(--acento-rojo); margin-top: 5px; display: none; font-weight: 700;">Credenciales incorrectas.</p>
+    </form>
+    <div id="adminControlsPanel" style="display: none;"> <div class="admin-group">
+            <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
         </div>
-</div>
+        <div class="admin-group">
+            <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
+            <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
+        </div>
+        
+        <button id="exitAdminBtn" class="primary-admin-btn" style="margin-top: 10px;">❌ SALIR DEL MODO EDICIÓN </button>
 
-<div class="login-controls">
-  <div class="status-message-container">
-    <span id="statusMessage">Accede a modo edición para actualizar la información</span>
-  </div>
-  
-  <form id="loginForm" class="login-form-container">
-    <input type="text" id="adminUser" placeholder="Usuario" required>
-    <input type="password" id="adminPass" placeholder="Contraseña" required>
-    <button type="submit" id="loginButton" class="primary-admin-btn">🛡️ ACTIVAR EL MODO EDICIÓN</button>
-  </form>
-  
-  <button id="logoutButton" class="primary-admin-btn" style="display: none; background-color: var(--acento-rojo);">🛑 SALIR DEL MODO EDICIÓN</button>
-  <div id="adminControlsPanel">
-    <div class="admin-group">
-        <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
-    </div>
-    <div class="admin-group">
-        <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
-        <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
-    </div>
     </div>
 </div>
 
@@ -78,27 +77,11 @@
 </section>
 
 <footer>
-    <div>© 2025 Consulado – Todos los Derechos Reservados.</div>
+    <div>© 2025 Consulado – Todos los derechos reservados.</div>
 </footer>
 
-<script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
-<script type="module" src="script.js"></script>
-<script>
-    // Inicia el cronómetro de tiempo en La Habana
-    function updateHeaderTime() {
-        const options = {
-            timeZone: 'America/Havana', 
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        };
-        const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(new Date());
 
-        document.getElementById('fecha-actualizacion').textContent = `${formattedDate} (CUBA)`;
-    }
-    
-    document.addEventListener('DOMContentLoaded', updateHeaderTime);
-    setInterval(updateHeaderTime, 1000); // Actualiza cada segundo
-</script>
+<script type="module" src="script.js"></script>
 
 </body>
 </html>
