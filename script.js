@@ -6,9 +6,10 @@ const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
 // ----------------------------------------------------
 
-// 🚨 CREDENCIALES DE ADMINISTRADOR (NUEVA IMPLEMENTACIÓN DE LOGIN) 🚨
-const ADMIN_USERNAME = "Admin"; 
-const ADMIN_PASSWORD = "54321"; 
+// 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
+// --- REINTRODUCIDAS PARA EL LOGIN ---
+const ADMIN_USER = "Admin"; 
+const ADMIN_PASS = "54321"; 
 // ----------------------------------------------------
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -49,20 +50,15 @@ const DOMElements = {
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
     
-    // ⭐ NUEVOS ELEMENTOS DEL FORMULARIO DE LOGIN ⭐
-    adminLoginForm: document.getElementById('adminLoginForm'),
-    adminUsernameInput: document.getElementById('adminUsername'),
-    adminPasswordInput: document.getElementById('adminPassword'),
+    // ⭐ NUEVOS ELEMENTOS DE LOGIN ⭐
+    loginFormContainer: document.getElementById('loginFormContainer'),
+    adminUser: document.getElementById('adminUser'),
+    adminPass: document.getElementById('adminPass'),
     loginAdminBtn: document.getElementById('loginAdminBtn'),
-    loginErrorElement: document.getElementById('loginError'),
-    // FIN NUEVOS ELEMENTOS DE LOGIN
+    loginMessage: document.getElementById('loginMessage'),
     
     statusMessage: document.getElementById('statusMessage'),
-    
-    // El elemento 'toggleAdminBtn' se elimina del DOM en index.html, pero se mantiene aquí
-    // por si el script original lo usa para el botón de "Salir" que refieres.
     toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
-    
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
@@ -115,66 +111,64 @@ function timeAgo(timestamp) {
     return { text, diff, date: new Date(timestamp) };
 }
 
-// ----------------------------------------------------
-// LÓGICA DEL LOGIN DE ADMINISTRADOR (NUEVA IMPLEMENTACIÓN)
-// ----------------------------------------------------
-if (DOMElements.loginAdminBtn) {
-    DOMElements.loginAdminBtn.addEventListener('click', () => {
-        const username = DOMElements.adminUsernameInput.value.trim();
-        const password = DOMElements.adminPasswordInput.value.trim();
-
-        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-            // Credenciales correctas
-            console.log("Acceso de administrador concedido. Activando modo edición.");
-            DOMElements.loginErrorElement.style.display = 'none';
-
-            // Ocultar el formulario de login y mostrar los controles
-            if (DOMElements.adminLoginForm) DOMElements.adminLoginForm.style.display = 'none'; 
-            if (DOMElements.adminControlsPanel) DOMElements.adminControlsPanel.style.display = 'flex'; 
-
-            // Llamar a la función que inicia el modo edición
-            updateAdminUI(true); 
-
-        } else {
-            // Credenciales incorrectas
-            console.log("Fallo en el intento de login: Usuario o contraseña incorrectos.");
-            DOMElements.loginErrorElement.textContent = "Usuario o Contraseña incorrectos.";
-            DOMElements.loginErrorElement.style.display = 'block';
-            DOMElements.adminPasswordInput.value = ''; // Limpiar la contraseña
-        }
-    });
-}
-// ----------------------------------------------------
-
 
 // ----------------------------------------------------
 // FUNCIONES DE UI Y LOGIN (MODIFICADAS)
 // ----------------------------------------------------
 
+// ⭐ NUEVA FUNCIÓN DE LOGIN ⭐
+function handleAdminLogin() {
+    const user = DOMElements.adminUser.value.trim();
+    const pass = DOMElements.adminPass.value.trim();
+    const loginMessage = DOMElements.loginMessage;
+
+    loginMessage.style.display = 'none'; // Reset message
+
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        // Login exitoso: Ocultar el formulario y activar el modo admin
+        updateAdminUI(true);
+        DOMElements.loginFormContainer.style.display = 'none';
+        DOMElements.toggleAdminBtn.style.display = 'block'; // Mostrar botón de salida
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN";
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)";
+        
+        // Limpiar la contraseña (buena práctica)
+        DOMElements.adminPass.value = '';
+
+    } else {
+        // Login fallido: Mostrar mensaje de error
+        loginMessage.textContent = 'Usuario o Contraseña incorrectos.';
+        loginMessage.style.display = 'block';
+        DOMElements.adminPass.value = ''; // Limpiar la contraseña
+    }
+}
+
+
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
-        // La visibilidad de adminControlsPanel se maneja en el listener de login
+        // DOMElements.loginForm.style.display = "none"; // Eliminado
+        DOMElements.adminControlsPanel.style.display = "flex";
         DOMElements.statusMessage.textContent = "✅ Modo de Edición Activado. ¡No olvides guardar!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
-        
-        // ELIMINADO: Se asume que el botón de "Salir" es otro en la web
-        // if (DOMElements.toggleAdminBtn) DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
-        // if (DOMElements.toggleAdminBtn) DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
-        
+        // DOMElements.toggleAdminBtn.textContent se actualiza en handleAdminLogin
+        // DOMElements.toggleAdminBtn.style.backgroundColor se actualiza en handleAdminLogin
         enableEditing(); 
+        alert("✅ Modo de Edición Activado. ¡No olvides guardar!"); 
     } else {
         DOMElements.body.classList.remove('admin-mode');
-        // El panel de edición se oculta en la función toggleAdminMode o por el botón de salir
+        DOMElements.adminControlsPanel.style.display = "none";
         DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; // Texto ajustado
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        
-        // ELIMINADO: Se asume que el botón de "Salir" es otro en la web
-        // if (DOMElements.toggleAdminBtn) DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
-        // if (DOMElements.toggleAdminBtn) DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
-        
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; // Texto por defecto (aunque estará oculto)
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; // Color original
         disableEditing(); 
+        
+        // ⭐ Mostrar el formulario de login y ocultar el botón de salida ⭐
+        DOMElements.toggleAdminBtn.style.display = 'none';
+        DOMElements.loginFormContainer.style.display = 'block';
+        DOMElements.loginMessage.style.display = 'none'; 
     }
     
     // ⭐ ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN ⭐
@@ -187,28 +181,18 @@ function updateAdminUI(isAdmin) {
     }
 }
 
-// Función de alternancia de modo de edición (Ahora solo se usa para SALIR y reiniciar)
+// Función de alternancia de modo de edición (MODIFICADA: AHORA SOLO MANEJA LA SALIDA)
 function toggleAdminMode() {
-    if (!admin) {
-        // Esta parte ya no se usa para login. Se podría reutilizar para un botón de salir.
-        // Si el user hace clic en toggleAdminBtn, es que quiere loguearse, pero ahora eso es el form
-        // Dejo el código original para que sea la función que ejecuta el botón de salir.
-        // updateAdminUI(true);
-        // alert("✅ Modo de Edición Activado. ¡No olvides guardar!");
-    } else {
-        // Lógica de SALIDA (Logout)
+    if (admin) { // Solo se ejecuta si admin es true (es el botón de SALIDA)
         if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición?")) {
             return;
         }
-        
-        // OCULTAR CONTROLES Y MOSTRAR LOGIN
-        if (DOMElements.adminControlsPanel) DOMElements.adminControlsPanel.style.display = 'none';
-        if (DOMElements.adminLoginForm) DOMElements.adminLoginForm.style.display = 'block';
-
         updateAdminUI(false);
+        // loadData y loadStatusData se llaman dentro de updateAdminUI(false)
         loadData(); // Recargar datos para descartar cambios
         loadStatusData(); // Recargar datos de estado para descartar cambios
-    }
+    } 
+    // La activación ahora la maneja handleAdminLogin
 }
 
 function enableEditing() {
@@ -1170,11 +1154,11 @@ function updateHeaderTime() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // MODIFICADO: Se elimina el listener de 'toggleAdminBtn' ya que el LOGIN se hace por formulario.
-    // La función 'toggleAdminMode' ahora se usa para el botón de "Salir del modo edición" que la web debe proveer.
-    if (DOMElements.toggleAdminBtn) {
-        DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
-    }
+    // ⭐ NUEVO: Listener para el botón de LOGIN ⭐
+    DOMElements.loginAdminBtn.addEventListener('click', handleAdminLogin);
+
+    // MANTENIDO: El botón original ahora es solo el botón de SALIDA
+    DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     
     DOMElements.saveBtn.addEventListener('click', saveChanges);
     DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
