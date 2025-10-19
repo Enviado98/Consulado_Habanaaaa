@@ -63,72 +63,80 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 #fecha-actualizacion { font-weight: 900; color: #ffd700; }
 
 /* ----------------------------------------------------------------
-   PANEL DE ESTADO DINÁMICO UNIFICADO (Horizontal Original)
+   PANEL DE ESTADO DINÁMICO UNIFICADO ⭐ CSS AJUSTADO A COMPACTO ⭐
    ---------------------------------------------------------------- */
 .status-panel-container {
     width: 95%;
     max-width: 800px;
-    margin: 15px auto;
-    background-color: var(--fondo-panel-status);
-    border: 2px solid var(--borde-panel-status);
-    border-radius: 12px;
-    font-size: 0.9rem;
-    color: var(--color-texto-principal);
+    margin: 8px auto; /* Más compacto */
+    background-color: var(--fondo-panel-status); /* Usa el AMARILLO INTENSO */
+    border: 1px solid var(--borde-panel-status); 
+    border-radius: 10px; 
+    font-size: 0.85rem; /* Más pequeño */
+    color: var(--color-texto-principal); 
     font-weight: 700;
-    box-shadow: 0 4px 8px var(--sombra-suave);
-    padding: 10px 15px;
-    text-align: center; 
+    box-shadow: 0 2px 4px var(--sombra-suave);
+    padding: 8px 10px; /* Más compacto */
 }
 
 .status-panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 5px;
-    margin-bottom: 8px;
+    padding-bottom: 3px; /* Más compacto */
+    margin-bottom: 5px;
     border-bottom: 1px dashed rgba(0,0,0,0.1);
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* Más pequeño */
     color: #555;
 }
 
+/* ⭐ MODIFICACIÓN SOLICITADA: Estilo para la etiqueta de Última Edición (Caja Roja y Tamaño) ⭐ */
 #lastEditedTime {
+    /* REQUISITO: Cuadro Rojo de Fondo */
     background-color: var(--acento-rojo); 
     color: white; 
     border-radius: 6px; 
-    padding: 3px 6px;
-    font-size: 0.7rem; 
-    font-weight: 700;
-    line-height: 1.1; 
-    display: inline-block;
-}
+    padding: 3px 5px; /* Compacto */
+    display: inline-block; /* Necesario para que el cuadro encierre el texto */
+    text-align: center;
+    line-height: 1.1; /* Compacta las líneas */
 
-/* ⭐ CLAVE: ESTE CONTENEDOR DEBE SER FLEX EN FILA PARA EL LAYOUT HORIZONTAL ⭐ */
-.status-data-container {
+    /* REQUISITO: Reducir tamaño (aprox 30% menos del 0.75rem del padre) */
+    font-size: 0.55rem; 
+    font-weight: 700;
+    flex-shrink: 0;
+}
+/* ---------------------------------------------------------------- */
+
+
+.status-panel-data {
     display: flex;
-    justify-content: space-around; /* Distribución uniforme */
-    align-items: flex-start;
-    flex-wrap: nowrap; /* Mantiene los ítems en una fila */
-    gap: 10px;
-    padding: 5px 0;
+    justify-content: space-between; /* Distribución uniforme y compacta */
+    align-items: center;
+    flex-wrap: nowrap; /* Asegura que se mantenga en fila */
+    gap: 5px; /* Más compacto */
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-align: center;
+    overflow-x: auto; /* Por si acaso en móvil extremo */
 }
 
 .status-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 5px 8px;
-    border-radius: 8px;
-    min-width: 120px;
-    flex-grow: 1; 
-    flex-basis: 0; 
+    padding: 3px 5px; /* Más compacto */
+    border-radius: 6px;
+    min-width: 95px; /* Ancho mínimo para mantener compacto */
+    flex-shrink: 0; /* No se encoge fácilmente */
 }
 
 /* Estilos de valores específicos */
 .status-item .value {
     display: block;
-    font-size: 1.1rem;
+    font-size: 1rem; /* Más pequeño */
     font-weight: 900;
-    margin-top: 5px;
+    margin-top: 2px;
 }
 
 .status-item.deficit .value {
@@ -136,51 +144,47 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .status-item.divisa .value {
     color: #008000; /* Verde para divisas */
+    font-size: 1rem;
 }
 
 .status-item .label {
-    font-size: 0.8rem;
+    font-size: 0.7rem; /* Más pequeño */
     font-weight: 600;
     color: #555;
     margin-bottom: 2px;
 }
-.status-message {
-    font-size: 0.85rem;
-    margin-top: 10px;
-}
 
-/* Modo Admin: Campos de edición (Aseguramos que se mantenga el Flex para la edición) */
+/* Modo Admin: Campos de edición para el panel */
 .status-panel-container.admin-mode {
+    padding: 10px;
     border: 2px dashed var(--acento-rojo); 
-    padding: 15px;
 }
-/* ⭐ IMPORTANTE: El status-data-container en admin mode debe permitir envolver si es necesario pero mantener la estructura flex ⭐ */
-.status-panel-container.admin-mode .status-data-container {
-    flex-direction: row; 
+.status-panel-container.admin-mode .status-panel-data {
+    flex-direction: row; /* ⭐ MANTIENE FILA EN ADMIN MODE ⭐ */
     flex-wrap: wrap; 
-    gap: 10px;
+    gap: 5px;
 }
 .status-panel-container.admin-mode .status-item {
-    width: 31%; /* Para que quepan 3 en fila */
-    flex-direction: column; 
+    width: 31%; /* Divide el espacio en 3 columnas */
+    flex-direction: column; /* Cambiado a columna para que el input sea 100% del item */
     justify-content: center;
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 8px;
+    padding: 5px;
     border: 1px solid #ccc;
 }
 .status-panel-container.admin-mode input {
     border: 1px solid var(--acento-rojo);
-    padding: 5px 8px;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
     font-weight: 700;
-    text-align: center;
-    width: 100%;
+    text-align: center; /* Centrado en columna */
+    width: 100%; /* Ocupa todo el item */
     margin-top: 5px;
 }
 .status-panel-container.admin-mode .status-item .label {
     color: var(--color-texto-principal);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 
@@ -205,9 +209,9 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .news-ticker-fixed-label {
     font-weight: 900; 
-    margin-right: 10px; 
-    padding: 0 10px; 
-    font-size: 0.8rem; 
+    margin-right: 8px; 
+    padding: 0 7px; 
+    font-size: 0.75rem; 
     background-color: rgba(0, 0, 0, 0.35); 
     border-radius: 4px;
     flex-shrink: 0;
@@ -215,126 +219,63 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     z-index: 2; 
 }
 .news-ticker-wrap { overflow: hidden; flex-grow: 1; position: relative; height: 100%; }
-.news-ticker-content { white-space: nowrap; font-size: 0.9rem; display: inline-block; }
+.news-ticker-content { white-space: nowrap; font-size: 0.8rem; display: inline-block; }
 .news-item { padding: 0 20px; display: inline-block; color: #f8f9fa; font-weight: 700; text-shadow: 0 0 2px rgba(0, 0, 0, 0.4); }
-.news-item small { font-weight: 600; opacity: 0.9; margin-left: 5px; font-size: 0.8rem; color: #1a1a1a; background-color: #ffc107; padding: 2px 5px; border-radius: 4px;}
+.news-item small { font-weight: 600; opacity: 0.9; margin-left: 5px; font-size: 0.7rem; color: #1a1a1a; background-color: #ffc107; padding: 2px 5px; border-radius: 4px;}
 .news-item a { color: #ffcc00; text-decoration: underline; font-weight: 800; }
 @keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 
 /* ----------------------------------------------------------------
-   LOGIN Y ADMIN CONTROLES (AJUSTES PARA LA ORIGINALIDAD)
+   LOGIN Y ADMIN CONTROLES (MODIFICADO PARA ACCESO DIRECTO Y DISEÑO MEJORADO)
    ---------------------------------------------------------------- */
+.login-controls {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; width: 95%; max-width: 550px; 
+  background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+  padding: 0.8rem; border-radius: 12px; border: 1px solid var(--glass-border); 
+  box-shadow: 0 4px 12px var(--sombra-fuerte); margin-bottom: 20px; z-index: 10; 
+}
+.login-message { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
 
-/* ⭐ NUEVO: Contenedor para inputs de login horizontales ⭐ */
-.login-input-row {
-    display: flex;
-    gap: 8px; /* Espacio entre los inputs */
-    width: 100%;
-}
-.login-input-row input {
-    flex-grow: 1; /* Ambos inputs ocupan el mismo espacio */
-    min-width: 0; /* Permite que el flexbox los reduzca */
-}
+/* ELIMINADO: #loginForm */
+/* ELIMINADO: .login-controls input */
 
-/* Estilos para el formulario de Login */
-.login-form-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    max-width: 350px;
-    margin: 5px auto 10px; 
-}
-.login-form-container input {
-    border: 1px solid #ccc;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 600;
+.login-controls button {
+  background: #4f46e5; color: white; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; flex-shrink: 0; 
 }
 
-
-/* ⭐ AJUSTES PARA BOTONES: Asegurar que primary-admin-btn sea consistente ⭐ */
-.primary-admin-btn {
-    background: #4f46e5; 
-    color: white; 
-    border: none; 
-    border-radius: 8px; 
-    padding: 8px 10px; 
-    cursor: pointer;
-    font-size: 0.9rem; 
-    font-weight: 800; 
-    transition: all 0.3s ease; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra para resaltar */
-}
-.primary-admin-btn:hover {
-    background-color: #3b30ad;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-
-/* Estilo para el botón de SALIR (es un primary-admin-btn con color rojo) */
-#toggleAdminBtn[style*="acento-rojo"] { 
-    background-color: var(--acento-rojo) !important; 
-}
-#toggleAdminBtn[style*="acento-rojo"]:hover {
-    background-color: #c71e30 !important;
-}
-
-
-/* ⭐ AJUSTES PARA LOS BOTONES ADMIN (Los de color blanco/gris) ⭐ */
-.admin-btn {
-    background-color: white; 
-    color: var(--color-texto-principal);
-    border: 1px solid #ccc; 
-    border-radius: 8px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 0.85rem; 
-    font-weight: 700;
-    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.admin-btn:hover {
-    background-color: #f0f0f0;
-    border-color: #aaa;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-
-/* Modificación del botón de activar/salir para que use el mismo estilo pero centrado */
+/* NUEVO: Botón principal de acceso */
 #toggleAdminBtn { 
+    font-size: 0.9rem; 
+    padding: 8px 15px; 
     width: 100%;
-    max-width: 350px; 
-    margin: 0 auto 10px; 
-    display: block; 
+    max-width: 350px; /* Ancho máximo para el botón de acceso */
+    margin-bottom: 5px;
 }
+#toggleAdminBtn:hover {
+    background-color: #3b30ad;
+}
+
 
 /* Panel de Administracion */
 #adminControlsPanel { 
-    display: none; justify-content: center; align-items: center; gap: 10px; padding: 10px 0 0; width: 100%; flex-wrap: wrap; 
+    display: none; justify-content: center; align-items: center; gap: 8px; padding: 8px; width: 100%; flex-wrap: wrap; background-color: rgba(0, 0, 0, 0.05); border-radius: 8px; overflow-x: hidden; 
 }
-#adminControlsPanel button { font-size: 0.85rem; padding: 8px 12px; flex-grow: 1; min-width: 130px; }
-
-/* El botón de Guardar es un admin-btn con color de fondo especial */
+#adminControlsPanel button { font-size: 0.8rem; padding: 7px 10px; flex-grow: 1; min-width: 120px; }
 #saveBtn { 
     background-color: var(--acento-verde); 
-    color: white;
     font-weight: 800;
-    min-width: 95%; 
-    padding: 12px 15px;
-    font-size: 0.95rem; 
-    border: none;
+    min-width: 90%; 
+    padding: 10px 15px;
+    font-size: 0.9rem; 
 } 
-#saveBtn:hover { 
-    background-color: #0c8075; 
-    border: none;
-} 
+#saveBtn:hover { background-color: #0c8075; } 
 
 /* NUEVO: Agrupación de botones para diseño */
 .admin-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     width: 100%; 
     justify-content: center;
     flex-wrap: wrap;
@@ -346,7 +287,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     width: 48%; /* Para que dos quepan en una línea */
     min-width: 150px;
 }
-.admin-group:first-child { margin-bottom: 10px; } 
+.admin-group:first-child { margin-bottom: 10px; } /* Espacio extra sobre el grupo de noticias */
 
 
 /* ----------------------------------------------------------------
@@ -354,11 +295,11 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
    ---------------------------------------------------------------- */
 .container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-  gap: 12px; 
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+  gap: 10px; 
   width: 95%;
   max-width: 800px; 
-  padding: 20px; 
+  padding: 15px; 
 }
 
 .card {
@@ -368,12 +309,12 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   border: 1px solid var(--glass-border);
   border-radius: 16px; 
   box-shadow: 0 6px 15px var(--sombra-suave);
-  padding: 10px; 
-  padding-top: 20px; 
+  padding: 8px; 
+  padding-top: 15px; 
   text-align: center;
   color: var(--color-texto-principal);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, background 0.3s; 
-  min-height: 120px; 
+  min-height: 110px; 
   display: flex;
   flex-direction: column;
   position: relative; 
@@ -381,7 +322,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   overflow: hidden; 
 }
 
-/* --- ESTILOS DE ESTADO --- */
+/* --- ESTILOS DE ESTADO (Web 1) --- */
 .card-recent:not(.admin-mode) {
     background: rgba(239, 35, 60, 0.1); 
     box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
@@ -393,56 +334,56 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     border: 1px solid rgba(0, 188, 212, 0.3); 
 }
 .card:hover:not(.admin-mode) {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   background: rgba(255, 255, 255, 0.5); 
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 .card.show-time-panel {
-    transform: translateY(-8px); 
+    transform: translateY(-6px); 
     background: rgba(255, 255, 255, 0.5); 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 
-/* *** LABEL DE RECIENTE *** */
+/* *** LABEL DE RECIENTE COMPACTO (Web 1 REINTRODUCIDO) *** */
 .card-label {
     position: absolute; 
     top: -1px; 
     right: -1px; 
     font-weight: 900;
-    padding: 3px 8px;
+    padding: 2px 6px;
     border-radius: 0 15px 0 15px; 
     z-index: 10;
-    font-size: 0.6rem; 
+    font-size: 0.55rem; 
     line-height: 1;
-    display: none; 
+    display: none; /* Se muestra con JS solo si es reciente */
 }
 .card-label[style*="acento-cian"] {
     color: var(--color-texto-principal); 
     font-weight: 700; 
 }
 
-.card span.emoji { font-size: 1.8rem; display: block; margin-bottom: 5px; }
-.card h3 { margin: 0; font-size: 1rem; font-weight: 800; color: #1a1a1a; margin-top: 5px; }
+.card span.emoji { font-size: 1.5rem; display: block; margin-bottom: 3px; }
+.card h3 { margin: 0; font-size: 0.9rem; font-weight: 800; color: #1a1a1a; margin-top: 5px; }
 .card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-.card-content p { margin: 5px 0 0; font-size: 0.85rem; color: #333; white-space: pre-wrap; text-align: center; }
+.card-content p { margin: 4px 0 0; font-size: 0.8rem; color: #333; white-space: pre-wrap; text-align: center; }
 
-/* --- CAMPOS DE EDICIÓN EN MODO ADMIN --- */
+/* --- CAMPOS DE EDICIÓN EN MODO ADMIN (MEJORADOS) --- */
 .card .editable-content {
-    width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px;
-    font-size: 0.9rem; resize: vertical; min-height: 60px; margin-top: 5px;
+    width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 8px;
+    font-size: 0.85rem; resize: vertical; min-height: 50px; margin-top: 5px;
     font-family: 'Nunito', sans-serif; box-sizing: border-box;
 }
 .card .editable-title, .card .editable-emoji {
-    border: 1px solid #4f46e5; padding: 5px; border-radius: 6px; 
+    border: 1px solid #4f46e5; padding: 4px; border-radius: 4px; 
     text-align: center; font-weight: 700; margin-bottom: 5px; 
 }
-.card .editable-emoji { width: 2rem; height: 2rem; font-size: 1.5rem; margin: 0 auto; display: block; }
-.card .editable-title { font-size: 0.95rem; }
+.card .editable-emoji { width: 1.5rem; height: 1.5rem; font-size: 1.2rem; margin: 0 auto; display: block; }
+.card .editable-title { font-size: 0.85rem; }
 
 /* PANEL DESLIZABLE DE TIEMPO */
 .card-time-panel {
-    position: absolute; bottom: 0; left: 0; width: 100%; padding: 8px 10px; 
-    font-size: 0.75rem; font-weight: 700; color: #1a1a1a; font-family: 'Nunito', sans-serif; 
+    position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px 8px; 
+    font-size: 0.7rem; font-weight: 700; color: #1a1a1a; font-family: 'Nunito', sans-serif; 
     background: white; transition: transform 0.3s ease-out; transform: translateY(100%); 
     border-radius: 0 0 16px 16px; text-align: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
 }
@@ -453,67 +394,68 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
    COMENTARIOS Y HILOS (Web 2) - ESTILOS MEJORADOS
    ---------------------------------------------------------------- */
 .comments-section {
-    width: 95%; max-width: 800px; padding: 25px; margin: 25px 0;
+    width: 95%; max-width: 800px; padding: 20px; margin: 20px 0;
     background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 4px 15px var(--sombra-suave);
 }
-.comments-section h2 { font-size: 1.5rem; margin-bottom: 20px; }
-.comments-display-wrap { max-height: 450px; padding: 15px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.85); overflow-y: auto; border-radius: 10px; border: 1px solid var(--color-borde-hilo); }
+.comments-section h2 { font-size: 1.3rem; margin-bottom: 15px; }
+.comments-display-wrap { max-height: 400px; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.85); overflow-y: auto; border-radius: 8px; border: 1px solid var(--color-borde-hilo); }
 
 /* Contenedor del Comentario Principal */
 .comment-item { 
-    border-bottom: 1px dashed #ccc; padding: 15px; margin-bottom: 12px; 
+    border-bottom: 1px dashed #ccc; padding: 12px; margin-bottom: 10px; 
     background-color: var(--color-comentario-fondo);
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .comment-item:last-child { border-bottom: none; }
 
 /* Nombre del Comentario Principal */
 .comment-item > strong.comment-name { 
-    font-size: 1.05rem; 
+    font-size: 1rem; 
     font-weight: 900; 
     border-bottom: 2px solid #ddd; 
-    padding-bottom: 5px;
-    margin-bottom: 8px;
+    padding-bottom: 4px;
+    margin-bottom: 5px;
     color: var(--comment-color, #333); 
     display: block; 
 }
 
-.comment-content { font-size: 0.9rem; color: #333; margin-left: 0; margin-top: 5px; white-space: pre-wrap; }
-.comment-date { font-size: 0.7rem; color: var(--color-texto-secundario); display: block; text-align: right; }
-.comment-form-container input, .comment-form-container textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
-#publishCommentBtn { background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.3s; width: 100%; }
+.comment-content { font-size: 0.85rem; color: #333; margin-left: 0; margin-top: 5px; }
+.comment-date { font-size: 0.65rem; color: var(--color-texto-secundario); display: block; text-align: right; }
+.comment-form-container input, .comment-form-container textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+#publishCommentBtn { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.3s; width: 100%; }
 #publishCommentBtn:hover { background: #059669; }
 
 /* Likes y Respuestas */
-.comment-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 8px; font-size: 0.85rem; }
-.like-button { background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 2px 5px; line-height: 1; transition: transform 0.1s ease; }
+.comment-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 5px; font-size: 0.8rem; }
+.like-button { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px 5px; line-height: 1; transition: transform 0.1s ease; }
 .like-button:hover { transform: scale(1.1); }
 .like-button .heart { color: #ccc; }
 .like-button.liked .heart { color: var(--acento-rojo); }
 .like-count { font-weight: 700; color: var(--color-texto-principal); }
-.reply-form-toggle { display: inline-block; margin-left: 10px; font-size: 0.8rem; color: var(--acento-verde); cursor: pointer; font-weight: 700; }
-.reply-form { display: none; margin-top: 15px; padding: 12px; background: rgba(240, 240, 240, 0.8); border-radius: 8px; }
-.reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.8rem; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
-.reply-form button { background: var(--acento-verde); color: white; border: none; padding: 8px 12px; font-size: 0.8rem; width: 100%; border-radius: 6px; cursor: pointer; }
+.reply-form-toggle { display: inline-block; margin-left: 10px; font-size: 0.75rem; color: var(--acento-verde); cursor: pointer; font-weight: 700; }
+.reply-form { display: none; margin-top: 10px; padding: 10px; background: rgba(240, 240, 240, 0.8); border-radius: 8px; }
+.reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.75rem; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+.reply-form button { background: var(--acento-verde); color: white; border: none; padding: 6px 10px; font-size: 0.75rem; width: 100%; border-radius: 6px; cursor: pointer; }
 
 /* REGLAS PARA RESPUESTAS (HILOS) - MEJORA ESTÉTICA */
 .replies-container { 
-    padding-left: 20px; 
-    margin-top: 12px; 
+    padding-left: 15px; 
+    margin-top: 10px; 
     border-left: 3px solid var(--color-borde-hilo); 
 }
 .reply-item { 
     margin-top: 10px; 
-    padding: 10px; 
+    padding: 8px; 
     background-color: var(--color-respuesta-fondo); /* Fondo diferente para respuestas */
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-radius: 6px;
+    border-top: none; /* Elimina la línea punteada */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .reply-item > span.comment-name { /* Estilo del nombre de la respuesta */
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--comment-color, #444);
     display: inline;
 }
@@ -522,8 +464,8 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 
 .reply-toggle { 
     display: block; 
-    margin: 10px 0; 
-    font-size: 0.8rem; 
+    margin: 8px 0; 
+    font-size: 0.75rem; 
     color: var(--acento-cian); 
     cursor: pointer; 
     font-weight: 800; 
@@ -533,41 +475,60 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 
 /* FOOTER */
 footer {
-    padding: 25px 20px; background: var(--glass-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border-radius: 16px 16px 0 0; border-top: 1px solid var(--glass-border); margin-top: 30px; 
-    width: 100%; max-width: 800px; text-align: center; font-size: 0.85rem; color: var(--color-texto-principal);
+    padding: 20px 15px; background: var(--glass-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-radius: 16px 16px 0 0; border-top: 1px solid var(--glass-border); margin-top: 25px; 
+    width: 100%; max-width: 800px; text-align: center; font-size: 0.8rem; color: var(--color-texto-principal);
 }
 
 /* MEDIA QUERIES (Ajustes para móviles) */
 @media (max-width: 600px) {
     header h1 { font-size: 1.2rem; }
-    .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
-    .card { min-height: 100px; padding: 8px; }
-    .card span.emoji { font-size: 1.5rem; }
-    .card h3 { font-size: 0.9rem; }
-    .card-content p { font-size: 0.8rem; }
+    .container { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
+    .card { min-height: 95px; padding: 6px; }
+    .card span.emoji { font-size: 1.3rem; }
+    .card h3 { font-size: 0.85rem; }
+    .card-content p { font-size: 0.75rem; }
+    .login-controls input, .login-controls button, #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
     
-    /* PANEL DE ESTADO */
-    .status-panel-container { padding: 8px 10px; }
-    .status-item { min-width: 90px; }
-    .status-item .value { font-size: 1rem; }
-    .status-item .label { font-size: 0.75rem; }
-    
-    /* LOGIN Y ADMIN CONTROLES EN MÓVIL */
-    .login-form-container { max-width: 100%; }
-    .login-input-row { flex-direction: column; gap: 5px; } /* En móvil se apilan */
-    #toggleAdminBtn { max-width: 100%; }
-    .login-form-container input, .login-form-container .primary-admin-btn, #toggleAdminBtn { font-size: 0.85rem; padding: 8px 10px; }
-    
-    /* Botones de Administracion */
+    /* AJUSTE BOTONES ADMIN EN MÓVIL */
+    #toggleAdminBtn { font-size: 0.85rem; padding: 6px 10px; }
     #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
-    #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 10px 10px; }
+    #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 8px 10px; }
     .admin-group button { width: 100%; min-width: auto; }
 
-
-    .comments-section h2 { font-size: 1.2rem; }
-    .comment-actions { font-size: 0.75rem; gap: 5px; }
+    .comments-section h2 { font-size: 1.1rem; }
+    .comment-actions { font-size: 0.7rem; gap: 5px; }
     .replies-container { padding-left: 10px; }
+    .comment-item { padding: 8px; }
+    .reply-item { padding: 6px; }
+
+    /* ⭐ AJUSTES ESPECÍFICOS PARA MANTENER EL PANEL COMPACTO Y HORIZONTAL EN MÓVIL ⭐ */
+    .status-panel-container {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+    }
+    .status-panel-data {
+        flex-direction: row; /* MANTIENE EN FILA */
+        flex-wrap: nowrap;
+        overflow-x: auto; /* Permite desplazamiento si los 3 no caben */
+    }
+    .status-item {
+        min-width: 90px; /* Ancho fijo para que todos quepan */
+        flex-shrink: 0;
+    }
+    .status-panel-container.admin-mode .status-panel-data {
+        flex-direction: row; 
+        flex-wrap: wrap; 
+        gap: 5px;
+    }
+    .status-panel-container.admin-mode .status-item {
+        flex-direction: column; 
+        width: 31%; 
+    }
+    .status-panel-container.admin-mode input {
+        width: 100%;
+        text-align: center;
+    }
 }
 /* ----------------------------------------------------------------
    ESTILO DEL BOTÓN DE NOTICIAS MEJORADO (index.html)
