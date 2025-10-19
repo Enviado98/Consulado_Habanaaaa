@@ -29,33 +29,42 @@
 <div id="statusPanel" class="status-panel-container">
     <div class="status-panel-header">
         <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
-        <span id="lastEditedTime">Última edición: ---</span>
+        <span id="lastEditedTime">Última edición: Hace un rato...</span>
     </div>
-    <div id="statusDataContainer" class="status-data-container">
-        </div>
-    
-    <div id="statusMessage" class="status-message">
-        Accede a modo edición para actualizar la información
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
     </div>
-    
-    <div id="loginFormContainer" class="login-form-container">
-        <div class="login-input-row"> <input type="text" id="adminUser" placeholder="Usuario" aria-label="Usuario Administrador" required>
-            <input type="password" id="adminPass" placeholder="Contraseña" aria-label="Contraseña Administrador" required>
-        </div>
-        <button id="loginAdminBtn" class="primary-admin-btn">🔑 INICIAR SESIÓN</button>
-        <p id="loginMessage" style="color: var(--acento-rojo); font-size: 0.9em; text-align: center; margin-top: 5px; display: none;">Usuario o Contraseña incorrectos.</p>
-    </div>
-    <button id="toggleAdminBtn" class="primary-admin-btn" style="display: none;">🛡️ ACTIVAR EL MODO EDICIÓN </button>
+</div>
 
-    
-    <div id="adminControlsPanel">
-        <div class="admin-group">
-            <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
+<div id="newsTicker" class="news-ticker-container" style="display:none;">
+    <strong class="news-ticker-fixed-label">NOTICIAS:</strong>
+    <div class="news-ticker-wrap">
+        <div id="newsTickerContent" class="news-ticker-content">
         </div>
-        <div class="admin-group">
-            <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
-            <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
-        </div>
+    </div>
+</div>
+
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
+      Accede a modo edición para actualizar la información
+  </div>
+  
+  <div id="loginInputs" class="login-inputs">
+      <input type="text" id="adminUser" placeholder="Usuario" aria-label="Usuario para Modo Edición">
+      <input type="password" id="adminPass" placeholder="Contraseña" aria-label="Contraseña para Modo Edición">
+  </div>
+  
+  <button id="toggleAdminBtn" class="primary-admin-btn">🛡️ ACTIVAR EL MODO EDICIÓN </button>
+
+  
+  <div id="adminControlsPanel">
+    <div class="admin-group">
+        <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
+    </div>
+    <div class="admin-group">
+        <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
+        <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
+    </div>
     </div>
 </div>
 
@@ -78,11 +87,12 @@
     </div>
 </section>
 
+
 <footer>
-    <div>© 2025 Consulado – Todos los derechos reservados.</div>
+  <div>© 2025 Consulado.</div>
 </footer>
 
-<script type="module" src="script.js"></script> 
+<script type="module" src="script.js"></script>
 
 </body>
 </html>
