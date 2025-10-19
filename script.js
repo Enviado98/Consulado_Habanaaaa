@@ -9,6 +9,10 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
 // ELIMINADAS: const ADMIN_USER = "Admin"; 
 // ELIMINADAS: const ADMIN_PASS = "54321"; 
+
+// ⭐ NUEVAS CREDENCIALES SIMPLES Y HARDCODEADAS ⭐
+const ADMIN_USER = "admin"; 
+const ADMIN_PASS = "12345"; 
 // ----------------------------------------------------
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -48,9 +52,15 @@ const DOMElements = {
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
-    // MODIFICADO: loginForm, user, pass ELIMINADOS
+    
+    // ⭐ NUEVOS ELEMENTOS DE LOGIN ⭐
+    loginFormContainer: document.getElementById('loginFormContainer'),
+    adminUser: document.getElementById('adminUser'),
+    adminPass: document.getElementById('adminPass'),
+    loginErrorMsg: document.getElementById('loginErrorMsg'),
+    // ⭐ FIN NUEVOS ELEMENTOS DE LOGIN ⭐
+    
     statusMessage: document.getElementById('statusMessage'),
-    // MODIFICADO: loginBtn, logoutBtn ELIMINADOS
     toggleAdminBtn: document.getElementById('toggleAdminBtn'), // NUEVO BOTÓN
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
@@ -113,17 +123,16 @@ function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
-        // DOMElements.loginForm.style.display = "none"; // Eliminado
+        DOMElements.loginFormContainer.style.display = "none"; // OCULTAR LOGIN
         DOMElements.adminControlsPanel.style.display = "flex";
         DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
         DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; // Nuevo texto
         DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; // Nuevo color
         enableEditing(); 
-        // alert("Modo edición activado. ¡No olvides guardar!"); // Alerta movida a toggleAdminMode
     } else {
         DOMElements.body.classList.remove('admin-mode');
-        // DOMElements.loginForm.style.display = "flex"; // Eliminado
+        DOMElements.loginFormContainer.style.display = "flex"; // MOSTRAR LOGIN
         DOMElements.adminControlsPanel.style.display = "none";
         DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; // Texto ajustado
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
@@ -144,15 +153,36 @@ function updateAdminUI(isAdmin) {
 
 // Función de alternancia de modo de edición (Reemplaza login y logout)
 function toggleAdminMode() {
+    DOMElements.loginErrorMsg.style.display = 'none'; // Limpiar mensaje de error
+    
     if (!admin) {
-        updateAdminUI(true);
-        alert("✅ Modo de Edición Activado. ¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
+        // Lógica de Login: Solo procede si las credenciales son correctas
+        const user = DOMElements.adminUser.value.trim();
+        const pass = DOMElements.adminPass.value.trim();
+
+        if (user === ADMIN_USER && pass === ADMIN_PASS) {
+            updateAdminUI(true);
+            alert("✅ Modo de Edición Activado. ¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
+            
+            // Limpiar campos después de un login exitoso
+            DOMElements.adminUser.value = '';
+            DOMElements.adminPass.value = '';
+            
+        } else {
+            // Error de Login
+            DOMElements.loginErrorMsg.textContent = "❌ Usuario o Contraseña incorrectos.";
+            DOMElements.loginErrorMsg.style.display = 'block';
+            DOMElements.adminPass.value = ''; // Limpiar campo de contraseña
+            alert("❌ Acceso denegado. Usuario o Contraseña incorrectos.");
+            return; // Detiene la activación del modo admin
+        }
     } else {
+        // Lógica de Logout
         if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición?")) {
             return;
         }
         updateAdminUI(false);
-        // alert("Sesión cerrada. Los cambios no guardados se perderán."); // Alerta movida al confirm
+        DOMElements.loginFormContainer.style.display = 'flex'; // Asegurar que el formulario se muestre al salir
         loadData(); // Recargar datos para descartar cambios
         loadStatusData(); // Recargar datos de estado para descartar cambios
     }
@@ -165,6 +195,7 @@ function enableEditing() {
 function disableEditing() {
     toggleEditing(false);
 }
+
 
 // ----------------------------------------------------
 // CREACIÓN DE CARD (Fusión y Edición Avanzada)
