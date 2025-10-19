@@ -237,40 +237,6 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .login-message { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
 
-/* NUEVOS ESTILOS PARA LOS CAMPOS DE LOGIN */
-.login-inputs {
-    display: flex; /* Para que estén uno al lado del otro */
-    gap: 10px;
-    width: 100%;
-    max-width: 400px; /* Ancho máximo para los inputs */
-    margin-bottom: 5px; /* Espacio antes del botón */
-    transition: opacity 0.3s ease;
-}
-
-.login-inputs input {
-    flex-grow: 1;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-    color: var(--color-texto-principal);
-    background-color: white;
-    transition: border-color 0.3s;
-}
-
-.login-inputs input:focus {
-    border-color: #4f46e5;
-    outline: none;
-    box-shadow: 0 0 5px rgba(79, 70, 229, 0.3);
-}
-
-/* Ajuste para móvil: stacked inputs */
-@media (max-width: 500px) {
-    .login-inputs { 
-        flex-direction: column; 
-        max-width: 95%; /* Asegura que se adapten bien */
-    }
-}
 /* ELIMINADO: #loginForm */
 /* ELIMINADO: .login-controls input */
 
