@@ -7,8 +7,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ----------------------------------------------------
 
 // 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
-const ADMIN_USER = "Admin"; // Usuario solicitado
-const ADMIN_PASS = "54321"; // Contraseña solicitada
+const ADMIN_USER = "Admin"; // Usuario solicitado: Admin
+const ADMIN_PASS = "54321"; // Contraseña solicitada: 54321
 // ----------------------------------------------------
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -48,16 +48,16 @@ const DOMElements = {
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
-    loginInputs: document.getElementById('loginInputs'), // Nuevo Contenedor de inputs
-    adminUser: document.getElementById('adminUser'), // Nuevo campo de usuario
-    adminPass: document.getElementById('adminPass'), // Nuevo campo de contraseña
+    loginInputs: document.getElementById('loginInputs'), 
+    adminUser: document.getElementById('adminUser'), 
+    adminPass: document.getElementById('adminPass'), 
     statusMessage: document.getElementById('statusMessage'),
-    toggleAdminBtn: document.getElementById('toggleAdminBtn'), // NUEVO BOTÓN
+    toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
-    // ⭐ NUEVOS ELEMENTOS DEL PANEL DE ESTADO UNIFICADO ⭐
+    // ⭐ ELEMENTOS DEL PANEL DE ESTADO UNIFICADO ⭐
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
     lastEditedTime: document.getElementById('lastEditedTime')
@@ -107,7 +107,7 @@ function timeAgo(timestamp) {
 
 
 // ----------------------------------------------------
-// FUNCIONES DE UI Y LOGIN (MODIFICADAS)
+// FUNCIONES DE UI Y LOGIN (CORREGIDAS)
 // ----------------------------------------------------
 
 function updateAdminUI(isAdmin) {
@@ -119,24 +119,25 @@ function updateAdminUI(isAdmin) {
         DOMElements.adminControlsPanel.style.display = "flex";
         DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; // Nuevo texto
-        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; // Nuevo color
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
         enableEditing(); 
     } else {
         DOMElements.loginInputs.style.display = "flex"; // Mostrar campos de login
         
         DOMElements.body.classList.remove('admin-mode');
         DOMElements.adminControlsPanel.style.display = "none";
-        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; // Texto ajustado
+        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; // Nuevo texto
-        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; // Color original
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
         disableEditing(); 
     }
     
-    // ⭐ ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN ⭐
+    // ⭐ FIX: Esta lógica es la que hace editable el panel de ESTADO (MW/DOLAR) ⭐
     if (isAdmin) {
         DOMElements.statusPanel.classList.add('admin-mode');
+        // Esto re-renderiza el panel con los campos de entrada editables.
         renderStatusPanel(currentStatus, true); 
     } else {
         DOMElements.statusPanel.classList.remove('admin-mode');
@@ -144,7 +145,7 @@ function updateAdminUI(isAdmin) {
     }
 }
 
-// Función de alternancia de modo de edición (Reemplaza login y logout)
+// Función de alternancia de modo de edición 
 function toggleAdminMode() {
     if (!admin) {
         // --- Lógica de Login ---
@@ -153,12 +154,12 @@ function toggleAdminMode() {
 
         if (user === ADMIN_USER && pass === ADMIN_PASS) {
             updateAdminUI(true);
-            DOMElements.adminUser.value = ""; // Limpiar campos al entrar
+            DOMElements.adminUser.value = ""; 
             DOMElements.adminPass.value = "";
             alert("✅ Modo de Edición Activado. ¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
         } else {
             alert("❌ Acceso denegado. Usuario o Contraseña incorrectos.");
-            DOMElements.adminPass.value = ""; // Limpiar solo la contraseña por seguridad
+            DOMElements.adminPass.value = ""; 
         }
         
     } else {
@@ -167,49 +168,48 @@ function toggleAdminMode() {
             return;
         }
         updateAdminUI(false);
-        // alert("Sesión cerrada. Los cambios no guardados se perderán."); // Alerta movida al confirm
-        loadData(); // Recargar datos para descartar cambios
-        loadStatusData(); // Recargar datos de estado para descartar cambios
+        loadData(); 
+        loadStatusData(); 
     }
 }
 
+// ⭐ FUNCIÓN CORREGIDA: HABILITAR EDICIÓN (para las tarjetas) ⭐
 function enableEditing() {
-    // ... (resto de la función)
+    // FIX: Se eliminan llamadas a funciones no definidas (como toggleEditing y toggleStatusPanelEditing).
+    // Se mantiene la lógica manual de contentEditable que activa la edición en las tarjetas.
+    
     const cardContentElements = DOMElements.contenedor.querySelectorAll('.card-content p');
     cardContentElements.forEach(p => p.contentEditable = "true");
     
-    // NUEVO: Permite editar el título y emoji
+    // Permite editar el título y emoji
     const cardTitleElements = DOMElements.contenedor.querySelectorAll('.card h3');
     cardTitleElements.forEach(h3 => h3.contentEditable = "true");
     
     const cardEmojiElements = DOMElements.contenedor.querySelectorAll('.card span.emoji');
     cardEmojiElements.forEach(span => span.contentEditable = "true");
 
-    // NUEVO: Agrega clases para estilos de edición
+    // Agrega clases para estilos de edición
     DOMElements.contenedor.querySelectorAll('.card').forEach(card => card.classList.add('admin-mode-active'));
-    
-    // NEW: ENABLE INPUTS IN STATUS PANEL
-    toggleStatusPanelEditing(true); 
 }
 
+// ⭐ FUNCIÓN CORREGIDA: DESHABILITAR EDICIÓN (para las tarjetas) ⭐
 function disableEditing() {
-    // ... (resto de la función)
+    // FIX: Se eliminan llamadas a funciones no definidas.
+    
     const cardContentElements = DOMElements.contenedor.querySelectorAll('.card-content p');
     cardContentElements.forEach(p => p.contentEditable = "false");
     
-    // NUEVO: Deshabilita la edición de título y emoji
+    // Deshabilita la edición de título y emoji
     const cardTitleElements = DOMElements.contenedor.querySelectorAll('.card h3');
     cardTitleElements.forEach(h3 => h3.contentEditable = "false");
     
     const cardEmojiElements = DOMElements.contenedor.querySelectorAll('.card span.emoji');
     cardEmojiElements.forEach(span => span.contentEditable = "false");
 
-    // NUEVO: Remueve clases de estilos de edición
+    // Remueve clases de estilos de edición
     DOMElements.contenedor.querySelectorAll('.card').forEach(card => card.classList.remove('admin-mode-active'));
-    
-    // NEW: DISABLE INPUTS IN STATUS PANEL
-    toggleStatusPanelEditing(false);
 }
+
 
 // ----------------------------------------------------
 // CREACIÓN DE CARD (Fusión y Edición Avanzada)
