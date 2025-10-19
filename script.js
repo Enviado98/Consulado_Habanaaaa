@@ -6,9 +6,9 @@ const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
 // ----------------------------------------------------
 
-// 🚨 CREDENCIALES DE ADMINISTRADOR (¡CÁMBIALAS POR SEGURIDAD!) 🚨
-const ADMIN_USER = "Admin"; 
-const ADMIN_PASS = "54321"; 
+// 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
+// ELIMINADAS: const ADMIN_USER = "Admin"; 
+// ELIMINADAS: const ADMIN_PASS = "54321"; 
 // ----------------------------------------------------
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -48,15 +48,10 @@ const DOMElements = {
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
-    // ⭐ NUEVOS ELEMENTOS DE LOGIN ⭐
-    loginFormContainer: document.getElementById('loginFormContainer'),
-    adminUser: document.getElementById('adminUser'),
-    adminPass: document.getElementById('adminPass'),
-    loginAdminBtn: document.getElementById('loginAdminBtn'),
-    loginMessage: document.getElementById('loginMessage'),
-    // ⭐ FIN ELEMENTOS DE LOGIN ⭐
+    // MODIFICADO: loginForm, user, pass ELIMINADOS
     statusMessage: document.getElementById('statusMessage'),
-    toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
+    // MODIFICADO: loginBtn, logoutBtn ELIMINADOS
+    toggleAdminBtn: document.getElementById('toggleAdminBtn'), // NUEVO BOTÓN
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
@@ -114,55 +109,26 @@ function timeAgo(timestamp) {
 // FUNCIONES DE UI Y LOGIN (MODIFICADAS)
 // ----------------------------------------------------
 
-/**
- * @function handleAdminLogin
- * Maneja la lógica de inicio de sesión al presionar el botón de Login.
- */
-function handleAdminLogin() {
-    const user = DOMElements.adminUser.value;
-    const pass = DOMElements.adminPass.value;
-
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-        DOMElements.loginMessage.style.display = "none";
-        DOMElements.loginFormContainer.style.display = "none";
-        DOMElements.toggleAdminBtn.style.display = "block"; // Muestra el botón de "ACTIVAR MODO EDICIÓN"
-        DOMElements.toggleAdminBtn.click(); // Simula el click para activar el modo edición (y mostrar los controles)
-    } else {
-        DOMElements.loginMessage.textContent = "Usuario o Contraseña incorrectos.";
-        DOMElements.loginMessage.style.display = "block";
-        DOMElements.adminPass.value = "";
-    }
-}
-
-
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
-        // Oculta el formulario de login y muestra el panel de controles
-        DOMElements.loginFormContainer.style.display = "none"; 
+        // DOMElements.loginForm.style.display = "none"; // Eliminado
         DOMElements.adminControlsPanel.style.display = "flex";
-        
-        DOMElements.statusMessage.textContent = "✅ Modo de Edición Activado. ¡No olvides guardar!";
+        DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
-        DOMElements.toggleAdminBtn.style.display = "block"; // Asegura que esté visible
-        
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; // Nuevo texto
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; // Nuevo color
         enableEditing(); 
+        // alert("Modo edición activado. ¡No olvides guardar!"); // Alerta movida a toggleAdminMode
     } else {
         DOMElements.body.classList.remove('admin-mode');
-        
-        // Muestra el formulario de login y oculta el panel de controles
-        DOMElements.loginFormContainer.style.display = "flex";
-        DOMElements.toggleAdminBtn.style.display = "none"; // Oculta el botón de Salir/Activar
+        // DOMElements.loginForm.style.display = "flex"; // Eliminado
         DOMElements.adminControlsPanel.style.display = "none";
-        
-        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
+        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; // Texto ajustado
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
-        
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; // Nuevo texto
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; // Color original
         disableEditing(); 
     }
     
@@ -179,27 +145,14 @@ function updateAdminUI(isAdmin) {
 // Función de alternancia de modo de edición (Reemplaza login y logout)
 function toggleAdminMode() {
     if (!admin) {
-        // Si no está logeado, el botón de "ACTIVAR" debe estar visible para que lo usen
-        // si ya pasaron la credencial (pero si no está logeado, este botón está oculto por defecto).
-        
-        // Nota: Con el nuevo flujo, este botón solo es clickeable una vez logeado,
-        // así que si se clickea y admin es false, es que el login falló o algo. 
-        
-        // Si el botón se clickea cuando admin es false, significa que el usuario ya pasó el login y quiere activar la edición.
-        // Pero en la implementación actual, `handleAdminLogin` hace el toggle inicial.
-        // Simplificaremos: Si llega aquí con `admin=false`, es porque el login fue exitoso y quiere entrar en edición.
-        if (DOMElements.loginFormContainer.style.display !== "none") {
-            alert("Por favor, inicia sesión primero.");
-            return;
-        }
-        
         updateAdminUI(true);
-        alert("✅ Modo de Edición Activado. ¡No olvides guardar!");
+        alert("✅ Modo de Edición Activado. ¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
     } else {
-        if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición? Los cambios no guardados se perderán.")) {
+        if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición?")) {
             return;
         }
         updateAdminUI(false);
+        // alert("Sesión cerrada. Los cambios no guardados se perderán."); // Alerta movida al confirm
         loadData(); // Recargar datos para descartar cambios
         loadStatusData(); // Recargar datos de estado para descartar cambios
     }
@@ -235,7 +188,7 @@ function createCardHTML(item, index) {
             labelText = ''; 
         } else if (diff >= OLD_THRESHOLD_MS) {
             cardClass = 'card-old';
-            labelHTML = '<div class="card-label" style="background-color: var(--acento-cian); color: var(--color-texto-principal); display: block;">Editado hace un tiempo</div>';
+            labelHTML = '<div class="card-label" style="background-color: var(--acento-cian); color: var(--color-texto-principal); display: block;">Editado hace tiempo</div>';
             panelStyle = `background: var(--tiempo-panel-cian); color: var(--acento-cian);`;
             labelText = '';
         } else {
@@ -1164,9 +1117,7 @@ function updateHeaderTime() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ⭐ NUEVO EVENT LISTENER PARA EL LOGIN ⭐
-    DOMElements.loginAdminBtn.addEventListener('click', handleAdminLogin);
-    
+    // MODIFICADO: Sustitución de loginBtn/logoutBtn por toggleAdminBtn
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     
     DOMElements.saveBtn.addEventListener('click', saveChanges);
