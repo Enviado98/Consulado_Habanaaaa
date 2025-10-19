@@ -48,9 +48,12 @@ const DOMElements = {
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
+    
+    // ⭐ ELEMENTOS NUEVOS DE LOGIN ⭐
     loginInputs: document.getElementById('loginInputs'), 
     adminUser: document.getElementById('adminUser'), 
     adminPass: document.getElementById('adminPass'), 
+    
     statusMessage: document.getElementById('statusMessage'),
     toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
     saveBtn: document.getElementById('saveBtn'),
@@ -60,7 +63,8 @@ const DOMElements = {
     // ⭐ ELEMENTOS DEL PANEL DE ESTADO UNIFICADO ⭐
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
-    lastEditedTime: document.getElementById('lastEditedTime')
+    lastEditedTime: document.getElementById('lastEditedTime'),
+    viewCounter: document.getElementById('viewCounter')
 };
 
 
@@ -134,7 +138,7 @@ function updateAdminUI(isAdmin) {
         disableEditing(); 
     }
     
-    // ⭐ FIX: Esta lógica es la que hace editable el panel de ESTADO (MW/DOLAR) ⭐
+    // Lógica para hacer editable el panel de ESTADO (MW/DOLAR)
     if (isAdmin) {
         DOMElements.statusPanel.classList.add('admin-mode');
         // Esto re-renderiza el panel con los campos de entrada editables.
@@ -173,42 +177,69 @@ function toggleAdminMode() {
     }
 }
 
-// ⭐ FUNCIÓN CORREGIDA: HABILITAR EDICIÓN (para las tarjetas) ⭐
+// ⭐ FUNCIÓN CORREGIDA Y ROBUSTA: HABILITAR EDICIÓN (para las tarjetas) ⭐
 function enableEditing() {
-    // FIX: Se eliminan llamadas a funciones no definidas (como toggleEditing y toggleStatusPanelEditing).
-    // Se mantiene la lógica manual de contentEditable que activa la edición en las tarjetas.
+    if (!DOMElements.contenedor) return; 
     
-    const cardContentElements = DOMElements.contenedor.querySelectorAll('.card-content p');
-    cardContentElements.forEach(p => p.contentEditable = "true");
+    // 1. Contenido de las tarjetas (párrafos)
+    DOMElements.contenedor.querySelectorAll('.card-content p').forEach(p => {
+        p.contentEditable = "true";
+        // Estilo visual de confirmación para el contenido
+        p.style.border = "1px dashed var(--acento-rojo, #ef233c)"; 
+    });
     
-    // Permite editar el título y emoji
-    const cardTitleElements = DOMElements.contenedor.querySelectorAll('.card h3');
-    cardTitleElements.forEach(h3 => h3.contentEditable = "true");
+    // 2. Título de las tarjetas (h3)
+    DOMElements.contenedor.querySelectorAll('.card h3').forEach(h3 => {
+        h3.contentEditable = "true";
+        // Estilo visual de confirmación para el título
+        h3.style.backgroundColor = "rgba(255, 255, 0, 0.2)";
+    });
     
-    const cardEmojiElements = DOMElements.contenedor.querySelectorAll('.card span.emoji');
-    cardEmojiElements.forEach(span => span.contentEditable = "true");
+    // 3. Emoji de las tarjetas (span.emoji)
+    DOMElements.contenedor.querySelectorAll('.card span.emoji').forEach(span => {
+        span.contentEditable = "true";
+        // Estilo visual de confirmación para el emoji
+        span.style.border = "1px dashed var(--acento-verde, #0d9488)"; 
+    });
 
-    // Agrega clases para estilos de edición
+    // 4. Agrega clases para estilos CSS de edición
     DOMElements.contenedor.querySelectorAll('.card').forEach(card => card.classList.add('admin-mode-active'));
 }
 
-// ⭐ FUNCIÓN CORREGIDA: DESHABILITAR EDICIÓN (para las tarjetas) ⭐
-function disableEditing() {
-    // FIX: Se eliminan llamadas a funciones no definidas.
-    
-    const cardContentElements = DOMElements.contenedor.querySelectorAll('.card-content p');
-    cardContentElements.forEach(p => p.contentEditable = "false");
-    
-    // Deshabilita la edición de título y emoji
-    const cardTitleElements = DOMElements.contenedor.querySelectorAll('.card h3');
-    cardTitleElements.forEach(h3 => h3.contentEditable = "false");
-    
-    const cardEmojiElements = DOMElements.contenedor.querySelectorAll('.card span.emoji');
-    cardEmojiElements.forEach(span => span.contentEditable = "false");
 
-    // Remueve clases de estilos de edición
+// ⭐ FUNCIÓN CORREGIDA Y ROBUSTA: DESHABILITAR EDICIÓN (para las tarjetas) ⭐
+function disableEditing() {
+    if (!DOMElements.contenedor) return; 
+    
+    // 1. Contenido de las tarjetas (párrafos)
+    DOMElements.contenedor.querySelectorAll('.card-content p').forEach(p => {
+        p.contentEditable = "false";
+        p.style.border = ""; // Quitar estilo de confirmación
+    });
+    
+    // 2. Título de las tarjetas (h3)
+    DOMElements.contenedor.querySelectorAll('.card h3').forEach(h3 => {
+        h3.contentEditable = "false";
+        h3.style.backgroundColor = ""; // Quitar estilo de confirmación
+    });
+    
+    // 3. Emoji de las tarjetas (span.emoji)
+    DOMElements.contenedor.querySelectorAll('.card span.emoji').forEach(span => {
+        span.contentEditable = "false";
+        span.style.border = ""; // Quitar estilo de confirmación
+    });
+
+    // 4. Remueve clases de estilos de edición
     DOMElements.contenedor.querySelectorAll('.card').forEach(card => card.classList.remove('admin-mode-active'));
 }
+
+
+// ----------------------------------------------------
+// RESTO DE FUNCIONES DEL SITIO WEB (Guardar, Cargar, Renderizar, etc.)
+// Nota: Se asume que el resto de tu código original (loadData, saveChanges, 
+// renderStatusPanel, etc.) está después de estas funciones.
+// ----------------------------------------------------
+// ... (Aquí iría el resto del código de tu script.js)
 
 
 // ----------------------------------------------------
