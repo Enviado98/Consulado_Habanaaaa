@@ -35,25 +35,24 @@
         Cargando datos de estado...
     </div>
 </div>
-
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
-    <strong class="news-ticker-fixed-label">NOTICIAS:</strong>
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
     <div class="news-ticker-wrap">
         <div id="newsTickerContent" class="news-ticker-content">
-        </div>
+            </div>
     </div>
 </div>
 
 <div class="login-controls">
   <div id="statusMessage" class="login-message">
-      Accede a modo edición para actualizar la información
+            Accede a modo edición para actualizar la información
   </div>
   
-  <div id="loginInputs" class="login-inputs">
-      <input type="text" id="adminUser" placeholder="Usuario" aria-label="Usuario para Modo Edición">
-      <input type="password" id="adminPass" placeholder="Contraseña" aria-label="Contraseña para Modo Edición">
+  <div id="loginFormContainer" class="login-compact-form">
+      <input type="text" id="adminUser" placeholder="Usuario" required title="Usuario Administrador" autocomplete="off">
+      <input type="password" id="adminPass" placeholder="Contraseña" required title="Contraseña Administrador" autocomplete="off">
   </div>
-  
+  <div id="loginErrorMsg" class="login-error-msg" style="display: none;"></div>
   <button id="toggleAdminBtn" class="primary-admin-btn">🛡️ ACTIVAR EL MODO EDICIÓN </button>
 
   
@@ -87,9 +86,8 @@
     </div>
 </section>
 
-
 <footer>
-  <div>© 2025 Consulado.</div>
+  <div>© 2025 Consulado – Información actualizada periódicamente.</div>
 </footer>
 
 <script type="module" src="script.js"></script>
