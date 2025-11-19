@@ -23,17 +23,9 @@ const OLD_THRESHOLD_MS = 7 * ONE_DAY;
 const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
 const TIME_PANEL_AUTOHIDE_MS = 2000; 
 
-// Variables globales de datos
 let currentData = [];
 let currentNews = []; 
 let currentStatus = {}; 
-// Cache para El Toque (para no llamar a la API en cada recarga si no ha pasado 1h)
-let elToqueCache = {
-    usd: null,
-    eur: null,
-    timestamp: 0
-};
-
 const timePanelTimeouts = new Map(); 
 
 // 🔑 LÓGICA DE USUARIO WEB ÚNICO
@@ -56,7 +48,7 @@ const DOMElements = {
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
     statusMessage: document.getElementById('statusMessage'),
-    toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
+    toggleAdminBtn: document.getElementById('toggleAdminBtn'),
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
@@ -74,6 +66,7 @@ function timeAgo(timestamp) {
     const then = new Date(timestamp).getTime();
     const now = Date.now();
     const diff = now - then;
+
     if (diff < 0) return { text: 'Ahora mismo', diff: 0, date: new Date(timestamp) }; 
 
     const SECONDS = Math.floor(diff / 1000);
@@ -82,32 +75,20 @@ function timeAgo(timestamp) {
     const DAYS = Math.floor(HOURS / 24);
 
     let text;
-    if (DAYS >= 1) text = `hace ${DAYS} día(s)`;
-    else if (HOURS >= 1) text = `hace ${HOURS} hora(s)`;
-    else if (MINUTES >= 1) text = `hace ${MINUTES} min.`;
+    if (DAYS >= 1) text = `hace ${DAYS} d`;
+    else if (HOURS >= 1) text = `hace ${HOURS} h`;
+    else if (MINUTES >= 1) text = `hace ${MINUTES} m`;
     else text = 'hace instantes';
     
     return { text, diff, date: new Date(timestamp) };
 }
 
 // ----------------------------------------------------
-// 📡 FUNCIÓN: OBTENER DATOS DE EL TOQUE
+// 📡 CONSULTA API EL TOQUE (NUEVO)
 // ----------------------------------------------------
 async function fetchElToqueRates() {
-    // 1. Comprobar caché local
-    const cachedData = localStorage.getItem('eltoque_cache');
-    const now = Date.now();
-
-    if (cachedData) {
-        const parsed = JSON.parse(cachedData);
-        // Si la data tiene menos de 1 hora, usamos la caché
-        if (now - parsed.timestamp < 3600000) {
-            return { usd: parsed.usd, eur: parsed.eur, fromCache: true };
-        }
-    }
-
-    // 2. Consultar API
     try {
+        // Sin caché para que veas cambios cada 3s (Para producción deberías usar caché)
         const response = await fetch(ELTOQUE_API_URL, {
             method: 'GET',
             headers: {
@@ -116,74 +97,67 @@ async function fetchElToqueRates() {
             }
         });
 
-        if (!response.ok) throw new Error(`Error API: ${response.status}`);
-
+        if (!response.ok) return null;
         const data = await response.json();
-        
+
+        // Intentar obtener valores de la estructura típica
         let usdVal = '---';
         let eurVal = '---';
-
-        // Ajuste según estructura común de respuesta de El Toque
+        
         if (data.tasas) {
-             usdVal = data.tasas.USD || data.tasas.USDT || '---';
-             eurVal = data.tasas.EUR || '---';
+            usdVal = data.tasas.USD || data.tasas.USDT || '---';
+            eurVal = data.tasas.EUR || '---';
         } else if (data.USD && data.EUR) {
-             usdVal = data.USD;
-             eurVal = data.EUR;
+            usdVal = data.USD;
+            eurVal = data.EUR;
         }
 
-        const cacheObject = {
-            usd: Math.floor(Number(usdVal) || 0),
-            eur: Math.floor(Number(eurVal) || 0),
-            timestamp: now
+        return { 
+            usd: Math.floor(Number(usdVal) || 0), 
+            eur: Math.floor(Number(eurVal) || 0) 
         };
-        localStorage.setItem('eltoque_cache', JSON.stringify(cacheObject));
-
-        return { usd: cacheObject.usd, eur: cacheObject.eur, fromCache: false };
 
     } catch (error) {
-        console.error("Error al conectar con El Toque:", error);
-        if (cachedData) {
-            const parsed = JSON.parse(cachedData);
-            return { usd: parsed.usd, eur: parsed.eur, fromCache: true, error: true };
-        }
+        console.error("Error API El Toque:", error);
         return null;
     }
 }
 
 // ----------------------------------------------------
-// 🎨 RENDERIZADO DEL PANEL DE ESTADO
+// 📊 PANEL DE ESTADO (CORREGIDO TAMAÑO GIGANTE)
 // ----------------------------------------------------
-
 function renderStatusPanel(status, isAdminMode) {
     if (!status || !DOMElements.statusDataContainer) {
-        DOMElements.statusDataContainer.innerHTML = "Cargando datos...";
+        DOMElements.statusDataContainer.innerHTML = "Cargando...";
         return;
     }
 
     const deficitTime = new Date(status.deficit_edited_at || 0).getTime();
     const { text: timeText } = timeAgo(deficitTime);
+    DOMElements.lastEditedTime.innerHTML = `Actualizado:<br> ${timeText}`;
     
-    DOMElements.lastEditedTime.innerHTML = `Última actualización:<br> ${timeText}`;
-    
+    // Estilo en línea para evitar que los inputs se hagan gigantes
+    const inputStyle = "width: 60px; font-size: 0.9rem; padding: 2px; text-align: center; border: 1px solid #ccc; border-radius: 4px;";
+    const disabledStyle = "background: #eee; color: #555; cursor: not-allowed;";
+
     if (isAdminMode) {
-        // 🔒 MODO ADMIN: Campos de Divisa BLOQUEADOS
+        // MODO ADMIN: Inputs pequeños y controlados
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item">
                 <span class="label">Deficit (MW):</span>
-                <input type="text" id="editDeficit" value="${status.deficit_mw || ''}" placeholder="Ej: 1800 MW">
+                <input type="text" id="editDeficit" value="${status.deficit_mw || ''}" style="${inputStyle}">
             </div>
-            <div class="status-item" style="opacity: 0.7;">
-                <span class="label">Dolar (API):</span>
-                <input type="number" id="editDollar" value="${status.dollar_cup || ''}" disabled style="background: #e0e0e0; color: #555; cursor: not-allowed;" title="Se actualiza solo con El Toque">
+            <div class="status-item">
+                <span class="label">USD (Auto):</span>
+                <input type="number" id="editDollar" value="${status.dollar_cup || ''}" disabled style="${inputStyle} ${disabledStyle}">
             </div>
-            <div class="status-item" style="opacity: 0.7;">
-                <span class="label">Euro (API):</span>
-                <input type="number" id="editEuro" value="${status.euro_cup || ''}" disabled style="background: #e0e0e0; color: #555; cursor: not-allowed;" title="Se actualiza solo con El Toque">
+            <div class="status-item">
+                <span class="label">EUR (Auto):</span>
+                <input type="number" id="editEuro" value="${status.euro_cup || ''}" disabled style="${inputStyle} ${disabledStyle}">
             </div>
         `;
     } else {
-        // 👁️ MODO PÚBLICO
+        // MODO VISUALIZACIÓN
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item deficit">
                 <span class="label">🔌 Déficit:</span>
@@ -201,38 +175,27 @@ function renderStatusPanel(status, isAdminMode) {
     }
 }
 
-// ----------------------------------------------------
-// 📊 CARGA DE DATOS DE ESTADO
-// ----------------------------------------------------
 async function loadStatusData() {
     try {
-        // 1. Cargar Deficit desde Supabase
-        const { data: supabaseData, error } = await supabase
-            .from('status_data')
-            .select('*')
-            .eq('id', 1) 
-            .single(); 
+        // 1. Datos de BD
+        const { data: dbData } = await supabase.from('status_data').select('*').eq('id', 1).single();
+        
+        // 2. Datos de API (Siempre frescos)
+        const apiData = await fetchElToqueRates();
 
-        // 2. Cargar Tasas desde El Toque
-        const apiRates = await fetchElToqueRates();
+        currentStatus = dbData || { deficit_mw: '---' };
 
-        currentStatus = supabaseData || { deficit_mw: '---' };
-
-        // 3. Prioridad: API para visualizar
-        if (apiRates) {
-            currentStatus.dollar_cup = apiRates.usd;
-            currentStatus.euro_cup = apiRates.eur;
+        if (apiData) {
+            currentStatus.dollar_cup = apiData.usd;
+            currentStatus.euro_cup = apiData.eur;
         }
-
-        if (error) console.error("Error Supabase Status:", error);
 
         renderStatusPanel(currentStatus, admin);
 
     } catch (error) {
-        console.error("Error general loadStatusData:", error);
+        console.error("Error loadStatusData:", error);
     }
 }
-
 // ----------------------------------------------------
 // ⚙️ FUNCIONES DE UI Y LOGIN
 // ----------------------------------------------------
@@ -257,13 +220,16 @@ function updateAdminUI(isAdmin) {
         disableEditing(); 
     }
     
+    // Renderizar panel con la nueva lógica de bloqueo
     renderStatusPanel(currentStatus, isAdmin);
 }
 
 function toggleAdminMode() {
     if (!admin) {
+        // En tu código original, este if solicita la contraseña. 
+        // Aquí no hacemos eso y simplemente activamos el modo Admin.
         updateAdminUI(true);
-        loadStatusData(); // Refrescar al entrar
+        loadStatusData(); 
     } else {
         if (!confirm("✅️ ¿Terminar la edición?")) return;
         updateAdminUI(false);
@@ -276,7 +242,7 @@ function enableEditing() { toggleEditing(true); }
 function disableEditing() { toggleEditing(false); }
 
 // ----------------------------------------------------
-// 💾 GUARDADO DE DATOS
+// 💾 GUARDADO DE DATOS (MODIFICADO para API)
 // ----------------------------------------------------
 
 async function saveChanges(){
@@ -287,7 +253,7 @@ async function saveChanges(){
     let hasChanges = false;
     const nuevoTimestamp = new Date().toISOString(); 
     
-    // 1. GUARDAR CARDS
+    // 1. GUARDAR CARDS (Lógica original)
     for (const card of cardElements) {
         const dbId = card.getAttribute('data-id'); 
         
@@ -300,6 +266,7 @@ async function saveChanges(){
             const newTitle = editableTitle.value;
             const newContent = editableContent.value;
             
+            // Comparamos con el valor original guardado en el input
             if (newEmoji !== editableEmoji.defaultValue || 
                 newTitle !== editableTitle.defaultValue || 
                 newContent !== editableContent.defaultValue) {
@@ -317,8 +284,9 @@ async function saveChanges(){
         }
     }
     
-    // 2. GUARDAR ESTADO (DÉFICIT + API RATES)
+    // 2. GUARDAR ESTADO (DÉFICIT + DIVISAS de API)
     const editDeficit = document.getElementById('editDeficit');
+    
     const currentApiDollar = currentStatus.dollar_cup;
     const currentApiEuro = currentStatus.euro_cup;
 
@@ -327,21 +295,22 @@ async function saveChanges(){
         let statusUpdate = {};
         let needsStatusUpdate = false;
 
-        // A. Verificar cambio en DÉFICIT
+        // A. Verificar cambio en DÉFICIT (Manual)
         if (newDeficit !== (currentStatus.deficit_mw || '')) {
             statusUpdate.deficit_mw = newDeficit;
             statusUpdate.deficit_edited_at = nuevoTimestamp; 
             needsStatusUpdate = true;
         }
 
-        // B. Persistir DIVISAS actuales (de API) en BD
+        // B. Persistir los valores de la API en la BD (Dólar y Euro)
         if (currentApiDollar && currentApiEuro) {
             statusUpdate.dollar_cup = currentApiDollar;
             statusUpdate.euro_cup = currentApiEuro;
             statusUpdate.divisa_edited_at = nuevoTimestamp;
-            needsStatusUpdate = true; // Forzar update para guardar la tasa del día
+            // Marcamos como cambio para que se guarde el valor de la API si no se ha guardado
+            needsStatusUpdate = needsStatusUpdate || true; 
         }
-        
+
         if (needsStatusUpdate) {
             hasChanges = true;
             updatePromises.push(
@@ -364,7 +333,7 @@ async function saveChanges(){
         }
 
         updateHeaderTime();
-        alert("✅ Cambios guardados correctamente.");
+        alert("✅ Cambios guardados (Déficit manual + Tasas API).");
 
     } catch (error) {
         console.error("Error al guardar:", error);
@@ -372,12 +341,12 @@ async function saveChanges(){
     }
 
     await loadData(); 
-    await loadStatusData(); 
+    await loadStatusData(); // Recargar para reflejar todo
     if (admin) setTimeout(enableEditing, 500); 
 }
 
 // ----------------------------------------------------
-// TARJETAS Y UI
+// FUNCIONES AUXILIARES RESTANTES
 // ----------------------------------------------------
 
 function createCardHTML(item, index) {
@@ -418,11 +387,14 @@ function createCardHTML(item, index) {
 
 function toggleEditing(enable) {
     const cards = document.querySelectorAll(".card");
+    const inputStyle = "width: 100%; padding: 5px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;";
+    
     cards.forEach(card => {
         const item = currentData[card.getAttribute('data-index')];
         const contentDiv = card.querySelector('.card-content');
         
         if (enable) {
+            // Entrar en modo edición: Reemplazar texto por inputs
             card.classList.remove('card-recent', 'card-old');
             card.querySelector('.card-time-panel').style.display = 'none';
             
@@ -434,7 +406,8 @@ function toggleEditing(enable) {
                 const input = document.createElement('input');
                 input.className = 'editable-emoji';
                 input.value = item.emoji;
-                input.defaultValue = item.emoji;
+                input.defaultValue = item.emoji; 
+                input.style = inputStyle + "width: 40px; text-align: center;";
                 card.insertBefore(input, emoji);
                 emoji.remove();
             }
@@ -443,6 +416,7 @@ function toggleEditing(enable) {
                 input.className = 'editable-title';
                 input.value = item.titulo;
                 input.defaultValue = item.titulo;
+                input.style = inputStyle;
                 card.insertBefore(input, title);
                 title.remove();
             }
@@ -451,9 +425,12 @@ function toggleEditing(enable) {
                 input.className = 'editable-content';
                 input.value = item.contenido;
                 input.defaultValue = item.contenido;
+                input.style = inputStyle + "height: 100px; resize: vertical;";
                 contentDiv.appendChild(input);
                 content.remove();
             }
+        } else {
+            // Salir: loadData() se encarga de restaurar la vista
         }
     });
 }
@@ -473,9 +450,7 @@ function linkify(text) {
     return text.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
 }
 
-// ----------------------------------------------------
-// NOTICIAS
-// ----------------------------------------------------
+// --- NOTICIAS ---
 async function loadNews() {
     const { data: newsData } = await supabase.from('noticias').select('*').order('timestamp', { ascending: false });
     
@@ -484,7 +459,7 @@ async function loadNews() {
 
     if (validNews.length > 0) {
         const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)}</span>`).join('<span class="news-item"> | </span>');
-        DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`; 
+        DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`; // Duplicado para loop
         
         const width = DOMElements.newsTickerContent.scrollWidth / 2;
         const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
@@ -516,7 +491,7 @@ async function deleteNews() {
 }
 
 // ----------------------------------------------------
-// 🗣️ COMENTARIOS
+// 🗣️ LÓGICA DE COMENTARIOS, HILOS Y LIKES
 // ----------------------------------------------------
 
 function generateColorByName(str) {
@@ -548,7 +523,9 @@ function createCommentHTML(comment, isLiked) {
                     <span class="heart">♥</span>
                 </button>
                 <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
-                ${!comment.parent_id ? `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : ''}
+                ${!comment.parent_id ? 
+                    `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : 
+                    ''}
                 <span class="comment-date">Publicado: ${formatCommentDate(comment.timestamp)}</span>
             </div>
             ${!comment.parent_id ? `
@@ -787,8 +764,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loadData();
     loadNews();
-    loadComments();
+    loadComments(); 
     loadStatusData(); 
+
+    // NUEVO: Ciclo de actualización de 3 segundos para el status
+    setInterval(loadStatusData, 3000);
     
     window.addEventListener('resize', () => {
         if (window.resizeTimer) clearTimeout(window.resizeTimer);
