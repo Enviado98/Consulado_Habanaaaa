@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // 💵 CONFIGURACIÓN API EL TOQUE 💵
 // ----------------------------------------------------
 const ELTOQUE_API_URL = "https://api.eltoque.com/v1/tasa";
-const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
+const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lKdWmT1qyAvzLUfl1-8";
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -84,11 +84,10 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 📡 CONSULTA API EL TOQUE (NUEVO)
+// 📡 CONSULTA API EL TOQUE (CON DEBUG)
 // ----------------------------------------------------
 async function fetchElToqueRates() {
     try {
-        // Sin caché para que veas cambios cada 3s (Para producción deberías usar caché)
         const response = await fetch(ELTOQUE_API_URL, {
             method: 'GET',
             headers: {
@@ -97,17 +96,22 @@ async function fetchElToqueRates() {
             }
         });
 
-        if (!response.ok) return null;
+        if (!response.ok) {
+            console.error(`❌ ERROR API El Toque: Status ${response.status}. Revisa el ELTOQUE_TOKEN y la URL.`);
+            return null;
+        }
+
         const data = await response.json();
+        console.log("✅ Respuesta de API El Toque:", data); // <-- MUESTRA LA RESPUESTA EN CONSOLA
 
         // Intentar obtener valores de la estructura típica
         let usdVal = '---';
         let eurVal = '---';
         
-        if (data.tasas) {
+        if (data.tasas) { 
             usdVal = data.tasas.USD || data.tasas.USDT || '---';
             eurVal = data.tasas.EUR || '---';
-        } else if (data.USD && data.EUR) {
+        } else if (data.USD && data.EUR) { 
             usdVal = data.USD;
             eurVal = data.EUR;
         }
@@ -118,13 +122,13 @@ async function fetchElToqueRates() {
         };
 
     } catch (error) {
-        console.error("Error API El Toque:", error);
+        console.error("Error al conectar o procesar El Toque:", error);
         return null;
     }
 }
 
 // ----------------------------------------------------
-// 📊 PANEL DE ESTADO (CORREGIDO TAMAÑO GIGANTE)
+// 📊 PANEL DE ESTADO Y RENDERIZADO (CORREGIDO TAMAÑO)
 // ----------------------------------------------------
 function renderStatusPanel(status, isAdminMode) {
     if (!status || !DOMElements.statusDataContainer) {
@@ -136,8 +140,8 @@ function renderStatusPanel(status, isAdminMode) {
     const { text: timeText } = timeAgo(deficitTime);
     DOMElements.lastEditedTime.innerHTML = `Actualizado:<br> ${timeText}`;
     
-    // Estilo en línea para evitar que los inputs se hagan gigantes
-    const inputStyle = "width: 60px; font-size: 0.9rem; padding: 2px; text-align: center; border: 1px solid #ccc; border-radius: 4px;";
+    // Estilo para evitar inputs gigantes en modo edición
+    const inputStyle = "width: 65px; font-size: 0.9rem; padding: 2px; text-align: center; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;";
     const disabledStyle = "background: #eee; color: #555; cursor: not-allowed;";
 
     if (isAdminMode) {
@@ -145,15 +149,15 @@ function renderStatusPanel(status, isAdminMode) {
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item">
                 <span class="label">Deficit (MW):</span>
-                <input type="text" id="editDeficit" value="${status.deficit_mw || ''}" style="${inputStyle}">
+                <input type="text" id="editDeficit" value="${status.deficit_mw || ''}" style="${inputStyle}" placeholder="Ej: 1800">
             </div>
             <div class="status-item">
                 <span class="label">USD (Auto):</span>
-                <input type="number" id="editDollar" value="${status.dollar_cup || ''}" disabled style="${inputStyle} ${disabledStyle}">
+                <input type="number" id="editDollar" value="${status.dollar_cup || ''}" disabled style="${inputStyle} ${disabledStyle}" title="Se actualiza solo con El Toque">
             </div>
             <div class="status-item">
                 <span class="label">EUR (Auto):</span>
-                <input type="number" id="editEuro" value="${status.euro_cup || ''}" disabled style="${inputStyle} ${disabledStyle}">
+                <input type="number" id="editEuro" value="${status.euro_cup || ''}" disabled style="${inputStyle} ${disabledStyle}" title="Se actualiza solo con El Toque">
             </div>
         `;
     } else {
@@ -177,7 +181,7 @@ function renderStatusPanel(status, isAdminMode) {
 
 async function loadStatusData() {
     try {
-        // 1. Datos de BD
+        // 1. Datos de BD (Para el Déficit y valores por defecto)
         const { data: dbData } = await supabase.from('status_data').select('*').eq('id', 1).single();
         
         // 2. Datos de API (Siempre frescos)
@@ -185,6 +189,7 @@ async function loadStatusData() {
 
         currentStatus = dbData || { deficit_mw: '---' };
 
+        // 3. Sobreescribir siempre las divisas con los datos de la API
         if (apiData) {
             currentStatus.dollar_cup = apiData.usd;
             currentStatus.euro_cup = apiData.eur;
@@ -196,6 +201,7 @@ async function loadStatusData() {
         console.error("Error loadStatusData:", error);
     }
 }
+
 // ----------------------------------------------------
 // ⚙️ FUNCIONES DE UI Y LOGIN
 // ----------------------------------------------------
@@ -220,14 +226,11 @@ function updateAdminUI(isAdmin) {
         disableEditing(); 
     }
     
-    // Renderizar panel con la nueva lógica de bloqueo
     renderStatusPanel(currentStatus, isAdmin);
 }
 
 function toggleAdminMode() {
     if (!admin) {
-        // En tu código original, este if solicita la contraseña. 
-        // Aquí no hacemos eso y simplemente activamos el modo Admin.
         updateAdminUI(true);
         loadStatusData(); 
     } else {
@@ -266,7 +269,6 @@ async function saveChanges(){
             const newTitle = editableTitle.value;
             const newContent = editableContent.value;
             
-            // Comparamos con el valor original guardado en el input
             if (newEmoji !== editableEmoji.defaultValue || 
                 newTitle !== editableTitle.defaultValue || 
                 newContent !== editableContent.defaultValue) {
@@ -307,7 +309,6 @@ async function saveChanges(){
             statusUpdate.dollar_cup = currentApiDollar;
             statusUpdate.euro_cup = currentApiEuro;
             statusUpdate.divisa_edited_at = nuevoTimestamp;
-            // Marcamos como cambio para que se guarde el valor de la API si no se ha guardado
             needsStatusUpdate = needsStatusUpdate || true; 
         }
 
@@ -341,7 +342,7 @@ async function saveChanges(){
     }
 
     await loadData(); 
-    await loadStatusData(); // Recargar para reflejar todo
+    await loadStatusData(); 
     if (admin) setTimeout(enableEditing, 500); 
 }
 
@@ -394,7 +395,6 @@ function toggleEditing(enable) {
         const contentDiv = card.querySelector('.card-content');
         
         if (enable) {
-            // Entrar en modo edición: Reemplazar texto por inputs
             card.classList.remove('card-recent', 'card-old');
             card.querySelector('.card-time-panel').style.display = 'none';
             
@@ -429,8 +429,6 @@ function toggleEditing(enable) {
                 contentDiv.appendChild(input);
                 content.remove();
             }
-        } else {
-            // Salir: loadData() se encarga de restaurar la vista
         }
     });
 }
@@ -459,7 +457,7 @@ async function loadNews() {
 
     if (validNews.length > 0) {
         const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)}</span>`).join('<span class="news-item"> | </span>');
-        DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`; // Duplicado para loop
+        DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`; 
         
         const width = DOMElements.newsTickerContent.scrollWidth / 2;
         const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
@@ -767,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadComments(); 
     loadStatusData(); 
 
-    // NUEVO: Ciclo de actualización de 3 segundos para el status
+    // Ciclo de actualización de 3 segundos
     setInterval(loadStatusData, 3000);
     
     window.addEventListener('resize', () => {
