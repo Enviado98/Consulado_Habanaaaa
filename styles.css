@@ -77,11 +77,6 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     font-weight: 700;
     box-shadow: 0 2px 4px var(--sombra-suave);
     padding: 8px 10px; /* Más compacto */
-    
-    /* ⭐ MODIFICACIÓN PARA CENTRAR EL LOGIN Y BOTÓN ⭐ */
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
 }
 
 .status-panel-header {
@@ -254,8 +249,8 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 #toggleAdminBtn { 
     font-size: 0.9rem; 
     padding: 8px 15px; 
-    width: 90%; /* Ajuste al 90% para que se centre y se vea mejor */
-    max-width: 400px; /* Ancho máximo para el botón de acceso, alineado con el login */
+    width: 100%;
+    max-width: 350px; /* Ancho máximo para el botón de acceso */
     margin-bottom: 5px;
 }
 #toggleAdminBtn:hover {
@@ -485,47 +480,6 @@ footer {
     width: 100%; max-width: 800px; text-align: center; font-size: 0.8rem; color: var(--color-texto-principal);
 }
 
-/* ----------------------------------------------------------------
-   LOGIN SIMPLE Y COMPACTO (NUEVOS ESTILOS)
-   ---------------------------------------------------------------- */
-.login-compact-form {
-    display: flex;
-    justify-content: center; /* Centrar los inputs */
-    align-items: center;
-    gap: 8px; /* Espacio compacto entre inputs */
-    margin: 10px 0 5px 0; /* Espacio arriba y abajo */
-    width: 90%;
-    max-width: 400px; /* Limitar el ancho para que se vea discreto */
-}
-
-.login-compact-form input[type="text"],
-.login-compact-form input[type="password"] {
-    flex-grow: 1; /* Permite que ambos inputs crezcan igual */
-    padding: 5px 8px;
-    border: 1px solid var(--color-texto-secundario);
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: center;
-    transition: border-color 0.3s;
-    background-color: white; /* Fondo blanco para mejor contraste */
-}
-
-.login-compact-form input:focus {
-    border-color: var(--acento-rojo);
-    outline: none;
-}
-
-.login-error-msg {
-    width: 100%;
-    text-align: center;
-    color: var(--acento-rojo);
-    font-weight: 700;
-    font-size: 0.8rem;
-    margin-bottom: 5px; 
-}
-
-
 /* MEDIA QUERIES (Ajustes para móviles) */
 @media (max-width: 600px) {
     header h1 { font-size: 1.2rem; }
@@ -537,12 +491,7 @@ footer {
     .login-controls input, .login-controls button, #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
     
     /* AJUSTE BOTONES ADMIN EN MÓVIL */
-    #toggleAdminBtn { 
-        font-size: 0.85rem; 
-        padding: 6px 10px; 
-        width: 90%; /* Ajuste al 90% para que se centre y se vea mejor */
-        max-width: 400px; /* Ancho máximo para el botón de acceso, alineado con el login */
-    }
+    #toggleAdminBtn { font-size: 0.85rem; padding: 6px 10px; }
     #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
     #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 8px 10px; }
     .admin-group button { width: 100%; min-width: auto; }
@@ -658,4 +607,4 @@ header {
     border-radius: 3px;
     background-color: rgba(0, 0, 0, 0.4); /* Un fondo sutil para contraste */
     white-space: nowrap; /* Evita que el texto se rompa */
-}
+                    }
