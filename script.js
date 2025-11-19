@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ----------------------------------------------------
 // 💵 CONFIGURACIÓN API EL TOQUE 💵
 // ----------------------------------------------------
-const ELTOQUE_API_URL = "https://eltoque.com/api/v1/tasa";
+const ELTOQUE_API_URL = "https://app.eltoque.com/api/v1/tasa";
 // ¡ATENCIÓN! Asegúrate de que este token es válido. Si da error 401/403, debes renovarlo.
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lKdWmT1qyAvzLUfl1-8";
 
