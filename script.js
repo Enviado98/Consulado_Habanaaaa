@@ -8,12 +8,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // 💵 CONFIGURACIÓN API EL TOQUE 💵
 // ----------------------------------------------------
 const ELTOQUE_API_URL = "https://api.eltoque.com/v1/tasa";
+// ¡ATENCIÓN! Asegúrate de que este token es válido. Si da error 401/403, debes renovarlo.
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lKdWmT1qyAvzLUfl1-8";
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let admin = false; // Estado global para el modo de edición
+let admin = false; 
 
 // Variables y constantes de tiempo
 const ONE_HOUR = 3600000;
@@ -84,9 +85,12 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 📡 CONSULTA API EL TOQUE (CON DEBUG)
+// 📡 CONSULTA API EL TOQUE (CON DEBUG EN EL DOM)
 // ----------------------------------------------------
 async function fetchElToqueRates() {
+    // Si no es modo admin, no mostramos el mensaje de debug tan intrusivo
+    if (admin) DOMElements.statusMessage.textContent = "Verificando API El Toque..."; 
+
     try {
         const response = await fetch(ELTOQUE_API_URL, {
             method: 'GET',
@@ -97,14 +101,23 @@ async function fetchElToqueRates() {
         });
 
         if (!response.ok) {
-            console.error(`❌ ERROR API El Toque: Status ${response.status}. Revisa el ELTOQUE_TOKEN y la URL.`);
+            const errorStatus = response.status;
+            const errorText = `❌ ERROR API: Código ${errorStatus}. Token/URL inválido.`;
+            if (admin) {
+                DOMElements.statusMessage.textContent = errorText; 
+                DOMElements.statusMessage.style.color = "var(--acento-rojo)"; 
+            }
+            console.error(errorText);
             return null;
         }
 
         const data = await response.json();
-        console.log("✅ Respuesta de API El Toque:", data); // <-- MUESTRA LA RESPUESTA EN CONSOLA
+        if (admin) {
+            DOMElements.statusMessage.textContent = "✅ API El Toque OK. Actualizando precios...";
+            DOMElements.statusMessage.style.color = "var(--acento-verde)"; 
+        }
 
-        // Intentar obtener valores de la estructura típica
+        // Extracción de valores
         let usdVal = '---';
         let eurVal = '---';
         
@@ -116,20 +129,85 @@ async function fetchElToqueRates() {
             eurVal = data.EUR;
         }
 
+        // Devolvemos los valores enteros
         return { 
             usd: Math.floor(Number(usdVal) || 0), 
             eur: Math.floor(Number(eurVal) || 0) 
         };
 
     } catch (error) {
+        const failText = "❌ Error de CONEXIÓN a la API (Red).";
+        if (admin) {
+            DOMElements.statusMessage.textContent = failText; 
+            DOMElements.statusMessage.style.color = "var(--acento-rojo)"; 
+        }
         console.error("Error al conectar o procesar El Toque:", error);
         return null;
     }
 }
 
 // ----------------------------------------------------
-// 📊 PANEL DE ESTADO Y RENDERIZADO (CORREGIDO TAMAÑO)
+// 📊 PANEL DE ESTADO Y AUTO-GUARDADO (MODIFICADO)
 // ----------------------------------------------------
+async function loadStatusData() {
+    try {
+        // 1. Obtener estado actual de la BD
+        const { data: dbData } = await supabase.from('status_data').select('*').eq('id', 1).single();
+        
+        // 2. Obtener tasas frescas de la API
+        const apiData = await fetchElToqueRates();
+
+        currentStatus = dbData || { deficit_mw: '---', dollar_cup: 0, euro_cup: 0 };
+        
+        // --- 🔑 LÓGICA DE AUTO-GUARDADO DE DIVISAS 🔑 ---
+        let needsAutoSave = false;
+        let autoUpdate = {};
+
+        if (apiData) {
+            
+            // A. Verificar si el Dólar ha cambiado (Importante: comparamos enteros)
+            if (apiData.usd !== currentStatus.dollar_cup) {
+                autoUpdate.dollar_cup = apiData.usd;
+                autoUpdate.divisa_edited_at = new Date().toISOString(); 
+                needsAutoSave = true;
+            }
+            
+            // B. Verificar si el Euro ha cambiado
+            if (apiData.eur !== currentStatus.euro_cup) {
+                autoUpdate.euro_cup = apiData.eur;
+                autoUpdate.divisa_edited_at = new Date().toISOString(); 
+                needsAutoSave = true;
+            }
+
+            // C. Si hay cambios en USD o EUR, guardar automáticamente
+            if (needsAutoSave) {
+                console.log("💰 Auto-Guardando nuevas tasas de cambio...");
+                const { error } = await supabase.from('status_data')
+                    .update(autoUpdate)
+                    .eq('id', 1);
+                
+                if (error) {
+                    console.error("Error al auto-guardar las divisas:", error);
+                } else {
+                     console.log("✅ Auto-Guardado de divisas completado.");
+                     
+                     // Actualizamos currentStatus en memoria con los nuevos valores guardados
+                     currentStatus = { ...currentStatus, ...autoUpdate };
+                }
+            } else {
+                 console.log("Precios de divisas sin cambios. No se requiere auto-guardado.");
+            }
+        }
+        // --- FIN DE LÓGICA DE AUTO-GUARDADO ---
+
+        // 3. Renderizar el panel con los datos más recientes (BD o API)
+        renderStatusPanel(currentStatus, admin);
+
+    } catch (error) {
+        console.error("Error loadStatusData:", error);
+    }
+}
+
 function renderStatusPanel(status, isAdminMode) {
     if (!status || !DOMElements.statusDataContainer) {
         DOMElements.statusDataContainer.innerHTML = "Cargando...";
@@ -179,29 +257,6 @@ function renderStatusPanel(status, isAdminMode) {
     }
 }
 
-async function loadStatusData() {
-    try {
-        // 1. Datos de BD (Para el Déficit y valores por defecto)
-        const { data: dbData } = await supabase.from('status_data').select('*').eq('id', 1).single();
-        
-        // 2. Datos de API (Siempre frescos)
-        const apiData = await fetchElToqueRates();
-
-        currentStatus = dbData || { deficit_mw: '---' };
-
-        // 3. Sobreescribir siempre las divisas con los datos de la API
-        if (apiData) {
-            currentStatus.dollar_cup = apiData.usd;
-            currentStatus.euro_cup = apiData.eur;
-        }
-
-        renderStatusPanel(currentStatus, admin);
-
-    } catch (error) {
-        console.error("Error loadStatusData:", error);
-    }
-}
-
 // ----------------------------------------------------
 // ⚙️ FUNCIONES DE UI Y LOGIN
 // ----------------------------------------------------
@@ -245,7 +300,7 @@ function enableEditing() { toggleEditing(true); }
 function disableEditing() { toggleEditing(false); }
 
 // ----------------------------------------------------
-// 💾 GUARDADO DE DATOS (MODIFICADO para API)
+// 💾 GUARDADO DE DATOS (AHORA SOLO GUARDA DÉFICIT Y CARDS)
 // ----------------------------------------------------
 
 async function saveChanges(){
@@ -286,32 +341,23 @@ async function saveChanges(){
         }
     }
     
-    // 2. GUARDAR ESTADO (DÉFICIT + DIVISAS de API)
+    // 2. GUARDAR ESTADO (SOLO DÉFICIT MANUAL)
     const editDeficit = document.getElementById('editDeficit');
-    
-    const currentApiDollar = currentStatus.dollar_cup;
-    const currentApiEuro = currentStatus.euro_cup;
 
     if (editDeficit) {
         const newDeficit = editDeficit.value.trim();
         let statusUpdate = {};
         let needsStatusUpdate = false;
 
-        // A. Verificar cambio en DÉFICIT (Manual)
+        // Verificar cambio en DÉFICIT (Manual)
         if (newDeficit !== (currentStatus.deficit_mw || '')) {
             statusUpdate.deficit_mw = newDeficit;
             statusUpdate.deficit_edited_at = nuevoTimestamp; 
             needsStatusUpdate = true;
         }
 
-        // B. Persistir los valores de la API en la BD (Dólar y Euro)
-        if (currentApiDollar && currentApiEuro) {
-            statusUpdate.dollar_cup = currentApiDollar;
-            statusUpdate.euro_cup = currentApiEuro;
-            statusUpdate.divisa_edited_at = nuevoTimestamp;
-            needsStatusUpdate = needsStatusUpdate || true; 
-        }
-
+        // NO TOCAMOS DOLLAR_CUP Y EURO_CUP aquí, porque se auto-guardan.
+        // Solo guardamos si hay un cambio manual en el déficit.
         if (needsStatusUpdate) {
             hasChanges = true;
             updatePromises.push(
@@ -334,7 +380,7 @@ async function saveChanges(){
         }
 
         updateHeaderTime();
-        alert("✅ Cambios guardados (Déficit manual + Tasas API).");
+        alert("✅ Cambios manuales guardados (Déficit + Tarjetas).");
 
     } catch (error) {
         console.error("Error al guardar:", error);
