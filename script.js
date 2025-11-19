@@ -1,15 +1,14 @@
 // ----------------------------------------------------
 // 🚨 CONFIGURACIÓN DE SUPABASE (POSTGRESQL BAAS) 🚨
 // ----------------------------------------------------
-// !!! NO IMPORTA QUE ESTÉ EN EL CÓDIGO DIRECTAMENTE (WEB DE PRUEBA) !!!
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
-// ----------------------------------------------------
 
-// 🚨 CREDENCIALES DE ADMINISTRADOR 🚨
-// ELIMINADAS: const ADMIN_USER = "Admin"; 
-// ELIMINADAS: const ADMIN_PASS = "54321"; 
 // ----------------------------------------------------
+// 💵 CONFIGURACIÓN API EL TOQUE 💵
+// ----------------------------------------------------
+const ELTOQUE_API_URL = "https://api.eltoque.com/v1/tasa";
+const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -24,19 +23,27 @@ const OLD_THRESHOLD_MS = 7 * ONE_DAY;
 const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
 const TIME_PANEL_AUTOHIDE_MS = 2000; 
 
+// Variables globales de datos
 let currentData = [];
 let currentNews = []; 
 let currentStatus = {}; 
+// Cache para El Toque (para no llamar a la API en cada recarga si no ha pasado 1h)
+let elToqueCache = {
+    usd: null,
+    eur: null,
+    timestamp: 0
+};
+
 const timePanelTimeouts = new Map(); 
 
-// 🔑 LÓGICA DE USUARIO WEB ÚNICO (Para persistir los Likes)
+// 🔑 LÓGICA DE USUARIO WEB ÚNICO
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
     userWebId = crypto.randomUUID(); 
     localStorage.setItem('userWebId', userWebId);
 }
 
-// Elementos del DOM (Simplificado)
+// Elementos del DOM
 const DOMElements = {
     body: document.body,
     contenedor: document.getElementById('contenedor'),
@@ -48,32 +55,25 @@ const DOMElements = {
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
     adminControlsPanel: document.getElementById('adminControlsPanel'),
-    // MODIFICADO: loginForm, user, pass ELIMINADOS
     statusMessage: document.getElementById('statusMessage'),
-    // MODIFICADO: loginBtn, logoutBtn ELIMINADOS
-    toggleAdminBtn: document.getElementById('toggleAdminBtn'), // NUEVO BOTÓN
+    toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
-    // ⭐ NUEVOS ELEMENTOS DEL PANEL DE ESTADO UNIFICADO ⭐
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
     lastEditedTime: document.getElementById('lastEditedTime')
 };
 
-
 // ----------------------------------------------------
 // FUNCIÓN DE FORMATO DE TIEMPO
 // ----------------------------------------------------
-
 function timeAgo(timestamp) {
-    if (!timestamp) return { text: 'Sin fecha de edición.', diff: -1, date: null };
-    
+    if (!timestamp) return { text: 'Sin fecha.', diff: -1, date: null };
     const then = new Date(timestamp).getTime();
     const now = Date.now();
     const diff = now - then;
-
     if (diff < 0) return { text: 'Ahora mismo', diff: 0, date: new Date(timestamp) }; 
 
     const SECONDS = Math.floor(diff / 1000);
@@ -82,128 +82,302 @@ function timeAgo(timestamp) {
     const DAYS = Math.floor(HOURS / 24);
 
     let text;
-    if (DAYS >= 30) {
-        text = `hace ${Math.floor(DAYS / 30)} meses`;
-    } else if (DAYS >= 7) {
-        const weeks = Math.floor(DAYS / 7);
-        text = `hace ${weeks} sem.`;
-    } else if (DAYS >= 2) {
-        text = `hace ${DAYS} días`;
-    } else if (DAYS === 1) {
-        text = 'hace 1 día';
-    } else if (HOURS >= 2) {
-        text = `hace ${HOURS} horas`;
-    } else if (HOURS === 1) {
-        text = 'hace 1 hora';
-    } else if (MINUTES >= 1) {
-        text = `hace ${MINUTES} min.`;
-    } else {
-        text = 'hace unos momentos';
-    }
+    if (DAYS >= 1) text = `hace ${DAYS} día(s)`;
+    else if (HOURS >= 1) text = `hace ${HOURS} hora(s)`;
+    else if (MINUTES >= 1) text = `hace ${MINUTES} min.`;
+    else text = 'hace instantes';
     
     return { text, diff, date: new Date(timestamp) };
 }
 
+// ----------------------------------------------------
+// 📡 FUNCIÓN: OBTENER DATOS DE EL TOQUE
+// ----------------------------------------------------
+async function fetchElToqueRates() {
+    // 1. Comprobar caché local
+    const cachedData = localStorage.getItem('eltoque_cache');
+    const now = Date.now();
+
+    if (cachedData) {
+        const parsed = JSON.parse(cachedData);
+        // Si la data tiene menos de 1 hora, usamos la caché
+        if (now - parsed.timestamp < 3600000) {
+            return { usd: parsed.usd, eur: parsed.eur, fromCache: true };
+        }
+    }
+
+    // 2. Consultar API
+    try {
+        const response = await fetch(ELTOQUE_API_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${ELTOQUE_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error(`Error API: ${response.status}`);
+
+        const data = await response.json();
+        
+        let usdVal = '---';
+        let eurVal = '---';
+
+        // Ajuste según estructura común de respuesta de El Toque
+        if (data.tasas) {
+             usdVal = data.tasas.USD || data.tasas.USDT || '---';
+             eurVal = data.tasas.EUR || '---';
+        } else if (data.USD && data.EUR) {
+             usdVal = data.USD;
+             eurVal = data.EUR;
+        }
+
+        const cacheObject = {
+            usd: Math.floor(Number(usdVal) || 0),
+            eur: Math.floor(Number(eurVal) || 0),
+            timestamp: now
+        };
+        localStorage.setItem('eltoque_cache', JSON.stringify(cacheObject));
+
+        return { usd: cacheObject.usd, eur: cacheObject.eur, fromCache: false };
+
+    } catch (error) {
+        console.error("Error al conectar con El Toque:", error);
+        if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            return { usd: parsed.usd, eur: parsed.eur, fromCache: true, error: true };
+        }
+        return null;
+    }
+}
 
 // ----------------------------------------------------
-// FUNCIONES DE UI Y LOGIN (MODIFICADAS)
+// 🎨 RENDERIZADO DEL PANEL DE ESTADO
+// ----------------------------------------------------
+
+function renderStatusPanel(status, isAdminMode) {
+    if (!status || !DOMElements.statusDataContainer) {
+        DOMElements.statusDataContainer.innerHTML = "Cargando datos...";
+        return;
+    }
+
+    const deficitTime = new Date(status.deficit_edited_at || 0).getTime();
+    const { text: timeText } = timeAgo(deficitTime);
+    
+    DOMElements.lastEditedTime.innerHTML = `Última actualización:<br> ${timeText}`;
+    
+    if (isAdminMode) {
+        // 🔒 MODO ADMIN: Campos de Divisa BLOQUEADOS
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item">
+                <span class="label">Deficit (MW):</span>
+                <input type="text" id="editDeficit" value="${status.deficit_mw || ''}" placeholder="Ej: 1800 MW">
+            </div>
+            <div class="status-item" style="opacity: 0.7;">
+                <span class="label">Dolar (API):</span>
+                <input type="number" id="editDollar" value="${status.dollar_cup || ''}" disabled style="background: #e0e0e0; color: #555; cursor: not-allowed;" title="Se actualiza solo con El Toque">
+            </div>
+            <div class="status-item" style="opacity: 0.7;">
+                <span class="label">Euro (API):</span>
+                <input type="number" id="editEuro" value="${status.euro_cup || ''}" disabled style="background: #e0e0e0; color: #555; cursor: not-allowed;" title="Se actualiza solo con El Toque">
+            </div>
+        `;
+    } else {
+        // 👁️ MODO PÚBLICO
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item deficit">
+                <span class="label">🔌 Déficit:</span>
+                <span class="value">${status.deficit_mw || '---'}</span>
+            </div>
+            <div class="status-item divisa">
+                <span class="label">💵 USD:</span>
+                <span class="value">${status.dollar_cup || '---'}</span>
+            </div>
+            <div class="status-item divisa">
+                <span class="label">💶 EUR:</span>
+                <span class="value">${status.euro_cup || '---'}</span>
+            </div>
+        `;
+    }
+}
+
+// ----------------------------------------------------
+// 📊 CARGA DE DATOS DE ESTADO
+// ----------------------------------------------------
+async function loadStatusData() {
+    try {
+        // 1. Cargar Deficit desde Supabase
+        const { data: supabaseData, error } = await supabase
+            .from('status_data')
+            .select('*')
+            .eq('id', 1) 
+            .single(); 
+
+        // 2. Cargar Tasas desde El Toque
+        const apiRates = await fetchElToqueRates();
+
+        currentStatus = supabaseData || { deficit_mw: '---' };
+
+        // 3. Prioridad: API para visualizar
+        if (apiRates) {
+            currentStatus.dollar_cup = apiRates.usd;
+            currentStatus.euro_cup = apiRates.eur;
+        }
+
+        if (error) console.error("Error Supabase Status:", error);
+
+        renderStatusPanel(currentStatus, admin);
+
+    } catch (error) {
+        console.error("Error general loadStatusData:", error);
+    }
+}
+
+// ----------------------------------------------------
+// ⚙️ FUNCIONES DE UI Y LOGIN
 // ----------------------------------------------------
 
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
-        // DOMElements.loginForm.style.display = "none"; // Eliminado
         DOMElements.adminControlsPanel.style.display = "flex";
-        DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
+        DOMElements.statusMessage.textContent = "¡🔴 EDITA CON RESPONSABILIDAD!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; // Nuevo texto
-        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; // Nuevo color
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)";
         enableEditing(); 
-        // alert("Modo edición activado. ¡No olvides guardar!"); // Alerta movida a toggleAdminMode
     } else {
         DOMElements.body.classList.remove('admin-mode');
-        // DOMElements.loginForm.style.display = "flex"; // Eliminado
         DOMElements.adminControlsPanel.style.display = "none";
-        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; // Texto ajustado
+        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; // Nuevo texto
-        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; // Color original
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
         disableEditing(); 
     }
     
-    // ⭐ ACTUALIZACIÓN DEL PANEL DE ESTADO EN MODO ADMIN ⭐
-    if (isAdmin) {
-        DOMElements.statusPanel.classList.add('admin-mode');
-        renderStatusPanel(currentStatus, true); 
+    renderStatusPanel(currentStatus, isAdmin);
+}
+
+function toggleAdminMode() {
+    if (!admin) {
+        updateAdminUI(true);
+        loadStatusData(); // Refrescar al entrar
     } else {
-        DOMElements.statusPanel.classList.remove('admin-mode');
-        renderStatusPanel(currentStatus, false); 
+        if (!confirm("✅️ ¿Terminar la edición?")) return;
+        updateAdminUI(false);
+        loadData(); 
+        loadStatusData(); 
     }
 }
 
-// Función de alternancia de modo de edición (Reemplaza login y logout)
-function toggleAdminMode() {
-    // 🚨 NUEVA LÓGICA DE LOGIN MANUAL: Capturar valores de los campos
-    const adminUser = document.getElementById('adminUser');
-    const adminPass = document.getElementById('adminPass');
-    const loginErrorMsg = document.getElementById('loginErrorMsg');
-    
-    // Credenciales harcodeadas (deben coincidir con las del archivo de prueba)
-    const HARDCODED_ADMIN_USER = "Admin"; 
-    const HARDCODED_ADMIN_PASS = "54321"; 
+function enableEditing() { toggleEditing(true); }
+function disableEditing() { toggleEditing(false); }
 
-    if (admin) {
-        // Lógica de SALIR DEL MODO EDICIÓN
-        if (!confirm("⚠️ ¿Estás seguro de que quieres salir del Modo Edición?")) {
-            return;
+// ----------------------------------------------------
+// 💾 GUARDADO DE DATOS
+// ----------------------------------------------------
+
+async function saveChanges(){
+    if (!admin) { alert("Acceso denegado."); return; }
+  
+    const cardElements = document.querySelectorAll(".card");
+    let updatePromises = [];
+    let hasChanges = false;
+    const nuevoTimestamp = new Date().toISOString(); 
+    
+    // 1. GUARDAR CARDS
+    for (const card of cardElements) {
+        const dbId = card.getAttribute('data-id'); 
+        
+        const editableEmoji = card.querySelector('.editable-emoji');
+        const editableTitle = card.querySelector('.editable-title');
+        const editableContent = card.querySelector('.editable-content');
+
+        if (editableEmoji && editableTitle && editableContent) {
+            const newEmoji = editableEmoji.value;
+            const newTitle = editableTitle.value;
+            const newContent = editableContent.value;
+            
+            if (newEmoji !== editableEmoji.defaultValue || 
+                newTitle !== editableTitle.defaultValue || 
+                newContent !== editableContent.defaultValue) {
+                
+                hasChanges = true;
+                updatePromises.push(
+                    supabase.from('items').update({ 
+                        emoji: newEmoji,
+                        titulo: newTitle,
+                        contenido: newContent, 
+                        last_edited_timestamp: nuevoTimestamp 
+                    }).eq('id', dbId)
+                );
+            }
+        }
+    }
+    
+    // 2. GUARDAR ESTADO (DÉFICIT + API RATES)
+    const editDeficit = document.getElementById('editDeficit');
+    const currentApiDollar = currentStatus.dollar_cup;
+    const currentApiEuro = currentStatus.euro_cup;
+
+    if (editDeficit) {
+        const newDeficit = editDeficit.value.trim();
+        let statusUpdate = {};
+        let needsStatusUpdate = false;
+
+        // A. Verificar cambio en DÉFICIT
+        if (newDeficit !== (currentStatus.deficit_mw || '')) {
+            statusUpdate.deficit_mw = newDeficit;
+            statusUpdate.deficit_edited_at = nuevoTimestamp; 
+            needsStatusUpdate = true;
+        }
+
+        // B. Persistir DIVISAS actuales (de API) en BD
+        if (currentApiDollar && currentApiEuro) {
+            statusUpdate.dollar_cup = currentApiDollar;
+            statusUpdate.euro_cup = currentApiEuro;
+            statusUpdate.divisa_edited_at = nuevoTimestamp;
+            needsStatusUpdate = true; // Forzar update para guardar la tasa del día
         }
         
-        // Limpiar campos y mensajes al salir
-        if (adminUser) adminUser.value = '';
-        if (adminPass) adminPass.value = '';
-        if (loginErrorMsg) loginErrorMsg.style.display = 'none';
-
-        updateAdminUI(false);
-        loadData(); // Recargar datos para descartar cambios
-        loadStatusData(); // Recargar datos de estado para descartar cambios
-
-    } else {
-        // Lógica de ACTIVAR EL MODO EDICIÓN (LOGIN)
-
-        if (!adminUser || !adminPass || !loginErrorMsg) {
-            // Esto no debería pasar si el HTML está bien, pero como fallback...
-            alert("Error: Faltan campos de login en el HTML. Contacta al soporte.");
-            return;
-        }
-
-        if (adminUser.value === HARDCODED_ADMIN_USER && adminPass.value === HARDCODED_ADMIN_PASS) {
-            // LOGIN EXITOSO
-            loginErrorMsg.style.display = 'none';
-            adminUser.value = ''; 
-            adminPass.value = ''; 
-            updateAdminUI(true);
-            alert("✅ Modo de Edición Activado. ¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
-        } else {
-            // LOGIN FALLIDO
-            loginErrorMsg.textContent = "❌ Usuario o Contraseña incorrectos";
-            loginErrorMsg.style.display = 'block';
-            adminPass.value = ''; // Limpiar solo la contraseña por seguridad
+        if (needsStatusUpdate) {
+            hasChanges = true;
+            updatePromises.push(
+                supabase.from('status_data').update(statusUpdate).eq('id', 1)
+            );
         }
     }
-}
-// FIN DE toggleAdminMode MODIFICADA
 
-function enableEditing() {
-    toggleEditing(true);
-}
+    if (!hasChanges) {
+        alert("No se detectaron cambios para guardar.");
+        return;
+    }
 
-function disableEditing() {
-    toggleEditing(false);
+    try {
+        const results = await Promise.all(updatePromises);
+        const failedUpdates = results.filter(r => r.error);
+        
+        if (failedUpdates.length > 0) {
+            throw failedUpdates[0].error;
+        }
+
+        updateHeaderTime();
+        alert("✅ Cambios guardados correctamente.");
+
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        alert(`❌ Error al guardar: ${error.message}`);
+    }
+
+    await loadData(); 
+    await loadStatusData(); 
+    if (admin) setTimeout(enableEditing, 500); 
 }
 
 // ----------------------------------------------------
-// CREACIÓN DE CARD (Fusión y Edición Avanzada)
+// TARJETAS Y UI
 // ----------------------------------------------------
 
 function createCardHTML(item, index) {
@@ -219,14 +393,11 @@ function createCardHTML(item, index) {
         
         if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
             cardClass = 'card-recent';
-            labelHTML = '<div class="card-label" style="background-color: var(--acento-rojo); color: white; display: block;">!EDITADO RECIENTEMENTE¡</div>';
+            labelHTML = '<div class="card-label" style="background-color: var(--acento-rojo); color: white; display: block;">!NUEVO!</div>';
             panelStyle = `background: var(--tiempo-panel-rojo); color: var(--acento-rojo);`; 
-            labelText = ''; 
         } else if (diff >= OLD_THRESHOLD_MS) {
             cardClass = 'card-old';
-            labelHTML = '<div class="card-label" style="background-color: var(--acento-cian); color: var(--color-texto-principal); display: block;">Editado hace tiempo</div>';
             panelStyle = `background: var(--tiempo-panel-cian); color: var(--acento-cian);`;
-            labelText = '';
         } else {
             panelStyle = `background: white; color: var(--color-texto-principal);`;
             labelText = 'Actualizado';
@@ -236,106 +407,52 @@ function createCardHTML(item, index) {
     return `
     <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
         ${labelHTML}
-        
         <span class="emoji">${item.emoji}</span>
         <h3>${item.titulo}</h3>
-        <div class="card-content">
-            <p>${item.contenido}</p>
-        </div>
+        <div class="card-content"><p>${item.contenido}</p></div>
         <div class="card-time-panel" data-id="${item.id}" style="${panelStyle}">
             <strong>${labelText}</strong> (${timeText})
         </div>
-    </div>
-    `;
+    </div>`;
 }
 
 function toggleEditing(enable) {
     const cards = document.querySelectorAll(".card");
     cards.forEach(card => {
-        const index = card.getAttribute('data-index');
-        const item = currentData[index];
+        const item = currentData[card.getAttribute('data-index')];
         const contentDiv = card.querySelector('.card-content');
         
-        // Elementos de Vista
-        const emojiSpan = card.querySelector('.emoji');
-        const titleH3 = card.querySelector('h3');
-        const contentP = contentDiv.querySelector('p');
-        
-        // Elementos de Edición
-        let editableEmoji = card.querySelector('.editable-emoji');
-        let editableTitle = card.querySelector('.editable-title');
-        let editableContent = card.querySelector('.editable-content');
-
         if (enable) {
-            // Entrar en modo Admin
-            card.removeEventListener('click', toggleTimePanel); 
             card.classList.remove('card-recent', 'card-old');
-            card.style.background = 'white'; 
-            card.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; 
-            card.style.border = '1px solid #4f46e5'; 
             card.querySelector('.card-time-panel').style.display = 'none';
-            const label = card.querySelector('.card-label');
-            if (label) label.style.display = 'none';
-
-
-            if (emojiSpan && titleH3 && contentP) {
-                // 1. Emoji
-                emojiSpan.remove();
-                editableEmoji = document.createElement('input');
-                editableEmoji.className = 'editable-emoji';
-                editableEmoji.value = item.emoji;
-                editableEmoji.defaultValue = item.emoji;
-                editableEmoji.maxLength = 2;
-                editableEmoji.title = "Emoji";
-                card.insertBefore(editableEmoji, card.firstChild);
-                
-                // 2. Título
-                titleH3.remove();
-                editableTitle = document.createElement('input');
-                editableTitle.className = 'editable-title';
-                editableTitle.value = item.titulo;
-                editableTitle.defaultValue = item.titulo;
-                editableTitle.title = "Título";
-                card.insertBefore(editableTitle, editableEmoji.nextSibling);
-
-                // 3. Contenido
-                contentP.remove();
-                editableContent = document.createElement('textarea');
-                editableContent.className = 'editable-content';
-                editableContent.value = item.contenido;
-                editableContent.defaultValue = item.contenido;
-                editableContent.title = "Contenido";
-                contentDiv.appendChild(editableContent);
+            
+            const emoji = card.querySelector('.emoji');
+            const title = card.querySelector('h3');
+            const content = contentDiv.querySelector('p');
+            
+            if (emoji) {
+                const input = document.createElement('input');
+                input.className = 'editable-emoji';
+                input.value = item.emoji;
+                input.defaultValue = item.emoji;
+                card.insertBefore(input, emoji);
+                emoji.remove();
             }
-        } else {
-            // Salir del modo Admin
-            if (editableEmoji && editableTitle && editableContent) {
-                // 1. Emoji
-                editableEmoji.remove();
-                const newEmojiSpan = document.createElement('span');
-                newEmojiSpan.className = 'emoji';
-                newEmojiSpan.textContent = editableEmoji.value;
-                card.insertBefore(newEmojiSpan, card.firstChild);
-                
-                // 2. Título
-                editableTitle.remove();
-                const newTitleH3 = document.createElement('h3');
-                newTitleH3.textContent = editableTitle.value;
-                card.insertBefore(newTitleH3, newEmojiSpan.nextSibling);
-
-                // 3. Contenido
-                editableContent.remove();
-                const newP = document.createElement('p');
-                newP.textContent = editableContent.value;
-                contentDiv.appendChild(newP);
-                
-                // Restaurar estilos de tarjeta (LoadData se encarga de la mayoría)
-                card.style.background = '';
-                card.style.boxShadow = '';
-                card.style.border = '';
-                card.querySelector('.card-time-panel').style.display = 'block';
-                const label = card.querySelector('.card-label');
-                if (label) label.style.display = 'block';
+            if (title) {
+                const input = document.createElement('input');
+                input.className = 'editable-title';
+                input.value = item.titulo;
+                input.defaultValue = item.titulo;
+                card.insertBefore(input, title);
+                title.remove();
+            }
+            if (content) {
+                const input = document.createElement('textarea');
+                input.className = 'editable-content';
+                input.value = item.contenido;
+                input.defaultValue = item.contenido;
+                contentDiv.appendChild(input);
+                content.remove();
             }
         }
     });
@@ -343,201 +460,64 @@ function toggleEditing(enable) {
 
 function toggleTimePanel(event) {
     if (admin) return;
-    
     const clickedCard = event.currentTarget;
     const cardId = clickedCard.getAttribute('data-id'); 
     
-    const allCards = document.querySelectorAll('.card');
-    allCards.forEach(card => {
-        const id = card.getAttribute('data-id');
-        if (id !== cardId) {
-            card.classList.remove('show-time-panel');
-        }
-        
-        if (timePanelTimeouts.has(id)) {
-            clearTimeout(timePanelTimeouts.get(id));
-            timePanelTimeouts.delete(id);
-        }
+    document.querySelectorAll('.card').forEach(c => {
+        if (c.getAttribute('data-id') !== cardId) c.classList.remove('show-time-panel');
     });
-
-    const isShowing = clickedCard.classList.toggle('show-time-panel');
-
-    if (isShowing) {
-        const timeout = setTimeout(() => {
-            clickedCard.classList.remove('show-time-panel');
-            timePanelTimeouts.delete(cardId); 
-        }, TIME_PANEL_AUTOHIDE_MS);
-        
-        timePanelTimeouts.set(cardId, timeout); 
-    }
+    clickedCard.classList.toggle('show-time-panel');
 }
-
-
-// ----------------------------------------------------
-// LÓGICA DE NOTICIAS 
-// ----------------------------------------------------
 
 function linkify(text) {
-    const urlPattern = /(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    
-    return text.replace(urlPattern, (url) => {
-        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
-        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
-    });
+    return text.replace(/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
 }
 
+// ----------------------------------------------------
+// NOTICIAS
+// ----------------------------------------------------
 async function loadNews() {
+    const { data: newsData } = await supabase.from('noticias').select('*').order('timestamp', { ascending: false });
     
-    const { data: newsData, error } = await supabase
-        .from('noticias')
-        .select('id, text, timestamp')
-        .order('timestamp', { ascending: false });
-
-    if (error) {
-        console.error("Error al cargar noticias de Supabase:", error);
-        return;
-    }
-
-    const twentyFourHoursAgoTimestamp = Date.now() - RECENT_THRESHOLD_MS;
-    const validNews = [];
-    const deletePromises = [];
-
-    newsData.forEach(n => {
-        if (new Date(n.timestamp).getTime() < twentyFourHoursAgoTimestamp) {
-            deletePromises.push(supabase.from('noticias').delete().eq('id', n.id));
-        } else {
-            validNews.push(n);
-        }
-    });
-    if (deletePromises.length > 0) {
-        Promise.all(deletePromises).catch(err => console.error("Error al limpiar noticias antiguas:", err));
-    }
-
-
+    const validNews = newsData ? newsData.filter(n => (Date.now() - new Date(n.timestamp).getTime()) < RECENT_THRESHOLD_MS) : [];
     currentNews = validNews;
-    
+
     if (validNews.length > 0) {
-        const newsHtml = validNews.map(n => {
-            const { text: timeInfo } = timeAgo(n.timestamp);
-            return `<span class="news-item">${linkify(n.text)} <small>(${timeInfo})</small></span>`;
-        }).join('<span class="news-item"> | </span>');
+        const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)}</span>`).join('<span class="news-item"> | </span>');
+        DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`; 
         
-        const contentToMeasure = `${newsHtml}<span class="news-item"> | </span>`;
-        const repeatedContent = `${contentToMeasure}${newsHtml}`; 
-        
-        DOMElements.newsTicker.style.display = 'flex'; 
-        DOMElements.fixedLabel.textContent = 'NOTICIAS'; 
-        
-        DOMElements.newsTickerContent.style.animation = 'none'; 
-        DOMElements.newsTickerContent.style.transform = 'none';
-        
-        DOMElements.newsTickerContent.innerHTML = repeatedContent;
-
-        DOMElements.newsTickerContent.offsetHeight; 
-
-        window.requestAnimationFrame(() => {
-            
-            const totalContentWidth = DOMElements.newsTickerContent.scrollWidth; 
-            const uniqueContentWidth = totalContentWidth / 2;
-            
-            if (uniqueContentWidth <= 0) return;
-
-            const durationSeconds = uniqueContentWidth / NEWS_SCROLL_SPEED_PX_PER_SEC;
-
-            DOMElements.dynamicTickerStyles.innerHTML = ''; 
-
-            const keyframesRule = `@keyframes ticker-move-dynamic { 
-                0% { transform: translateX(0); }
-                100% { transform: translateX(-${uniqueContentWidth}px); } 
-            }`;
-            
-            DOMElements.dynamicTickerStyles.innerHTML = keyframesRule;
-
-            DOMElements.newsTickerContent.style.animationDuration = `${durationSeconds}s`;
-            DOMElements.newsTickerContent.style.animationName = 'ticker-move-dynamic';
-            DOMElements.newsTickerContent.style.animationPlayState = 'running';
-            DOMElements.newsTickerContent.style.animationIterationCount = 'infinite';
-            DOMElements.newsTickerContent.style.animationTimingFunction = 'linear';
-        });
-
-    
+        const width = DOMElements.newsTickerContent.scrollWidth / 2;
+        const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
+        DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
+        DOMElements.newsTickerContent.style.animation = `ticker ${duration}s linear infinite`;
+        DOMElements.newsTicker.style.display = 'flex';
     } else {
-        const avisoText = 'Sin Noticias en estos momentos.... ||  🛡 Activa el modo edición para publicar una Noticia aquí';
-        const repeatedAviso = `<span class="news-item">${avisoText}</span><span class="news-item"> | </span><span class="news-item">${avisoText}</span>`;
-        
-        DOMElements.newsTicker.style.display = 'flex'; 
-        DOMElements.fixedLabel.textContent = 'AVISO'; 
-        DOMElements.newsTickerContent.style.animation = 'none'; 
-        DOMElements.newsTickerContent.style.transform = 'none';
-        
-        DOMElements.newsTickerContent.innerHTML = repeatedAviso;
-
-        DOMElements.newsTickerContent.style.animationDuration = `15s`; 
-        DOMElements.newsTickerContent.style.animationName = 'ticker-move-static';
-        DOMElements.newsTickerContent.style.animationPlayState = 'running';
-        DOMElements.newsTickerContent.style.animationIterationCount = 'infinite';
-        DOMElements.newsTickerContent.style.animationTimingFunction = 'linear';
+        DOMElements.newsTicker.style.display = 'none';
     }
 }
 
 async function addQuickNews() {
-    if (!admin) { alert("Acceso denegado."); return; }
-    const newsText = window.prompt("✍️ Escribe tu noticia aqui para agregarla al rodillo...");
-    if (newsText === null || newsText.trim() === "") return;
-    
-    const confirmSave = confirm(`¿Confirmas que deseas publicar: \n\n"${newsText.trim()}"\n\n(Se borrará automáticamente en 24 horas)`);
-
-    if (confirmSave) {
-        try {
-            const { error } = await supabase.from('noticias').insert([{ text: newsText.trim() }]);
-            if (error) throw error;
-            alert(`✅ Noticia publicada.`);
-            loadNews(); 
-        } catch (error) {
-            console.error("Error al guardar la noticia:", error);
-            alert("❌ Error al guardar la noticia. Revisa RLS.");
-        }
+    if (!admin) return;
+    const text = prompt("Nueva noticia (24h):");
+    if (text) {
+        await supabase.from('noticias').insert([{ text }]);
+        loadNews();
     }
 }
 
 async function deleteNews() {
-    if (!admin) { alert("Acceso denegado."); return; }
-    if (currentNews.length === 0) {
-        alert("No hay noticias activas para eliminar.");
-        return;
-    }
-
-    const newsList = currentNews.map((n, index) => `${index + 1}. ${n.text}`).join('\n');
-    const choice = window.prompt(`Selecciona el número de la noticia que deseas eliminar:\n\n${newsList}`);
-
-    const indexToDelete = parseInt(choice) - 1;
-
-    if (isNaN(indexToDelete) || indexToDelete < 0 || indexToDelete >= currentNews.length) {
-        if (choice !== null) alert("Selección inválida.");
-        return;
-    }
-
-    const newsItem = currentNews[indexToDelete];
-    const confirmDelete = confirm(`¿Estás seguro de que quieres eliminar esta noticia?\n\n"${newsItem.text}"`);
-
-    if (confirmDelete) {
-        try {
-            const { error } = await supabase.from('noticias').delete().eq('id', newsItem.id); 
-            if (error) throw error;
-            alert(`✅ Noticia eliminada.`);
-            loadNews();
-        } catch (error) {
-            console.error("Error al eliminar la noticia:", error);
-            alert("❌ Error al eliminar la noticia. Revisa RLS.");
-        }
+    if (!admin || currentNews.length === 0) return;
+    const ids = currentNews.map((n, i) => `${i+1}. ${n.text}`).join('\n');
+    const sel = prompt(`Eliminar número:\n${ids}`);
+    if (sel && currentNews[sel-1]) {
+        await supabase.from('noticias').delete().eq('id', currentNews[sel-1].id);
+        loadNews();
     }
 }
 
-
 // ----------------------------------------------------
-// LÓGICA DE COMENTARIOS, HILOS Y LIKES 
+// 🗣️ COMENTARIOS
 // ----------------------------------------------------
-// (Se omite el detalle de las funciones de comentarios, ya que se asume que funcionan)
 
 function generateColorByName(str) {
     let hash = 0;
@@ -557,25 +537,20 @@ function formatCommentDate(timestamp) {
 function createCommentHTML(comment, isLiked) {
     const color = generateColorByName(comment.name.toLowerCase());
     const likeClass = isLiked ? 'liked' : '';
-    
     const itemClass = comment.parent_id ? 'comment-item reply-style' : 'comment-item'; 
     
     return `
         <div class="${itemClass}" data-comment-id="${comment.id}" style="--comment-color: ${color};">
             <strong class="comment-name">${comment.name} dijo:</strong>
             <div class="comment-content">${comment.text}</div>
-            
             <div class="comment-actions">
                 <button class="like-button ${likeClass}" data-id="${comment.id}">
                     <span class="heart">♥</span>
                 </button>
                 <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
-                ${!comment.parent_id ? 
-                    `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : 
-                    ''}
+                ${!comment.parent_id ? `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : ''}
                 <span class="comment-date">Publicado: ${formatCommentDate(comment.timestamp)}</span>
             </div>
-            
             ${!comment.parent_id ? `
                 <div class="reply-form" data-reply-to="${comment.id}">
                     <input type="text" class="reply-name" placeholder="Tu Nombre" required maxlength="30">
@@ -590,16 +565,13 @@ function createCommentHTML(comment, isLiked) {
 
 function drawReplies(container, replies, userLikesMap) {
     container.innerHTML = ''; 
-    
     replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
 
     replies.forEach((reply) => {
         const isLiked = userLikesMap.get(reply.id) || false;
-        
         const replyWrapper = document.createElement('div');
         replyWrapper.className = 'reply-item';
         replyWrapper.innerHTML = createCommentHTML(reply, isLiked);
-        
         container.appendChild(replyWrapper);
     });
     
@@ -617,44 +589,32 @@ function drawReplies(container, replies, userLikesMap) {
     }
 }
 
-
 async function loadComments() {
-    
     const [commentsResponse, likesResponse] = await Promise.all([
-        supabase.from('comentarios')
-            .select('id, name, text, timestamp, parent_id, likes_count')
-            .order('timestamp', { ascending: false }),
-        
-        supabase.from('likes')
-            .select('comment_id')
-            .eq('user_web_id', userWebId)
+        supabase.from('comentarios').select('id, name, text, timestamp, parent_id, likes_count').order('timestamp', { ascending: false }),
+        supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
     ]);
     
     if (commentsResponse.error) {
-        DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--acento-rojo); margin: 15px;">❌ Error de conexión al cargar comentarios. (Ver consola)</p>`;
-        console.error("Error al cargar comentarios:", commentsResponse.error);
+        DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--acento-rojo);">❌ Error al cargar comentarios.</p>`;
         return;
     }
     
     const allComments = commentsResponse.data;
     const userLikesMap = new Map();
-    if (likesResponse.data) {
-        likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
-    }
+    if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
     
     const principalComments = allComments.filter(c => c.parent_id === null);
     const repliesMap = allComments.reduce((map, comment) => {
         if (comment.parent_id !== null) {
-            if (!map.has(comment.parent_id)) {
-                map.set(comment.parent_id, []);
-            }
+            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []);
             map.get(comment.parent_id).push(comment);
         }
         return map;
     }, new Map());
     
     if (principalComments.length === 0) {
-        DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Aún no hay comentarios activos. ¡Sé el primero!</p>`;
+        DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #888; margin: 15px;">Aún no hay comentarios. ¡Sé el primero!</p>`;
         return; 
     }
     
@@ -667,36 +627,22 @@ async function loadComments() {
         const replies = repliesMap.get(comment.id);
         if (replies) {
             const repliesContainer = document.querySelector(`.replies-container[data-parent-of="${comment.id}"]`);
-            if (repliesContainer) {
-                drawReplies(repliesContainer, replies, userLikesMap);
-            }
+            if (repliesContainer) drawReplies(repliesContainer, replies, userLikesMap);
         }
     });
 
-    document.querySelectorAll('.reply-form-toggle').forEach(btn => {
-        btn.addEventListener('click', toggleReplyForm);
-    });
-    document.querySelectorAll('.publish-reply-btn').forEach(btn => {
-        btn.addEventListener('click', handlePublishReply);
-    });
-    document.querySelectorAll('.like-button').forEach(btn => {
-        btn.removeEventListener('click', handleLikeToggle);
-        btn.addEventListener('click', handleLikeToggle);
-    });
+    document.querySelectorAll('.reply-form-toggle').forEach(btn => btn.addEventListener('click', toggleReplyForm));
+    document.querySelectorAll('.publish-reply-btn').forEach(btn => btn.addEventListener('click', handlePublishReply));
+    document.querySelectorAll('.like-button').forEach(btn => btn.addEventListener('click', handleLikeToggle));
 }
 
 function toggleReplyForm(event) {
     const commentId = event.target.getAttribute('data-id');
     const form = document.querySelector(`.reply-form[data-reply-to="${commentId}"]`);
     if (form) {
-        document.querySelectorAll('.reply-form').forEach(f => {
-            if (f !== form) f.style.display = 'none';
-        });
-        
+        document.querySelectorAll('.reply-form').forEach(f => { if (f !== form) f.style.display = 'none'; });
         form.style.display = form.style.display === 'block' ? 'none' : 'block';
-        if (form.style.display === 'block') {
-            form.querySelector('.reply-name').focus();
-        }
+        if (form.style.display === 'block') form.querySelector('.reply-name').focus();
     }
 }
 
@@ -705,7 +651,7 @@ async function publishComment() {
     const text = DOMElements.commentText.value.trim();
     
     if (name.length < 2 || text.length < 5) {
-        alert("Por favor, ingresa un nombre válido (mín. 2) y un comentario (mín. 5).");
+        alert("Ingresa un nombre (mín. 2) y comentario (mín. 5).");
         return;
     }
     
@@ -713,22 +659,16 @@ async function publishComment() {
     DOMElements.publishCommentBtn.textContent = "Publicando...";
 
     try {
-        const { error } = await supabase.from('comentarios').insert([{ name: name, text: text, parent_id: null, likes_count: 0 }]);
-        
+        const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: null, likes_count: 0 }]);
         if (error) throw error;
 
         DOMElements.commenterName.value = '';
         DOMElements.commentText.value = '';
         await loadComments(); 
-        
-        const commentsWrap = document.querySelector('.comments-display-wrap');
-        if (commentsWrap) commentsWrap.scrollTop = 0;
-
-        alert("✅ Comentario publicado. Estará activo por 3 días.");
-
+        alert("✅ Comentario publicado.");
     } catch (error) {
-        console.error("Error al publicar el comentario:", error);
-        alert("❌ Error al publicar en Supabase. Revisa RLS de INSERT.");
+        console.error("Error comentarios:", error);
+        alert("❌ Error al publicar.");
     } finally {
         DOMElements.publishCommentBtn.disabled = false;
         DOMElements.publishCommentBtn.textContent = "Publicar Comentario";
@@ -738,14 +678,11 @@ async function publishComment() {
 async function handlePublishReply(event) {
     const parentId = event.target.getAttribute('data-parent-id');
     const form = event.target.closest('.reply-form');
-    const nameInput = form.querySelector('.reply-name');
-    const textInput = form.querySelector('.reply-text');
-    
-    const name = nameInput.value.trim();
-    const text = textInput.value.trim();
+    const name = form.querySelector('.reply-name').value.trim();
+    const text = form.querySelector('.reply-text').value.trim();
 
     if (name.length < 2 || text.length < 5) {
-        alert("Por favor, ingresa un nombre válido (mín. 2) y una respuesta (mín. 5).");
+        alert("Ingresa nombre y respuesta válidos.");
         return;
     }
     
@@ -753,20 +690,15 @@ async function handlePublishReply(event) {
     event.target.textContent = "Enviando...";
 
     try {
-        const { error } = await supabase.from('comentarios').insert([{ name: name, text: text, parent_id: parentId, likes_count: 0 }]);
-        
+        const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0 }]);
         if (error) throw error;
 
-        nameInput.value = '';
-        textInput.value = '';
         form.style.display = 'none';
         await loadComments(); 
-        
         alert("✅ Respuesta publicada.");
-
     } catch (error) {
-        console.error("Error al publicar la respuesta:", error);
-        alert("❌ Error al publicar la respuesta. Revisa RLS de INSERT.");
+        console.error("Error respuesta:", error);
+        alert("❌ Error al responder.");
     } finally {
         event.target.disabled = false;
         event.target.textContent = "Publicar Respuesta";
@@ -780,396 +712,82 @@ async function handleLikeToggle(event) {
     const counterElement = document.querySelector(`.like-count[data-counter-id="${commentId}"]`);
     
     button.disabled = true;
-    
     let currentCount = parseInt(counterElement.textContent);
 
     try {
         if (isLiked) {
-            const { error: deleteError } = await supabase
-                .from('likes')
-                .delete()
-                .eq('comment_id', commentId)
-                .eq('user_web_id', userWebId);
+            const { error: delErr } = await supabase.from('likes').delete().eq('comment_id', commentId).eq('user_web_id', userWebId);
+            if (delErr) throw delErr;
 
-            if (deleteError) throw deleteError;
-
-            const newCount = Math.max(0, currentCount - 1); 
-            const { error: updateError } = await supabase
-                .rpc('decrement_likes', { row_id: commentId }); 
-
-            if (updateError) throw updateError;
-            
+            await supabase.rpc('decrement_likes', { row_id: commentId }); 
             button.classList.remove('liked');
-            counterElement.textContent = newCount;
-
+            counterElement.textContent = Math.max(0, currentCount - 1);
         } else {
-            const { error: insertError } = await supabase
-                .from('likes')
-                .insert([{ comment_id: commentId, user_web_id: userWebId }]);
+            const { error: insErr } = await supabase.from('likes').insert([{ comment_id: commentId, user_web_id: userWebId }]);
+            if (insErr && insErr.code !== '23505') throw insErr; 
 
-            if (insertError) {
-                if (insertError.code !== '23505') throw insertError; 
-                alert("Ya habías dado like a este comentario. El voto no se duplicó.");
-                return; 
+            if (!insErr) {
+                await supabase.rpc('increment_likes', { row_id: commentId });
+                button.classList.add('liked');
+                counterElement.textContent = currentCount + 1;
             }
-
-            const newCount = currentCount + 1;
-            const { error: updateError } = await supabase
-                .rpc('increment_likes', { row_id: commentId }); 
-
-            if (updateError) throw updateError;
-
-            button.classList.add('liked');
-            counterElement.textContent = newCount;
         }
-
     } catch (error) {
-        console.error("Error en la operación de like/unlike:", error);
-        alert("❌ Error al procesar el voto. (Ver consola)");
+        console.error("Error like:", error);
     } finally {
         button.disabled = false;
     }
 }
 
 // ----------------------------------------------------
-// --- NUEVAS FUNCIONES PARA CONTADOR DE VISTAS ---
+// VISTAS Y PERSISTENCIA GENERAL
 // ----------------------------------------------------
-
-// Tiempo en milisegundos para considerar una visita "única" (24 horas)
-const UNIQUE_VISIT_DURATION = 24 * 60 * 60 * 1000; 
-const VISIT_KEY = 'lastPageView';
-
-// 1. Registra una nueva vista en la base de datos SOLO si no la registró en las últimas 24h
 async function registerPageView() {
-    
-    // Paso 1: Comprobar localStorage
-    const lastVisitTimestamp = localStorage.getItem(VISIT_KEY);
+    const key = 'lastView';
     const now = Date.now();
-
-    // Si existe un timestamp y es más reciente que el tiempo límite, salimos (no contamos).
-    if (lastVisitTimestamp && (now - parseInt(lastVisitTimestamp)) < UNIQUE_VISIT_DURATION) {
-        // console.log("Vista ya registrada recientemente. No se cuenta.");
-        return; 
-    }
-
-    // Paso 2: Si es una visita nueva, registramos en Supabase.
-    try {
-        const { error } = await supabase
-            .from('page_views')
-            .insert({}) 
-            .select(); 
-
-        if (error) {
-            console.error("Error al registrar la vista (Supabase):", error.message);
-        } else {
-            // Paso 3: Guardamos el timestamp de la visita en localStorage
-            localStorage.setItem(VISIT_KEY, now.toString());
-            // console.log("Nueva vista única registrada.");
-        }
-    } catch (e) {
-        console.error("Excepción al registrar la vista:", e);
+    if (!localStorage.getItem(key) || (now - localStorage.getItem(key) > ONE_DAY)) {
+        await supabase.from('page_views').insert({});
+        localStorage.setItem(key, now);
     }
 }
 
-// 2. Obtiene el conteo de vistas de los últimos 7 días y lo muestra
 async function getAndDisplayViewCount() {
-    const viewCounterElement = document.getElementById('viewCounter');
-    
-    // Si el elemento no existe (p. ej. en otra página), salimos.
-    if (!viewCounterElement) return;
-
-    try {
-        // Calcula la fecha de hace 1 día
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 1);
-        const sevenDaysAgoISO = sevenDaysAgo.toISOString();
-
-        // Consulta Supabase: cuenta los registros 'page_views' después de la fecha
-        const { count, error } = await supabase
-            .from('page_views')
-            .select('*', { count: 'exact', head: true }) 
-            .gt('created_at', sevenDaysAgoISO); 
-
-        if (error) {
-            console.error("Error al obtener el conteo de vistas:", error.message);
-            viewCounterElement.textContent = '( 👁 - Error )';
-            return;
-        }
-
-        const formattedCount = count ? count.toLocaleString('es-ES') : '0';
-        
-        // Formato solicitado: ( 👁 - 12 vistas )
-        viewCounterElement.textContent = `👀 - ${formattedCount} vistas en (24h)`;
-
-    } catch (e) {
-        console.error("Excepción al obtener/mostrar el conteo:", e);
-        viewCounterElement.textContent = '( 👁 - Error )';
-    }
+    const yesterday = new Date(Date.now() - ONE_DAY).toISOString();
+    const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday);
+    if (document.getElementById('viewCounter')) document.getElementById('viewCounter').textContent = `👀 ${count || 0} vistas (24h)`;
 }
-
-// ----------------------------------------------------
-// FUNCIONES DE CARGA Y RENDERIZADO DEL PANEL DE ESTADO ⭐ MODIFICADO ⭐
-// ----------------------------------------------------
-
-function renderStatusPanel(status, isAdminMode) {
-    if (!status || !DOMElements.statusDataContainer) {
-        DOMElements.statusDataContainer.innerHTML = "No se pudieron cargar los datos de estado.";
-        return;
-    }
-
-    // ⭐ Determinar el TIMESTAMP más reciente para el panel header ⭐
-    const deficitTime = new Date(status.deficit_edited_at || 0).getTime();
-    const divisaTime = new Date(status.divisa_edited_at || 0).getTime();
-    const latestTime = Math.max(deficitTime, divisaTime);
-    
-    const { text: latestTimeText } = timeAgo(latestTime);
-    // ⭐ CAMBIO APLICADO: Usar innerHTML e insertar <br> para el salto de línea ⭐
-    DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${latestTimeText}`;
-    
-    if (isAdminMode) {
-        // Modo Admin: Campos de Input
-        DOMElements.statusDataContainer.innerHTML = `
-            <div class="status-item">
-                <span class="label">Deficit Eléctrico (MW):</span>
-                <input type="text" id="editDeficit" value="${status.deficit_mw || ''}" placeholder="Ej: 1800 MW">
-            </div>
-            <div class="status-item">
-                <span class="label">Dollar (CUP):</span>
-                <input type="number" id="editDollar" value="${status.dollar_cup || ''}" placeholder="Ej: 420">
-            </div>
-            <div class="status-item">
-                <span class="label">Euro (CUP):</span>
-                <input type="number" id="editEuro" value="${status.euro_cup || ''}" placeholder="Ej: 440">
-            </div>
-        `;
-    } else {
-        // Modo Público: Vista Estilizada
-        DOMElements.statusDataContainer.innerHTML = `
-            <div class="status-item deficit">
-                <span class="label">🔌 Déficit Estimado:</span>
-                <span class="value">${status.deficit_mw || '---'}</span>
-            </div>
-            <div class="status-item divisa">
-                <span class="label">💵 Dólar (CUP):</span>
-                <span class="value">${status.dollar_cup || '---'}</span>
-            </div>
-            <div class="status-item divisa">
-                <span class="label">💶 Euro (CUP):</span>
-                <span class="value">${status.euro_cup || '---'}</span>
-            </div>
-        `;
-    }
-}
-
-async function loadStatusData() {
-    try {
-        const { data, error } = await supabase
-            .from('status_data')
-            .select('deficit_mw, dollar_cup, euro_cup, deficit_edited_at, divisa_edited_at')
-            .eq('id', 1) 
-            .single(); 
-
-        if (error) {
-            console.error("Error al cargar datos de estado:", error);
-            currentStatus = {
-                deficit_mw: 'Error', dollar_cup: '---', euro_cup: '---', 
-                deficit_edited_at: null, divisa_edited_at: null
-            };
-        } else {
-            currentStatus = data || {};
-        }
-
-        renderStatusPanel(currentStatus, admin);
-
-    } catch (error) {
-        console.error("Error de red al cargar datos de estado:", error);
-    }
-}
-
-// ----------------------------------------------------
-// FUNCIONES CLAVE DE PERSISTENCIA (Modificada para Edición Completa y Status)
-// ----------------------------------------------------
 
 async function loadData() {
-    try {
-        const { data, error } = await supabase
-            .from('items')
-            .select('id, emoji, titulo, contenido, last_edited_timestamp')
-            .order('id', { ascending: true }); 
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-            currentData = data; 
-            DOMElements.contenedor.innerHTML = data.map((item, index) => createCardHTML(item, index)).join('');
-            
-            document.querySelectorAll('.card').forEach(card => {
-                card.removeEventListener('click', toggleTimePanel); 
-                card.addEventListener('click', toggleTimePanel);
-            });
-
-        } else {
-            DOMElements.contenedor.innerHTML = "<p style='grid-column: 1 / -1; text-align: center; color: var(--acento-rojo);'>⚠️ Error al cargar los datos.</p>";
-        }
-    } catch (error) {
-        DOMElements.contenedor.innerHTML = "<p style='grid-column: 1 / -1; text-align: center; color: var(--acento-rojo);'>❌ Error de conexión a la base de datos.</p>";
-    }
-}
-
-async function saveChanges(){
-    if (!admin) { alert("Acceso denegado."); return; }
-  
-    const cardElements = document.querySelectorAll(".card");
-    let updatePromises = [];
-    let hasChanges = false;
-    const nuevoTimestamp = new Date().toISOString(); 
-    
-    // --- LÓGICA PARA GUARDAR CARDS (ORIGINAL) ---
-    for (const card of cardElements) {
-        const dbId = card.getAttribute('data-id'); 
-        const index = parseInt(card.getAttribute('data-index')); 
-        
-        const editableEmoji = card.querySelector('.editable-emoji');
-        const editableTitle = card.querySelector('.editable-title');
-        const editableContent = card.querySelector('.editable-content');
-
-        const oldEmoji = editableEmoji ? editableEmoji.defaultValue : '';
-        const newEmoji = editableEmoji ? editableEmoji.value : '';
-        const oldTitle = editableTitle ? editableTitle.defaultValue : '';
-        const newTitle = editableTitle ? editableTitle.value : '';
-        const oldContent = editableContent ? editableContent.defaultValue : '';
-        const newContent = editableContent ? editableContent.value : '';
-        
-        if (newEmoji !== oldEmoji || newTitle !== oldTitle || newContent !== oldContent) {
-            hasChanges = true;
-            
-            const cardUpdateObject = { 
-                emoji: newEmoji,
-                titulo: newTitle,
-                contenido: newContent, 
-                last_edited_timestamp: nuevoTimestamp 
-            };
-            
-            updatePromises.push(
-                supabase.from('items').update(cardUpdateObject).eq('id', dbId)
-            );
-            
-            if (editableEmoji) editableEmoji.defaultValue = newEmoji;
-            if (editableTitle) editableTitle.defaultValue = newTitle;
-            if (editableContent) editableContent.defaultValue = newContent;
-            currentData[index].emoji = newEmoji;
-            currentData[index].titulo = newTitle;
-            currentData[index].contenido = newContent;
-            currentData[index].last_edited_timestamp = nuevoTimestamp;
-        }
-    }
-    
-    // ⭐ LÓGICA DE GUARDADO PARA EL PANEL DE ESTADO (MODIFICADO) ⭐
-    const editDeficit = document.getElementById('editDeficit');
-    const editDollar = document.getElementById('editDollar');
-    const editEuro = document.getElementById('editEuro');
-    
-    if (editDeficit && editDollar && editEuro) {
-        
-        const newDeficit = editDeficit.value.trim();
-        const newDollar = parseInt(editDollar.value);
-        const newEuro = parseInt(editEuro.value);
-
-        let statusUpdate = {};
-        let needsStatusUpdate = false;
-
-        // 1. Verificar y preparar el update del DÉFICIT
-        if (newDeficit !== (currentStatus.deficit_mw || '')) {
-            statusUpdate.deficit_mw = newDeficit;
-            statusUpdate.deficit_edited_at = nuevoTimestamp; // Actualizar solo el tiempo de déficit
-            needsStatusUpdate = true;
-        }
-
-        // 2. Verificar y preparar el update de las DIVISAS
-        if (newDollar !== currentStatus.dollar_cup || newEuro !== currentStatus.euro_cup) {
-            statusUpdate.dollar_cup = newDollar;
-            statusUpdate.euro_cup = newEuro;
-            statusUpdate.divisa_edited_at = nuevoTimestamp; // Actualizar solo el tiempo de divisas
-            needsStatusUpdate = true;
-        }
-        
-        // 3. Crear una única promesa de actualización si hay cambios
-        if (needsStatusUpdate) {
-            hasChanges = true;
-            updatePromises.push(
-                supabase.from('status_data').update(statusUpdate).eq('id', 1)
-            );
-        }
-    }
-
-    if (!hasChanges) {
-        alert("No se detectaron cambios para guardar.");
-        return;
-    }
-
-    try {
-        const results = await Promise.all(updatePromises);
-        const failedUpdates = results.filter(r => r.error);
-        
-        if (failedUpdates.length > 0) {
-            const error = failedUpdates[0].error;
-            const errorMessage = error.message || (error.error ? error.error.message : "Error desconocido en la base de datos.");
-            console.error("Error al guardar en Supabase:", errorMessage, error);
-            alert(`❌ Error al guardar. Verifica RLS de UPDATE. Detalle: ${errorMessage}`);
-            return;
-        }
-
-        updateHeaderTime();
-        alert("✅ Cambios guardados permanentemente.");
-
-    } catch (error) {
-        const errorMessage = error.message || "Error de red o desconocido al guardar.";
-        console.error("Error al guardar en Supabase:", errorMessage, error);
-        alert(`❌ Error al guardar. Detalle: ${errorMessage}`);
-    }
-
-    await loadData(); 
-    await loadStatusData(); 
-    if (admin) {
-        setTimeout(enableEditing, 500); 
+    const { data } = await supabase.from('items').select('*').order('id');
+    if (data) {
+        currentData = data;
+        DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
+        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
 }
 
 function updateHeaderTime() {
-    const options = {
-        timeZone: 'America/Havana', 
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    };
-    const formattedDate = new Intl.DateTimeFormat('es-ES', options).format(new Date());
-
-    document.getElementById('fecha-actualizacion').textContent = `${formattedDate} (CUBA)`;
+    const date = new Date().toLocaleString('es-ES', { timeZone: 'America/Havana' });
+    document.getElementById('fecha-actualizacion').textContent = `${date} (CUBA)`;
 }
 
-
 // ----------------------------------------------------
-// MANEJO DE EVENTOS Y CARGA INICIAL
+// 🚀 INICIALIZACIÓN
 // ----------------------------------------------------
-
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // MODIFICADO: Sustitución de loginBtn/logoutBtn por toggleAdminBtn
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
-    
     DOMElements.saveBtn.addEventListener('click', saveChanges);
     DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
     DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
-    DOMElements.publishCommentBtn.addEventListener('click', publishComment); 
-    
-    updateHeaderTime(); 
-    
-    // NUEVO: Funciones para el contador de vistas
+    DOMElements.publishCommentBtn.addEventListener('click', publishComment);
+
+    updateHeaderTime();
     registerPageView();
     getAndDisplayViewCount();
     
     loadData();
     loadNews();
-    loadComments(); 
+    loadComments();
     loadStatusData(); 
     
     window.addEventListener('resize', () => {
