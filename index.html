@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba API elTOQUE</title>
+    <title>Prueba API elTOQUE v2</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -27,39 +27,44 @@
         }
         .log-line { margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
         .error { color: #ff4444; }
+        .success { color: #00ffff; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>💰 Tasas en Tiempo Real</h2>
+        <h2>💰 Tasas elTOQUE (Prueba v2)</h2>
         <div class="price-box">USD: <span id="usd-display" class="usd">---</span> CUP</div>
         <div class="price-box">EUR: <span id="eur-display" class="eur">---</span> CUP</div>
-        <p style="font-size: 0.8rem; color: #666;">Actualizando cada 10 seg...</p>
+        <p style="font-size: 0.8rem; color: #666;">Intentando nueva dirección...</p>
     </div>
 
-    <h3>📟 Registro de Diagnóstico (Log):</h3>
-    <div id="screen-console">Esperando primera conexión...</div>
+    <h3>📟 Registro de Diagnóstico:</h3>
+    <div id="screen-console">Iniciando v2...</div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        const API_URL = "https://api.eltoque.com/v1/trm?cur=CUP";
+        // --- 🚨 CAMBIO CLAVE: Nueva URL (tasas.eltoque.com/v1/trmi) ---
+        const API_URL = "https://tasas.eltoque.com/v1/trmi"; 
+        
         const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
         
-        // Función para escribir en la pantalla negra
         function log(msg, type = 'info') {
             const consoleDiv = document.getElementById('screen-console');
             const time = new Date().toLocaleTimeString();
-            const colorClass = type === 'error' ? 'error' : '';
+            let colorClass = '';
+            if(type === 'error') colorClass = 'error';
+            if(type === 'success') colorClass = 'success';
+            
             consoleDiv.innerHTML = `<div class="log-line ${colorClass}">[${time}] ${msg}</div>` + consoleDiv.innerHTML;
         }
 
         async function fetchRates() {
-            log("🔄 Iniciando petición a elTOQUE...");
+            log("🔄 Probando conexión a: tasas.eltoque.com...");
 
             try {
-                // USAMOS PROXY PARA EVITAR BLOQUEO EN NAVEGADOR MÓVIL
+                // Usamos proxy para evitar bloqueo CORS en móvil
                 const proxy = "https://corsproxy.io/?";
+                // Aseguramos que la URL viaje bien codificada
                 const target = encodeURIComponent(API_URL);
                 const finalUrl = proxy + target;
 
@@ -72,46 +77,36 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Estado HTTP: ${response.status}`);
+                    // Si falla, mostramos el error exacto (404, 401, 500...)
+                    throw new Error(`Error HTTP: ${response.status}`);
                 }
 
                 const data = await response.json();
-                log("✅ Datos recibidos (JSON Raw): " + JSON.stringify(data).substring(0, 100) + "...");
+                // Mostramos un pedacito del JSON para verificar estructura
+                log("✅ ¡CONEXIÓN EXITOSA!", 'success');
+                log("📦 Datos: " + JSON.stringify(data).substring(0, 80) + "...");
 
-                // Lógica de extracción
                 let usd = '---';
                 let eur = '---';
 
-                // Buscar en estructura: data.tasas o data.result o data directo
-                if (data.tasas) {
-                    usd = data.tasas.USD || 'No encontrado';
-                    eur = data.tasas.EUR || 'No encontrado';
-                } else if (data.USD) {
-                    usd = data.USD;
-                    eur = data.EUR;
-                } else if (data.result && data.result.tasas) {
-                    usd = data.result.tasas.USD;
-                    eur = data.result.tasas.EUR;
-                } else {
-                    log("⚠️ Estructura JSON desconocida.", 'error');
-                    log("JSON Completo: " + JSON.stringify(data));
-                }
+                // Lógica inteligente para encontrar el precio donde sea que esté
+                if (data.USD) { usd = data.USD; eur = data.EUR; }
+                else if (data.tasas && data.tasas.USD) { usd = data.tasas.USD; eur = data.tasas.EUR; }
+                else if (data.result && data.result.tasas) { usd = data.result.tasas.USD; eur = data.result.tasas.EUR; }
 
-                // Actualizar pantalla
+                // Renderizado
                 document.getElementById('usd-display').textContent = parseFloat(usd).toFixed(0);
                 document.getElementById('eur-display').textContent = parseFloat(eur).toFixed(0);
 
-                log(`💰 ÉXITO: Dólar ${usd} - Euro ${eur}`);
+                log(`💰 Actualizado: USD ${parseFloat(usd).toFixed(0)} | EUR ${parseFloat(eur).toFixed(0)}`, 'success');
 
             } catch (error) {
-                log("❌ ERROR: " + error.message, 'error');
+                log("❌ FALLÓ: " + error.message, 'error');
             }
         }
 
-        // Ejecutar al inicio
+        // Ejecutar inmediatamente y luego cada 10 seg
         fetchRates();
-
-        // Repetir cada 10 segundos
         setInterval(fetchRates, 10000);
 
     </script>
