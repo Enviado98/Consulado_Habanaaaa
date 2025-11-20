@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------
-   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORREGIDO PANEL ADMIN)
+   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORREGIDO FINAL)
    ---------------------------------------------------------------- */
 :root {
   --color-texto-principal: #2b2d42;
@@ -63,7 +63,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   background-color: rgba(0, 0, 0, 0.4); white-space: nowrap; z-index: 10;
 }
 
-/* --- PANEL DE ESTADO (CORREGIDO) --- */
+/* --- PANEL DE ESTADO (CORREGIDO PROBLEMA #1) --- */
 .status-panel-container {
   width: 95%; max-width: 800px; margin: 8px auto;
   background-color: var(--fondo-panel-status);
@@ -71,6 +71,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   border-radius: 10px; font-size: 0.85rem; color: var(--color-texto-principal);
   font-weight: 700; box-shadow: 0 2px 4px var(--sombra-suave);
   padding: 8px 10px;
+  transition: padding 0.3s;
 }
 .status-panel-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -99,36 +100,36 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-item.divisa .value { color: #008000; }
 .status-item .label { font-size: 0.7rem; font-weight: 600; color: #555; }
 
-/* --- MODO ADMIN: CORRECCIÓN DE TAMAÑO --- */
-.status-panel-container.admin-mode { 
-  padding: 5px 10px; /* Padding reducido */
-  border: 2px dashed var(--acento-rojo); 
+/* --- MODO ADMIN (SOLUCIÓN #1 - Diseño Original) --- */
+/* Eliminamos los estilos que rompían la fila. Ahora los inputs se adaptan al contenedor */
+
+.status-panel-container.admin-mode {
+  /* Solo un borde para indicar modo edición, sin cambiar layout drástico */
+  border: 2px dashed var(--acento-rojo);
 }
-.status-panel-container.admin-mode .status-panel-data {
-  flex-direction: row; /* Forzar fila horizontal */
-  flex-wrap: nowrap;   /* NO permitir que se apilen hacia abajo */
-  gap: 8px;
-  justify-content: space-between;
-}
-.status-panel-container.admin-mode .status-item {
-  width: auto;
-  flex: 1; /* Distribuir espacio equitativamente */
-  min-width: 0; /* Permitir que se encojan si es necesario */
-  background-color: rgba(255,255,255,0.6);
-  padding: 4px;
-  border: 1px solid #ccc;
-}
+
 .status-panel-container.admin-mode input {
-  border: 1px solid var(--acento-rojo); padding: 2px 4px;
-  border-radius: 4px; font-size: 0.85rem; font-weight: 700;
-  text-align: center; 
-  width: 100%; /* Ocupar el ancho de su cajita (flex-item) */
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+  color: #333;
+  width: 100%;
+  max-width: 100px; /* Evita que se hagan gigantes */
   margin-top: 2px;
-  min-width: 50px; /* Evita que desaparezca en pantallas micro */
 }
+
 .status-panel-container.admin-mode input:disabled {
-  background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border-color: #ccc;
+  background-color: transparent;
+  border: none;
+  color: #555;
+  opacity: 0.8;
+  cursor: default;
 }
+
 /* --------------------------------------- */
 
 /* --- TICKER NOTICIAS --- */
@@ -181,16 +182,24 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 
 /* --- CARDS --- */
 .container {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px; width: 95%; max-width: 800px; padding: 15px;
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Ajustado para mejor distribución */
+  gap: 15px; 
+  width: 95%; 
+  max-width: 800px; 
+  padding: 15px;
+  align-items: stretch; /* Hace que todas las tarjetas de la fila tengan la misma altura */
 }
 .card {
   background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border); border-radius: 16px;
   box-shadow: 0 6px 15px var(--sombra-suave);
-  padding: 8px; padding-top: 15px; text-align: center;
+  padding: 12px; padding-top: 15px; text-align: center;
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, background 0.3s;
-  min-height: 110px; display: flex; flex-direction: column;
+  min-height: 110px; 
+  height: 100%; /* Ocupa toda la altura disponible en el grid */
+  display: flex; 
+  flex-direction: column;
   position: relative; cursor: pointer; overflow: hidden;
 }
 .card-recent:not(.admin-mode) {
@@ -218,17 +227,31 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
 .card-content p { margin: 4px 0 0; font-size: 0.8rem; color: #333; white-space: pre-wrap; text-align: center; }
 
-/* Edit Fields */
+/* --- SOLUCIÓN #3: EDIT FIELDS (TEXTAREA GRANDE) --- */
 .card .editable-content {
-  width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 8px;
-  font-size: 0.85rem; resize: vertical; min-height: 50px; margin-top: 5px; font-family: inherit;
+  width: 100%; 
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
+  padding: 8px;
+  font-size: 0.85rem; 
+  font-family: inherit;
+  margin-top: 5px; 
+  
+  /* Mejora Visual: Que se vea todo el texto */
+  min-height: 120px; /* Altura base más grande */
+  height: auto;      /* Permitir crecimiento (controlado por JS) */
+  resize: none;      /* Evitar el control manual feo */
+  overflow: hidden;  /* Ocultar scrollbars */
+  background: rgba(255,255,255,0.8);
 }
+
 .card .editable-title, .card .editable-emoji {
   border: 1px solid #4f46e5; padding: 4px; border-radius: 4px;
   text-align: center; font-weight: 700; margin-bottom: 5px; font-family: inherit;
+  background: rgba(255,255,255,0.8);
 }
-.card .editable-emoji { width: 1.5rem; height: 1.5rem; font-size: 1.2rem; margin: 0 auto; display: block; }
-.card .editable-title { font-size: 0.85rem; }
+.card .editable-emoji { width: 2rem; height: 2rem; font-size: 1.3rem; margin: 0 auto; display: block; }
+.card .editable-title { width: 100%; font-size: 0.9rem; }
 
 .card-time-panel {
   position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px 8px;
