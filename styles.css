@@ -54,8 +54,12 @@ header {
   width: 100%;
   text-align: center;
   padding: 1rem; 
-  /* ⭐ MODIFICADO: Degradado de NEGRO (#000000) a GRIS OSCURO (#434343) ⭐ */
-  background: linear-gradient(135deg, #000000, #434343);
+  
+  /* ⭐ MODIFICADO: AZUL DIPLOMÁTICO PROFESIONAL ⭐ 
+     Usa tonos derivados de tu --color-texto-principal (#2b2d42)
+     para máxima armonía visual. */
+  background: linear-gradient(135deg, #1a1c29, #2b2d42);
+  
   color: white;
   box-shadow: 0 4px 10px var(--sombra-fuerte);
 }
