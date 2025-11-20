@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------
-   ESTILOS OPTIMIZADOS - CONSULADO HABANA
+   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORREGIDO PANEL ADMIN)
    ---------------------------------------------------------------- */
 :root {
   --color-texto-principal: #2b2d42;
@@ -63,7 +63,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   background-color: rgba(0, 0, 0, 0.4); white-space: nowrap; z-index: 10;
 }
 
-/* --- PANEL DE ESTADO (AMARILLO) --- */
+/* --- PANEL DE ESTADO (CORREGIDO) --- */
 .status-panel-container {
   width: 95%; max-width: 800px; margin: 8px auto;
   background-color: var(--fondo-panel-status);
@@ -99,21 +99,37 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-item.divisa .value { color: #008000; }
 .status-item .label { font-size: 0.7rem; font-weight: 600; color: #555; }
 
-/* Admin Mode Status Panel */
-.status-panel-container.admin-mode { padding: 10px; border: 2px dashed var(--acento-rojo); }
-.status-panel-container.admin-mode .status-panel-data { flex-wrap: wrap; }
+/* --- MODO ADMIN: CORRECCIÓN DE TAMAÑO --- */
+.status-panel-container.admin-mode { 
+  padding: 5px 10px; /* Padding reducido */
+  border: 2px dashed var(--acento-rojo); 
+}
+.status-panel-container.admin-mode .status-panel-data {
+  flex-direction: row; /* Forzar fila horizontal */
+  flex-wrap: nowrap;   /* NO permitir que se apilen hacia abajo */
+  gap: 8px;
+  justify-content: space-between;
+}
 .status-panel-container.admin-mode .status-item {
-  width: 31%; background-color: rgba(255,255,255,0.7);
-  padding: 5px; border: 1px solid #ccc;
+  width: auto;
+  flex: 1; /* Distribuir espacio equitativamente */
+  min-width: 0; /* Permitir que se encojan si es necesario */
+  background-color: rgba(255,255,255,0.6);
+  padding: 4px;
+  border: 1px solid #ccc;
 }
 .status-panel-container.admin-mode input {
-  border: 1px solid var(--acento-rojo); padding: 3px 6px;
-  border-radius: 4px; font-size: 0.8rem; font-weight: 700;
-  text-align: center; width: 100%; margin-top: 5px;
+  border: 1px solid var(--acento-rojo); padding: 2px 4px;
+  border-radius: 4px; font-size: 0.85rem; font-weight: 700;
+  text-align: center; 
+  width: 100%; /* Ocupar el ancho de su cajita (flex-item) */
+  margin-top: 2px;
+  min-width: 50px; /* Evita que desaparezca en pantallas micro */
 }
 .status-panel-container.admin-mode input:disabled {
-  background-color: #e9ecef; color: #6c757d; cursor: not-allowed;
+  background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border-color: #ccc;
 }
+/* --------------------------------------- */
 
 /* --- TICKER NOTICIAS --- */
 .news-ticker-container {
@@ -309,7 +325,7 @@ footer {
   
   /* Controles & Admin */
   .login-controls input, .login-controls button, #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
-  #toggleAdminBtn { font-size: 0.85rem; padding: 6px 10px; }
+  #toggleAdminBtn { font-size: 0.85rem; padding: 8px 10px; }
   #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 8px 10px; }
   .admin-group button { width: 100%; min-width: auto; }
 
