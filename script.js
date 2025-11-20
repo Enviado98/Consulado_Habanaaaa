@@ -5,11 +5,14 @@ const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
 
 // ----------------------------------------------------
-// 💰 CONFIGURACIÓN API ELTOQUE (MONEDA AUTOMÁTICA) 🚨
+// 💰 CONFIGURACIÓN API ELTOQUE (Caché Inteligente) 🚨
 // ----------------------------------------------------
-// Usamos la dirección v1/trmi que confirmamos que funciona
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
+
+// ⏱️ TIEMPO DE CACHÉ: 10 Minutos (en milisegundos)
+// Si el dato en la BD tiene menos de este tiempo, NO gastamos llamada a la API.
+const CACHE_DURATION = 10 * 60 * 1000; 
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -26,11 +29,13 @@ const TIME_PANEL_AUTOHIDE_MS = 2000;
 
 let currentData = [];
 let currentNews = []; 
+// Inicializamos status
 let currentStatus = {
     deficit_mw: 'Cargando...', 
     dollar_cup: '...', 
     euro_cup: '...',
-    deficit_edited_at: null
+    deficit_edited_at: null,
+    divisa_edited_at: null // Importante para el caché
 }; 
 const timePanelTimeouts = new Map(); 
 
@@ -86,12 +91,24 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 LÓGICA API ELTOQUE (FINAL CORREGIDA: ECU)
+// 💰 LÓGICA API ELTOQUE CON CACHÉ INTELIGENTE
 // ----------------------------------------------------
 
 async function fetchElToqueRates() {
     try {
-        // Usamos proxy para evitar bloqueo CORS
+        // 1. Verificar la edad del dato en la BD
+        const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
+        const now = Date.now();
+        
+        // Si el dato tiene menos de 10 minutos, NO llamamos a la API.
+        if ((now - lastUpdate) < CACHE_DURATION) {
+            // console.log("☕ Dato fresco de BD. Ahorrando llamada a API.");
+            return; 
+        }
+
+        // console.log("🔄 Dato viejo (>10min). Llamando a elTOQUE...");
+
+        // 2. Si es viejo, llamamos a la API
         const proxyUrl = "https://corsproxy.io/?"; 
         const targetUrl = encodeURIComponent(ELTOQUE_API_URL);
 
@@ -110,32 +127,45 @@ async function fetchElToqueRates() {
         let usdPrice = '---';
         let eurPrice = '---';
 
-        // 🚨 CORRECCIÓN APLICADA AQUÍ:
-        // Si 'data.tasas' existe, buscamos 'USD' y luego 'EUR' o 'ECU'
         if (data.tasas) {
             usdPrice = data.tasas.USD || '---';
             eurPrice = data.tasas.EUR || data.tasas.ECU || '---'; 
-        } 
-        // Soporte para estructura alternativa directa
-        else if (data.USD) {
+        } else if (data.USD) {
              usdPrice = data.USD;
              eurPrice = data.EUR || data.ECU;
         }
 
-        // Redondeamos y limpiamos
         usdPrice = parseFloat(usdPrice).toFixed(0);
         eurPrice = parseFloat(eurPrice).toFixed(0);
 
         if (isNaN(usdPrice)) usdPrice = '---';
         if (isNaN(eurPrice)) eurPrice = '---';
 
-        // Actualizamos el estado visual solo si recibimos números
-        if (usdPrice !== '---') currentStatus.dollar_cup = usdPrice;
-        if (eurPrice !== '---') currentStatus.euro_cup = eurPrice;
+        // 3. GUARDAR EN BASE DE DATOS (Aquí ocurre la magia)
+        // Si obtuvimos datos válidos, actualizamos Supabase para todos los demás
+        if (usdPrice !== '---' && eurPrice !== '---') {
+            const newTime = new Date().toISOString();
+            
+            // Actualizamos el objeto local inmediatamente para que se vea rápido
+            currentStatus.dollar_cup = usdPrice;
+            currentStatus.euro_cup = eurPrice;
+            currentStatus.divisa_edited_at = newTime;
+            
+            renderStatusPanel(currentStatus, admin);
 
-        renderStatusPanel(currentStatus, admin);
-        
-        // console.log(`💰 Actualizado: USD ${usdPrice} - EUR ${eurPrice}`);
+            // Enviamos el dato nuevo a la nube
+            const { error } = await supabase
+                .from('status_data')
+                .update({ 
+                    dollar_cup: usdPrice, 
+                    euro_cup: eurPrice,
+                    divisa_edited_at: newTime
+                })
+                .eq('id', 1);
+
+            if (error) console.error("⚠️ Error al guardar caché en DB:", error.message);
+            // else console.log("✅ Precio actualizado en la Nube para todos.");
+        }
 
     } catch (error) {
         console.error("⚠️ Error silencioso API:", error.message);
@@ -560,11 +590,18 @@ async function getAndDisplayViewCount() {
 // ----------------------------------------------------
 
 function renderStatusPanel(status, isAdminMode) {
+    // Usamos deficit_edited_at para el tiempo de edición manual
     const timeInfo = timeAgo(new Date(status.deficit_edited_at || Date.now()).getTime()).text;
     DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${timeInfo}`;
     
+    // Mostramos la hora de la divisa si existe y estamos en modo no-admin
+    if (!isAdminMode && status.divisa_edited_at) {
+        const { text: divisaTimeText } = timeAgo(status.divisa_edited_at);
+        DOMElements.lastEditedTime.innerHTML += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${divisaTimeText}</small>`;
+    }
+
     if (isAdminMode) {
-        // MODO ADMIN: Inputs Grises (Disabled)
+        // MODO ADMIN: Inputs para editar déficit, divisas deshabilitadas
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
             <div class="status-item"><span class="label">Dollar (Auto):</span><input type="text" value="${status.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
@@ -581,10 +618,16 @@ function renderStatusPanel(status, isAdminMode) {
 }
 
 async function loadStatusData() {
+    // Aquí cargamos todos los campos, incluyendo divisa_edited_at, para el caché
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
     if (data) currentStatus = { ...currentStatus, ...data };
+    
+    // 1. Renderizamos el panel con los datos que ya tenemos (Divisas del caché viejo)
     renderStatusPanel(currentStatus, admin);
-    fetchElToqueRates(); // Llamada inicial a API
+    
+    // 2. Ejecutamos la función de caché inteligente. 
+    // Esta función decidirá si debe actualizar desde la API o no.
+    fetchElToqueRates(); 
 }
 
 async function saveChanges() {
@@ -629,9 +672,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     registerPageView();
     getAndDisplayViewCount();
-    loadData(); loadNews(); loadComments(); loadStatusData();
+    loadData(); loadNews(); loadComments(); 
     
-    setInterval(fetchElToqueRates, 60000);
+    // 🚨 MODIFICACIÓN CLAVE: Quitamos el setInterval porque el caché ahora se actualiza al cargar la página.
+    // Solo actualizaremos si el usuario está en modo admin (opcional) o si se requiere un update forzado.
+    loadStatusData(); 
 });
 
 async function loadData() {
