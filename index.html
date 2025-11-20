@@ -90,7 +90,7 @@
                 let eur = '---';
 
                 // Lógica inteligente para encontrar el precio donde sea que esté
-                if (data.USD) { usd = data.USD; eur = data.EUR; }
+                if (data.USD) { usd = data.USD; eur = data.ECU; }
                 else if (data.tasas && data.tasas.USD) { usd = data.tasas.USD; eur = data.tasas.EUR; }
                 else if (data.result && data.result.tasas) { usd = data.result.tasas.USD; eur = data.result.tasas.EUR; }
 
