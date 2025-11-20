@@ -21,7 +21,9 @@
     <a href="news.html" class="news-btn-v2" role="button">🔴 Noticias aquí 👈🏻</a>
   </div>
   
-  <div id="viewCounter" class="view-counter" aria-live="polite"></div>
+  <div id="viewCounter" class="view-counter" aria-live="polite">
+    </div>
+
 </header>
 
 <div id="statusPanel" class="status-panel-container">
@@ -33,31 +35,31 @@
         Cargando datos de estado...
     </div>
 </div>
-
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
     <strong class="news-ticker-fixed-label">NOTICIAS</strong>
     <div class="news-ticker-wrap">
-        <div id="newsTickerContent" class="news-ticker-content"></div>
+        <div id="newsTickerContent" class="news-ticker-content">
+            </div>
     </div>
 </div>
 
 <div class="login-controls">
   <div id="statusMessage" class="login-message">
-      Accede a modo edición para actualizar la información
+            Accede a modo edición para actualizar la información
   </div>
   
   <button id="toggleAdminBtn" class="primary-admin-btn">🛡️ ACTIVAR EL MODO EDICIÓN </button>
 
+  
   <div id="adminControlsPanel">
     <div class="admin-group">
-        <button id="addCardBtn" class="admin-btn" style="background-color: #0d9488; color: white;">➕ Nueva Tarjeta Vacía</button>
-        <button id="saveBtn" class="admin-btn">💾 Guardar Cambios</button>
+        <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
     </div>
     <div class="admin-group">
         <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
         <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
     </div>
-  </div>
+    </div>
 </div>
 
 <div class="container" id="contenedor">
