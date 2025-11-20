@@ -1,114 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba API elTOQUE v2</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1 { color: #333; }
-        .price-box { font-size: 24px; font-weight: bold; margin: 10px 0; }
-        .usd { color: #0d9488; }
-        .eur { color: #4f46e5; }
-        
-        /* Consola en pantalla para móvil */
-        #screen-console {
-            background-color: #1e1e1e;
-            color: #00ff00;
-            font-family: monospace;
-            text-align: left;
-            padding: 10px;
-            border-radius: 8px;
-            height: 300px;
-            overflow-y: scroll;
-            font-size: 12px;
-            border: 2px solid #333;
-        }
-        .log-line { margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
-        .error { color: #ff4444; }
-        .success { color: #00ffff; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
+
+<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css"> 
+<style id="dynamicTickerStyles"></style>
+
 </head>
 <body>
 
-    <div class="card">
-        <h2>💰 Tasas elTOQUE (Prueba v2)</h2>
-        <div class="price-box">USD: <span id="usd-display" class="usd">---</span> CUP</div>
-        <div class="price-box">EUR: <span id="eur-display" class="eur">---</span> CUP</div>
-        <p style="font-size: 0.8rem; color: #666;">Intentando nueva dirección...</p>
+<header>
+  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
+  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
+  <div class="header-action-container">
+    <a href="news.html" class="news-btn-v2" role="button">🔴 Noticias aquí 👈🏻</a>
+  </div>
+  
+  <div id="viewCounter" class="view-counter" aria-live="polite">
     </div>
 
-    <h3>📟 Registro de Diagnóstico:</h3>
-    <div id="screen-console">Iniciando v2...</div>
+</header>
 
-    <script>
-        // --- 🚨 CAMBIO CLAVE: Nueva URL (tasas.eltoque.com/v1/trmi) ---
-        const API_URL = "https://tasas.eltoque.com/v1/trmi"; 
-        
-        const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
-        
-        function log(msg, type = 'info') {
-            const consoleDiv = document.getElementById('screen-console');
-            const time = new Date().toLocaleTimeString();
-            let colorClass = '';
-            if(type === 'error') colorClass = 'error';
-            if(type === 'success') colorClass = 'success';
-            
-            consoleDiv.innerHTML = `<div class="log-line ${colorClass}">[${time}] ${msg}</div>` + consoleDiv.innerHTML;
-        }
+<div id="statusPanel" class="status-panel-container">
+    <div class="status-panel-header">
+        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
+        <span id="lastEditedTime">Última edición: Hace un rato...</span>
+    </div>
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
+    </div>
+</div>
+<div id="newsTicker" class="news-ticker-container" style="display:none;">
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+    <div class="news-ticker-wrap">
+        <div id="newsTickerContent" class="news-ticker-content">
+            </div>
+    </div>
+</div>
 
-        async function fetchRates() {
-            log("🔄 Probando conexión a: tasas.eltoque.com...");
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
+            Accede a modo edición para actualizar la información
+  </div>
+  
+  <button id="toggleAdminBtn" class="primary-admin-btn">🛡️ ACTIVAR EL MODO EDICIÓN </button>
 
-            try {
-                // Usamos proxy para evitar bloqueo CORS en móvil
-                const proxy = "https://corsproxy.io/?";
-                // Aseguramos que la URL viaje bien codificada
-                const target = encodeURIComponent(API_URL);
-                const finalUrl = proxy + target;
+  
+  <div id="adminControlsPanel">
+    <div class="admin-group">
+        <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
+    </div>
+    <div class="admin-group">
+        <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
+        <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
+    </div>
+    </div>
+</div>
 
-                const response = await fetch(finalUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${TOKEN}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+<div class="container" id="contenedor">
+  </div>
 
-                if (!response.ok) {
-                    // Si falla, mostramos el error exacto (404, 401, 500...)
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
+<section class="comments-section">
+    <h2>🗣️ Comentarios de la Comunidad</h2>
+    
+    <div class="comments-display-wrap">
+        <div id="commentsContainer" class="comments-list-container">
+            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
+        </div>
+    </div>
 
-                const data = await response.json();
-                // Mostramos un pedacito del JSON para verificar estructura
-                log("✅ ¡CONEXIÓN EXITOSA!", 'success');
-                log("📦 Datos: " + JSON.stringify(data).substring(0, 80) + "...");
+    <div class="comment-form-container">
+        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
+        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
+        <button id="publishCommentBtn">Publicar Comentario</button>
+    </div>
+</section>
 
-                let usd = '---';
-                let eur = '---';
+<footer>
+  <div>© 2025 – Información actualizada periódicamente.</div>
+</footer>
 
-                // Lógica inteligente para encontrar el precio donde sea que esté
-                if (data.USD) { usd = data.USD; eur = data.ECU; }
-                else if (data.tasas && data.tasas.USD) { usd = data.tasas.USD; eur = data.tasas.EUR; }
-                else if (data.result && data.result.tasas) { usd = data.result.tasas.USD; eur = data.result.tasas.EUR; }
+<script type="module" src="script.js"></script>
 
-                // Renderizado
-                document.getElementById('usd-display').textContent = parseFloat(usd).toFixed(0);
-                document.getElementById('eur-display').textContent = parseFloat(eur).toFixed(0);
-
-                log(`💰 Actualizado: USD ${parseFloat(usd).toFixed(0)} | EUR ${parseFloat(eur).toFixed(0)}`, 'success');
-
-            } catch (error) {
-                log("❌ FALLÓ: " + error.message, 'error');
-            }
-        }
-
-        // Ejecutar inmediatamente y luego cada 10 seg
-        fetchRates();
-        setInterval(fetchRates, 10000);
-
-    </script>
 </body>
 </html>
