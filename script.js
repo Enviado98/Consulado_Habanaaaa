@@ -1,4 +1,4 @@
-// script.js - VERSIÓN FINAL (CON DELETE BUTTON Y FIX ALINEACIÓN)
+// script.js - VERSIÓN FINAL (AUTO-RESIZE, DELETE INTERNO, 1 TARJETA VACÍA)
 // ----------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
@@ -68,8 +68,9 @@ function timeAgo(timestamp) {
 const linkify = (text) => text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, 
     (url) => `<a href="${url.startsWith('http') ? url : 'http://' + url}" target="_blank">${url}</a>`);
 
-// Función para auto-ajustar altura de textareas
+// FUNCIÓN DE AUTO-RESIZE (SOLUCIÓN #3)
 window.autoResize = function(textarea) {
+    if (!textarea) return;
     textarea.style.height = 'auto'; 
     textarea.style.height = (textarea.scrollHeight + 5) + 'px'; 
 }
@@ -110,7 +111,7 @@ function renderStatusPanel() {
     if (!admin && currentStatus.divisa_edited_at) timeHtml += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${timeAgo(currentStatus.divisa_edited_at).text}</small>`;
     DOM.lastEdited.innerHTML = timeHtml;
 
-    // En modo ADMIN, usamos inputs pero controlados por CSS para que no rompan el layout
+    // MODO ADMIN: Inputs transparentes y pequeños para no romper layout
     if (admin) {
         DOM.statusData.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}"></div>
@@ -194,8 +195,10 @@ function renderAdminCards(enable) {
         
         if (enable) {
             card.removeAttribute('onclick');
-            // Botón Eliminar (Cruz Roja)
-            const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="deleteCard('${item.id}')">×</button>`;
+            
+            // Botón Eliminar con stopPropagation para no activar efectos raros
+            // Solo aparece si NO es la tarjeta temporal
+            const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="event.stopPropagation(); deleteCard('${item.id}')">×</button>`;
 
             card.innerHTML = `
                 ${deleteBtn}
@@ -205,13 +208,14 @@ function renderAdminCards(enable) {
                     <textarea class="editable-content" oninput="autoResize(this)" placeholder="Contenido...">${item.contenido}</textarea>
                 </div>`;
             
+            // Auto-resize inicial para que se vea todo el texto al entrar en edición
             const textarea = card.querySelector('.editable-content');
             if(textarea) autoResize(textarea);
         }
     });
 }
 
-// NUEVA FUNCIÓN: ELIMINAR TARJETA
+// FUNCIÓN ELIMINAR (Global)
 window.deleteCard = async (id) => {
     if (!confirm("⛔ ¿Estás seguro de ELIMINAR esta tarjeta permanentemente?")) return;
 
@@ -219,8 +223,7 @@ window.deleteCard = async (id) => {
         const { error } = await supabase.from('items').delete().eq('id', id);
         if (error) throw error;
         alert("🗑️ Tarjeta eliminada.");
-        // Recargamos para refrescar la vista
-        location.reload();
+        location.reload(); // Recarga segura
     } catch (e) {
         alert("Error al eliminar: " + e.message);
     }
@@ -243,6 +246,7 @@ async function saveChanges() {
 
         if (contenido !== original.contenido || titulo !== original.titulo || emoji !== original.emoji) {
             if (id.startsWith('temp_')) {
+                // Solo insertar la temporal si se ha escrito algo real en ella
                 if (titulo !== 'Espacio Disponible' || contenido !== '...') {
                     updates.push(supabase.from('items').insert([{ emoji, titulo, contenido, last_edited_timestamp: now }]));
                 }
@@ -435,6 +439,7 @@ async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
     if (data) {
         currentData = data;
+        // SOLUCIÓN #2: SOLO 1 TARJETA TEMPORAL AL FINAL
         currentData.push({ id: 'temp_new', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
         DOM.container.innerHTML = currentData.map((item, i) => createCardHTML(item, i)).join('');
     }
