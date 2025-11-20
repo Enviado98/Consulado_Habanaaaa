@@ -64,7 +64,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .news-btn-v2:hover { background-color: #0c8276; box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4); transform: translateY(-2px); }
 .news-btn-v2:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); background-color: #0b7060; }
 
-/* --- PANEL DE ESTADO (ESTRUCTURA GENERAL) --- */
+/* --- PANEL DE ESTADO (General) --- */
 .status-panel-container {
     width: 95%; max-width: 800px; margin: 8px auto;
     background-color: var(--fondo-panel-status);
@@ -87,7 +87,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     font-size: 0.55rem; font-weight: 700; flex-shrink: 0;
 }
 
-/* ESTILO NORMAL (VISUALIZACIÓN) */
+/* Estilos VISUALIZACIÓN (NO admin) */
 .status-panel-data {
     display: flex; justify-content: space-between; align-items: center;
     gap: 5px; font-size: 0.9rem; font-weight: 800; text-align: center;
@@ -105,60 +105,67 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-item .label { font-size: 0.7rem; font-weight: 600; color: #555; margin-bottom: 2px; }
 
 /* ---------------------------------------------------------
-   🚨 CORRECCIÓN DEFINITIVA MODO ADMIN (CAJAS PEQUEÑAS) 🚨
+   🚨 CORRECCIÓN TOTAL MODO EDICIÓN (COPIA FIEL FOTO BUENA) 🚨
    --------------------------------------------------------- */
 .status-panel-container.admin-mode {
     border: 2px dashed var(--acento-rojo);
-    padding: 5px 8px; /* Padding reducido */
+    padding: 5px; /* Poco padding para aprovechar espacio */
 }
 
-/* 1. El contenedor: FLEXIBLE pero SIN SCROLL */
+/* CONTENEDOR FLEX: Fuerza los elementos a quedarse en 1 fila */
 .status-panel-container.admin-mode .status-panel-data {
     display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    justify-content: space-between !important; /* Espacio equitativo */
-    gap: 4px !important;
-    overflow: hidden !important; /* PROHIBIDO DESLIZAR */
+    flex-direction: row !important; /* Siempre fila */
+    flex-wrap: nowrap !important;   /* NUNCA bajar de línea */
+    justify-content: space-between !important; /* Repartir espacio */
+    align-items: flex-start !important;
+    gap: 2px !important; /* Gap mínimo */
+    overflow: visible !important; /* No scroll */
 }
 
-/* 2. Los Items: OCUPAN ESPACIO PERO SE ENCOGEN SI ES NECESARIO */
+/* CADA ÍTEM (COLUMNA): Ancho fijo porcentual */
 .status-panel-container.admin-mode .status-item {
-    flex: 1 1 auto !important; /* Crecer y encoger */
-    min-width: 0 !important;   /* Permite que se hagan pequeños en pantallas diminutas */
-    width: auto !important;    /* Quita anchos fijos */
-    background-color: rgba(255,255,255,0.6);
-    border: 1px solid #ccc;
-    padding: 4px 2px !important;
+    width: 32% !important;     /* 32% x 3 = 96% (caben perfecto) */
+    min-width: 0 !important;   /* Permite encogerse por debajo del contenido si hace falta */
+    flex: 0 0 32% !important;  /* No crecer, no encoger, ancho fijo */
+    
+    background: transparent !important; /* Sin fondo blanco feo */
+    border: none !important;
+    padding: 0 !important;
     margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
 }
 
-/* 3. EL INPUT: TAMAÑO LIMITADO EN PIXELES (LA SOLUCIÓN) */
+/* EL INPUT: Pequeño y centrado */
 .status-panel-container.admin-mode input {
-    width: 100% !important;
+    width: 95% !important; /* Casi todo el ancho de su columna del 32% */
+    box-sizing: border-box !important; /* Para que el padding no sume ancho */
     
-    /* ESTO ES LO QUE PIDES: CAJITA PEQUEÑA */
-    max-width: 80px !important; 
+    text-align: center !important;
+    margin-top: 2px !important;
+    padding: 4px 0 !important;
     
-    display: block;
-    margin: 2px auto 0 auto !important; /* Centrado absoluto */
-    border: 1px solid var(--acento-rojo); 
-    padding: 2px 0;
-    border-radius: 4px; 
-    font-size: 0.85rem; 
-    font-weight: 700;
-    text-align: center; 
-    font-family: inherit;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    border-radius: 4px !important;
+    border: 1px solid #ccc !important;
+    background-color: white !important;
 }
 
-/* Estilo gris y cursiva para automáticos */
+/* Estilo especial para Dólar/Euro (Deshabilitados) */
 .status-panel-container.admin-mode input:disabled {
-    background-color: #e9ecef; 
-    color: #6c757d; 
-    border-color: #ced4da;
-    cursor: not-allowed; 
-    font-style: italic;
-    opacity: 0.9;
+    background-color: #e9ecef !important; /* Gris */
+    color: #6c757d !important;
+    font-style: italic !important;
+    border-color: #ced4da !important;
+}
+
+/* Estilo para Deficit (Habilitado) */
+.status-panel-container.admin-mode #editDeficit {
+    border: 1px solid var(--acento-rojo) !important;
+    color: #000 !important;
 }
 
 
@@ -340,9 +347,4 @@ footer { padding: 20px 15px; background: var(--glass-bg); backdrop-filter: blur(
     .comment-actions { font-size: 0.7rem; gap: 5px; }
     .replies-container { padding-left: 10px; }
     .comment-item { padding: 8px; }
-    
-    /* Ajuste Status Panel en móvil para asegurar que las "cajitas" se vean bien */
-    .status-panel-container.admin-mode input {
-        max-width: 70px !important; /* Un poco más pequeñas en móvil */
-    }
 }
