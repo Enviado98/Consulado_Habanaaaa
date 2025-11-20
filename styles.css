@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------
-   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORREGIDO DEFINITIVO)
+   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORRECCIÓN MÓVIL DEFINITIVA)
    ---------------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -89,9 +89,11 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 
 .status-panel-data {
     display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: nowrap; gap: 5px;
+    gap: 5px;
     font-size: 0.9rem; font-weight: 800; text-align: center;
+    /* Original behavior: scroll if needed */
     overflow-x: auto;
+    white-space: nowrap;
 }
 
 .status-item {
@@ -103,27 +105,48 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-item.divisa .value { color: #008000; }
 .status-item .label { font-size: 0.7rem; font-weight: 600; color: #555; margin-bottom: 2px; }
 
-/* CORRECCIÓN MODO ADMIN (PANEL ESTADO): Mantiene fila horizontal */
+/* --- CORRECCIÓN MODO ADMIN (PANEL ESTADO) --- */
+/* En móvil y escritorio, forzamos que se vea IGUAL que el original */
+
 .status-panel-container.admin-mode .status-panel-data {
+    /* Mantiene la fila horizontal original */
     display: flex; 
-    flex-direction: row !important; /* Forzar fila */
-    flex-wrap: nowrap !important; /* NO envolver */
+    flex-direction: row; 
+    flex-wrap: nowrap; 
+    overflow-x: auto;
+    justify-content: space-between;
     gap: 5px;
 }
+
 .status-panel-container.admin-mode .status-item {
-    width: auto; min-width: 90px;
-    background-color: transparent; border: none; padding: 0;
+    /* Mismos tamaños que el original */
+    min-width: 95px;
+    width: auto;
+    flex-shrink: 0;
+    border: 1px dashed rgba(0,0,0,0.1); /* Borde sutil para saber que es editable */
+    background: rgba(255,255,255,0.3);
 }
+
 .status-panel-container.admin-mode input {
-    border: 1px solid rgba(0,0,0,0.2);
-    background: rgba(255,255,255,0.6);
-    padding: 2px; border-radius: 4px;
-    font-size: 0.9rem; font-weight: 900;
-    text-align: center; width: 100%; max-width: 90px;
-    margin-top: 2px; font-family: inherit; color: inherit;
+    /* El input se disfraza de texto */
+    border: none;
+    border-bottom: 2px solid var(--acento-rojo); /* Solo una línea abajo */
+    background: transparent;
+    padding: 0;
+    font-size: 1rem; /* Mismo tamaño que .value */
+    font-weight: 900;
+    text-align: center; 
+    width: 100%; 
+    max-width: 80px;
+    font-family: inherit; 
+    color: inherit;
+    margin-top: 2px;
 }
+
 .status-panel-container.admin-mode input:disabled {
-    background-color: transparent; border: none; opacity: 1; color: inherit;
+    border-bottom: none;
+    opacity: 1; 
+    color: inherit;
 }
 
 /* --- TICKER NOTICIAS --- */
@@ -187,13 +210,13 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   min-height: 110px; height: 100%;
   display: flex; flex-direction: column;
   position: relative; cursor: pointer;
-  overflow: hidden; /* CRUCIAL: Mantiene el panel oculto */
+  overflow: hidden; /* OBLIGATORIO: Mantiene el panel oculto */
 }
 
-/* Botón Eliminar (Cruz) - Ajustado para estar ADENTRO de la tarjeta */
+/* Botón Eliminar (Cruz) - ADENTRO de la tarjeta */
 .delete-card-btn {
   position: absolute; 
-  top: 5px; right: 5px; /* Adentro de la tarjeta */
+  top: 5px; right: 5px; 
   background: var(--acento-rojo); color: white; 
   border: 2px solid white; border-radius: 50%; 
   width: 24px; height: 24px; 
@@ -204,7 +227,6 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .delete-card-btn:hover { transform: scale(1.1); background-color: #d00000; }
 
-/* Estados de Tarjeta */
 .card-recent:not(.admin-mode) {
     background: rgba(239, 35, 60, 0.1);
     box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
@@ -244,15 +266,15 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .card .editable-emoji { width: 2rem; height: 2rem; font-size: 1.3rem; margin: 0 auto; display: block; }
 .card .editable-title { width: 100%; font-size: 0.9rem; }
 
-/* PANEL DESLIZABLE (Corrección: translateY 100% lo esconde abajo) */
+/* PANEL DESLIZABLE */
 .card-time-panel {
     position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px 8px;
     font-size: 0.7rem; font-weight: 700; color: #1a1a1a; background: white;
     transition: transform 0.3s ease-out;
-    transform: translateY(100%); /* Oculto abajo */
+    transform: translateY(100%);
     border-radius: 0 0 16px 16px; text-align: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
 }
-.card.show-time-panel .card-time-panel { transform: translateY(0); /* Sube al activarse */ }
+.card.show-time-panel .card-time-panel { transform: translateY(0); }
 
 /* --- COMENTARIOS --- */
 .comments-section {
@@ -307,9 +329,22 @@ footer { padding: 20px 15px; background: var(--glass-bg); backdrop-filter: blur(
     .admin-group button { width: 100%; min-width: auto; }
 
     .status-panel-container { font-size: 0.8rem; padding: 8px 10px; }
-    .status-panel-data { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
-    .status-item { min-width: 90px; flex-shrink: 0; }
     
+    /* FIX MÓVIL FINAL: Forzar fila y scroll */
+    .status-panel-data, 
+    .status-panel-container.admin-mode .status-panel-data { 
+        flex-direction: row !important; 
+        flex-wrap: nowrap !important; 
+        overflow-x: auto;
+        gap: 5px;
+    }
+    .status-item, 
+    .status-panel-container.admin-mode .status-item { 
+        min-width: 90px; 
+        flex-shrink: 0; 
+        width: auto !important;
+    }
+
     .comments-section h2 { font-size: 1.1rem; }
     .comment-actions { font-size: 0.7rem; gap: 5px; }
     .replies-container { padding-left: 10px; }
