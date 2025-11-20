@@ -54,7 +54,8 @@ header {
   width: 100%;
   text-align: center;
   padding: 1rem; 
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  /* ⭐ MODIFICADO: Degradado de NEGRO (#000000) a GRIS OSCURO (#434343) ⭐ */
+  background: linear-gradient(135deg, #000000, #434343);
   color: white;
   box-shadow: 0 4px 10px var(--sombra-fuerte);
 }
@@ -619,4 +620,4 @@ header {
     cursor: not-allowed; /* Icono de prohibido */
     font-style: italic;
     opacity: 0.8;
-}
+                  }
