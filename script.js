@@ -19,6 +19,9 @@ let admin = false;
 let currentData = [];
 let itemsToDelete = new Set(); // Almacena IDs para borrar al guardar
 let currentStatus = { deficit_mw: '...', dollar_cup: '...', euro_cup: '...', deficit_edited_at: null, divisa_edited_at: null }; 
+let userWebId = localStorage.getItem('userWebId') || crypto.randomUUID();
+
+if (!localStorage.getItem('userWebId')) localStorage.setItem('userWebId', userWebId);
 
 // CONSTANTES TIEMPO
 const ONE_DAY = 86400000;
@@ -36,14 +39,10 @@ const DOM = {
     toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
     statusDataContainer: document.getElementById('statusDataContainer'),
     lastEditedTime: document.getElementById('lastEditedTime'),
-    // Inputs Comentarios
     commentName: document.getElementById('commenterName'),
     commentText: document.getElementById('commentText'),
     pubCommentBtn: document.getElementById('publishCommentBtn')
 };
-
-let userWebId = localStorage.getItem('userWebId') || crypto.randomUUID();
-if (!localStorage.getItem('userWebId')) localStorage.setItem('userWebId', userWebId);
 
 // ----------------------------------------------------
 // 🛠️ UTILIDADES
@@ -69,6 +68,12 @@ function linkify(text) {
         let fullUrl = url.startsWith('http') ? url : 'http://' + url;
         return `<a href="${fullUrl}" target="_blank">${url}</a>`;
     });
+}
+
+function generateColorByName(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    return `hsl(${hash % 360}, 70%, 45%)`; 
 }
 
 // ----------------------------------------------------
@@ -104,9 +109,8 @@ function createCardHTML(item) {
     </div>`;
 }
 
-// 2. Generar HTML de Tarjeta (Modo Edición)
+// 2. Generar HTML de Tarjeta (Modo Edición - REQ #1)
 function createEditableCardHTML(item) {
-    // Si es nueva (ID temporal), ponemos valores vacíos por defecto si no existen
     const emoji = item.emoji || '📝';
     const titulo = item.titulo || '';
     const contenido = item.contenido || '';
@@ -122,7 +126,6 @@ function createEditableCardHTML(item) {
     </div>`;
 }
 
-// 3. Cargar Datos Iniciales
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
     if (data) {
@@ -132,21 +135,20 @@ async function loadData() {
 }
 
 function renderCards() {
-    // Si estamos en admin, renderizamos editable, si no, renderizamos normal
     DOM.contenedor.innerHTML = currentData.map(item => 
         admin ? createEditableCardHTML(item) : createCardHTML(item)
     ).join('');
 }
 
 // ----------------------------------------------------
-// 🛡️ GESTIÓN MODO ADMIN (REQUERIMIENTOS #1, #2, #3)
+// 🛡️ GESTIÓN MODO ADMIN
 // ----------------------------------------------------
 
 function toggleAdminMode() {
     if (!admin) {
         if(!confirm("⚠️ ¿Entrar en Modo Edición?")) return;
         admin = true;
-        itemsToDelete.clear(); // Reseteamos lista de borrado
+        itemsToDelete.clear();
         
         document.body.classList.add('admin-mode');
         DOM.adminPanel.style.display = "flex";
@@ -155,7 +157,7 @@ function toggleAdminMode() {
         DOM.toggleAdminBtn.textContent = "🛑 SALIR SIN GUARDAR"; 
         DOM.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)";
         
-        renderCards(); // Re-renderiza en modo editable
+        renderCards(); 
         renderStatusPanel(currentStatus, true);
 
     } else {
@@ -169,7 +171,7 @@ function toggleAdminMode() {
             DOM.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
             DOM.toggleAdminBtn.style.backgroundColor = "#4f46e5";
             
-            loadData(); // Recarga datos originales de la BD
+            loadData(); 
             loadStatusData();
         }
     }
@@ -177,32 +179,25 @@ function toggleAdminMode() {
 
 // REQ #3: Añadir Tarjeta Vacía
 function addNewCard() {
-    const tempId = 'new_' + Date.now(); // ID Temporal
+    const tempId = 'new_' + Date.now(); 
     const newItem = { id: tempId, titulo: '', contenido: '', emoji: '📝' };
-    
-    // La agregamos al array local
     currentData.push(newItem);
     
-    // Creamos el elemento DOM y lo añadimos visualmente
     const div = document.createElement('div');
     div.innerHTML = createEditableCardHTML(newItem);
-    // Extraemos el nodo hijo para no tener un div extra
     DOM.contenedor.appendChild(div.firstElementChild);
-    
-    // Scroll suave hacia la nueva tarjeta
-    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    div.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// REQ #2: Lógica de Borrado (Visual)
+// REQ #2: Lógica de Borrado
 function markCardForDeletion(cardId, cardElement) {
     if (confirm("🗑️ ¿Eliminar esta tarjeta?\n(Se borrará definitivamente al Guardar Cambios)")) {
         if (!cardId.toString().startsWith('new_')) {
             itemsToDelete.add(cardId);
         } else {
-            // Si es nueva y no se ha guardado, la sacamos del array currentData directamente
             currentData = currentData.filter(i => i.id !== cardId);
         }
-        cardElement.remove(); // Eliminar del DOM
+        cardElement.remove(); 
     }
 }
 
@@ -212,12 +207,12 @@ async function saveChanges() {
     btn.disabled = true; btn.textContent = "Guardando...";
 
     try {
-        // 1. Procesar Borrados (REQ #2)
+        // 1. Borrados
         if (itemsToDelete.size > 0) {
             await supabase.from('items').delete().in('id', Array.from(itemsToDelete));
         }
 
-        // 2. Procesar Actualizaciones e Inserciones
+        // 2. Updates / Inserts
         const cards = document.querySelectorAll('.card');
         const updates = [];
         const inserts = [];
@@ -230,10 +225,8 @@ async function saveChanges() {
             const contenido = card.querySelector('.editable-content').value;
 
             if (id.startsWith('new_')) {
-                // Es una Inserción
                 inserts.push({ emoji, titulo, contenido, last_edited_timestamp: now });
             } else {
-                // Es una Actualización: Buscamos si cambió algo
                 const original = currentData.find(i => i.id == id);
                 if (original && (original.emoji !== emoji || original.titulo !== titulo || original.contenido !== contenido)) {
                     updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: now }).eq('id', id));
@@ -244,14 +237,14 @@ async function saveChanges() {
         if (inserts.length > 0) await supabase.from('items').insert(inserts);
         if (updates.length > 0) await Promise.all(updates);
 
-        // 3. Guardar Estado (Deficit)
+        // 3. Estado
         const newDeficit = document.getElementById('editDeficit').value;
         if (newDeficit !== currentStatus.deficit_mw) {
             await supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: now }).eq('id', 1);
         }
 
         alert("✅ Cambios guardados correctamente.");
-        location.reload(); // Recargar para limpiar estado
+        location.reload();
 
     } catch (e) {
         console.error(e);
@@ -261,7 +254,7 @@ async function saveChanges() {
 }
 
 // ----------------------------------------------------
-// 💰 API ELTOQUE & STATUS PANEL
+// 💰 API ELTOQUE & STATUS
 // ----------------------------------------------------
 async function fetchElToqueRates() {
     const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
@@ -321,7 +314,7 @@ async function loadStatusData() {
 }
 
 // ----------------------------------------------------
-// 📰 NOTICIAS (Simplificado)
+// 📰 NOTICIAS
 // ----------------------------------------------------
 async function loadNews() {
     const cutoff = Date.now() - RECENT_THRESHOLD_MS;
@@ -329,7 +322,6 @@ async function loadNews() {
     
     let validNews = [];
     if(data) {
-        // Limpieza automática de noticias viejas
         data.forEach(n => {
             if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n);
             else supabase.from('noticias').delete().eq('id', n.id);
@@ -341,7 +333,6 @@ async function loadNews() {
         DOM.newsTickerContent.innerHTML = `${html} <span class="news-item"> | </span> ${html}`;
         DOM.newsTicker.style.display = 'flex';
         
-        // Animación dinámica basada en longitud
         const width = DOM.newsTickerContent.scrollWidth / 2;
         document.getElementById('dynamicTickerStyles').innerHTML = `@keyframes tick { 0% {transform:translateX(0);} 100% {transform:translateX(-${width}px);} }`;
         DOM.newsTickerContent.style.animation = `tick ${width / 50}s linear infinite`;
@@ -369,46 +360,146 @@ async function deleteQuickNews() {
 }
 
 // ----------------------------------------------------
-// 💬 COMENTARIOS (Optimizado)
+// 💬 COMENTARIOS (RESTAURADO Y OPTIMIZADO)
 // ----------------------------------------------------
+
+// Crear HTML de un comentario
+function createCommentHTML(comment, isLiked) {
+    const color = generateColorByName(comment.name);
+    const likeClass = isLiked ? 'liked' : '';
+    const itemClass = comment.parent_id ? 'reply-item' : 'comment-item'; // Estilos distintos
+    
+    return `
+        <div class="${itemClass}" data-id="${comment.id}" style="--comment-color: ${color};">
+            <strong class="comment-name">${comment.name}</strong>
+            <div class="comment-content">${comment.text}</div>
+            
+            <div class="comment-actions">
+                <button class="like-button ${likeClass}" data-action="like" data-id="${comment.id}"><span class="heart">♥</span></button>
+                <span class="like-count" data-id="${comment.id}">${comment.likes_count || 0}</span>
+                <span class="comment-date">${new Date(comment.timestamp).toLocaleString()}</span>
+                ${!comment.parent_id ? `<span class="reply-form-toggle" data-action="toggle-reply" data-id="${comment.id}">Responder</span>` : ''}
+            </div>
+
+            ${!comment.parent_id ? `
+                <div class="reply-form" id="reply-form-${comment.id}">
+                    <input type="text" class="reply-name" placeholder="Tu Nombre" maxlength="30">
+                    <textarea class="reply-text" placeholder="Tu Respuesta (máx. 250)" maxlength="250"></textarea>
+                    <button class="pub-reply-btn" data-action="pub-reply" data-id="${comment.id}">Enviar Respuesta</button>
+                </div>
+                <div class="replies-container" id="replies-${comment.id}"></div>
+            ` : ''}
+        </div>`;
+}
+
 async function loadComments() {
-    const { data } = await supabase.from('comentarios').select('*').order('timestamp', { ascending: false });
-    if (!data || !data.length) {
+    // Carga paralela de comentarios y likes
+    const [commentsRes, likesRes] = await Promise.all([
+        supabase.from('comentarios').select('*').order('timestamp', { ascending: false }),
+        supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
+    ]);
+    
+    if (commentsRes.error) return DOM.commentsContainer.innerHTML = `<p style="text-align:center;color:red">Error cargando.</p>`;
+    
+    const allComments = commentsRes.data || [];
+    const userLikes = new Set(likesRes.data ? likesRes.data.map(l => l.comment_id) : []);
+    
+    // Separar padres y respuestas
+    const parents = allComments.filter(c => c.parent_id === null);
+    const repliesMap = allComments.reduce((map, c) => {
+        if (c.parent_id) {
+            if (!map.has(c.parent_id)) map.set(c.parent_id, []);
+            map.get(c.parent_id).push(c);
+        }
+        return map;
+    }, new Map());
+
+    if (parents.length === 0) {
         DOM.commentsContainer.innerHTML = `<p style="text-align:center;color:#999">Sé el primero en comentar.</p>`;
         return;
     }
-    // ... (Lógica de renderizado de hilos mantenida similar pero más limpia)
-    // Para simplificar el archivo, mantengo la lógica visual básica aquí:
-    const parents = data.filter(c => !c.parent_id);
-    DOM.commentsContainer.innerHTML = parents.map(c => `
-        <div class="comment-item">
-            <strong class="comment-name" style="color:${stringToColor(c.name)}">${c.name}</strong>
-            <div class="comment-content">${c.text}</div>
-            <small class="comment-date">${new Date(c.timestamp).toLocaleString()}</small>
-        </div>
-    `).join('');
+
+    // Renderizar padres
+    DOM.commentsContainer.innerHTML = parents.map(c => createCommentHTML(c, userLikes.has(c.id))).join('');
+
+    // Insertar respuestas en sus padres (ordenadas por fecha antigua primero para leer en orden)
+    parents.forEach(p => {
+        const replies = repliesMap.get(p.id);
+        if (replies) {
+            const container = document.getElementById(`replies-${p.id}`);
+            replies.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+            container.innerHTML = replies.map(r => createCommentHTML(r, userLikes.has(r.id))).join('');
+            
+            if(replies.length > 0) {
+                container.style.display = 'block'; 
+                container.classList.add('expanded'); // Mostrar por defecto o usar lógica "Ver más"
+            }
+        }
+    });
 }
 
-function stringToColor(str) {
-    let hash = 0; 
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${hash % 360}, 70%, 40%)`;
-}
-
+// PUBLICAR COMENTARIO PRINCIPAL
 async function publishComment() {
     const name = DOM.commentName.value.trim();
     const text = DOM.commentText.value.trim();
     if (name.length < 2 || text.length < 3) return alert("Escribe un nombre y mensaje válidos.");
     
     DOM.pubCommentBtn.disabled = true;
-    await supabase.from('comentarios').insert([{ name, text, likes_count: 0 }]);
-    DOM.commentName.value = ''; DOM.commentText.value = '';
+    const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0 }]);
+    
+    if(!error) {
+        DOM.commentName.value = ''; DOM.commentText.value = '';
+        loadComments();
+    } else alert("Error al publicar");
+    
     DOM.pubCommentBtn.disabled = false;
-    loadComments();
+}
+
+// PUBLICAR RESPUESTA (HILO)
+async function publishReply(parentId, btn) {
+    const form = document.getElementById(`reply-form-${parentId}`);
+    const name = form.querySelector('.reply-name').value.trim();
+    const text = form.querySelector('.reply-text').value.trim();
+    
+    if (name.length < 2 || text.length < 3) return alert("Datos incompletos.");
+    
+    btn.disabled = true;
+    const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0 }]);
+    
+    if(!error) {
+        form.style.display = 'none'; // Ocultar formulario
+        loadComments(); // Recargar para ver la respuesta
+    } else alert("Error al responder");
+    
+    btn.disabled = false;
+}
+
+// LIKE TOGGLE
+async function toggleLike(commentId, btn) {
+    const isLiked = btn.classList.contains('liked');
+    const counter = document.querySelector(`.like-count[data-id="${commentId}"]`);
+    btn.disabled = true;
+
+    if (isLiked) {
+        // Quitar Like
+        await supabase.from('likes').delete().eq('comment_id', commentId).eq('user_web_id', userWebId);
+        await supabase.rpc('decrement_likes', { row_id: commentId });
+        btn.classList.remove('liked');
+        counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+    } else {
+        // Dar Like
+        const { error } = await supabase.from('likes').insert([{ comment_id: commentId, user_web_id: userWebId }]);
+        if (!error || error.code === '23505') { // Ignorar duplicados
+            if(!error) await supabase.rpc('increment_likes', { row_id: commentId });
+            btn.classList.add('liked');
+            counter.textContent = parseInt(counter.textContent) + 1;
+        }
+    }
+    btn.disabled = false;
 }
 
 // ----------------------------------------------------
-// 🚀 INICIALIZACIÓN & EVENTOS (Delegación)
+// 🚀 INICIALIZACIÓN & EVENTOS (Delegación Centralizada)
 // ----------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
@@ -417,35 +508,54 @@ document.addEventListener('DOMContentLoaded', () => {
     loadComments();
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
 
-    // Listeners Botones Principales
+    // Botones Generales
     DOM.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     document.getElementById('saveBtn').addEventListener('click', saveChanges);
     document.getElementById('addNewsBtn').addEventListener('click', addQuickNews);
     document.getElementById('deleteNewsBtn').addEventListener('click', deleteQuickNews);
-    document.getElementById('addCardBtn').addEventListener('click', addNewCard); // Nuevo Listener REQ #3
+    document.getElementById('addCardBtn').addEventListener('click', addNewCard);
     DOM.pubCommentBtn.addEventListener('click', publishComment);
 
-    // DELEGACIÓN DE EVENTOS EN CONTENEDOR (REQ #4 Optimización)
-    DOM.contenedor.addEventListener('click', (e) => {
-        const card = e.target.closest('.card');
-        if (!card) return;
-
-        // REQ #2: Click en Botón Eliminar
-        if (e.target.classList.contains('delete-card-btn')) {
-            e.stopPropagation(); // Evitar que abra el panel de tiempo
-            markCardForDeletion(card.dataset.id, card);
-            return;
+    // DELEGACIÓN DE EVENTOS (El "Cerebro" que maneja clicks dinámicos)
+    document.body.addEventListener('click', (e) => {
+        const target = e.target;
+        
+        // 1. Manejo de Tarjetas (Borrar y Panel Tiempo)
+        if (target.closest('.card')) {
+            const card = target.closest('.card');
+            if (target.classList.contains('delete-card-btn')) {
+                e.stopPropagation();
+                markCardForDeletion(card.dataset.id, card);
+                return;
+            }
+            // Panel tiempo solo en modo lectura y si no es link
+            if (!admin && !target.closest('a')) {
+                document.querySelectorAll('.card.show-time-panel').forEach(c => {
+                    if (c !== card) c.classList.remove('show-time-panel');
+                });
+                card.classList.toggle('show-time-panel');
+                if (card.classList.contains('show-time-panel')) setTimeout(() => card.classList.remove('show-time-panel'), 3000);
+            }
         }
 
-        // Click en Tarjeta (Panel Tiempo - Solo en modo lectura)
-        if (!admin && !e.target.closest('a')) { // Ignorar clicks en enlaces
-            document.querySelectorAll('.card.show-time-panel').forEach(c => {
-                if (c !== card) c.classList.remove('show-time-panel');
-            });
-            card.classList.toggle('show-time-panel');
-            if (card.classList.contains('show-time-panel')) {
-                setTimeout(() => card.classList.remove('show-time-panel'), 3000);
-            }
+        // 2. Manejo de Comentarios (Delegado)
+        // A. Toggle Responder
+        if (target.dataset.action === 'toggle-reply') {
+            const form = document.getElementById(`reply-form-${target.dataset.id}`);
+            // Cierra otros abiertos
+            document.querySelectorAll('.reply-form').forEach(f => { if(f !== form) f.style.display = 'none'; });
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // B. Publicar Respuesta
+        if (target.dataset.action === 'pub-reply') {
+            publishReply(target.dataset.id, target);
+        }
+
+        // C. Like
+        if (target.closest('.like-button')) {
+            const btn = target.closest('.like-button');
+            toggleLike(btn.dataset.id, btn);
         }
     });
 });
