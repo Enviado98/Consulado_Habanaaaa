@@ -145,6 +145,683 @@ async function fetchElToqueRates() {
     }
 }
 // ----------------------------------------------------
+// FUNCIONES DE UI Y LOGIN
+// ----------------------------------------------------
+
+function updateAdminUI(isAdmin) {
+    admin = isAdmin;
+    if (isAdmin) {
+        DOMElements.body.classList.add('admin-mode');
+        DOMElements.adminControlsPanel.style.display = "flex";
+        DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
+        DOMElements.statusMessage.style.color = "#0d9488"; 
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
+        enableEditing(); 
+    } else {
+        DOMElements.body.classList.remove('admin-mode');
+        DOMElements.adminControlsPanel.style.display = "none";
+        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
+        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
+        disableEditing(); 
+    }
+    
+    // Actualizar panel de estado (aquí se aplicarán los inputs grises definidos en renderStatusPanel)
+    if (isAdmin) {
+        DOMElements.statusPanel.classList.add('admin-mode');
+        renderStatusPanel(currentStatus, true); 
+    } else {
+        DOMElements.statusPanel.classList.remove('admin-mode');
+        renderStatusPanel(currentStatus, false); 
+    }
+}
+
+function toggleAdminMode() {
+    if (!admin) {
+        updateAdminUI(true);
+        alert("¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
+    } else {
+        if (!confirm("✅️ ¿Terminar la edición?")) {
+            return;
+        }
+        updateAdminUI(false);
+        loadData(); // Recargar datos para descartar cambios
+        loadStatusData(); // Recargar datos de estado
+    }
+}
+
+function enableEditing() {
+    toggleEditing(true);
+}
+
+function disableEditing() {
+    toggleEditing(false);
+}
+
+// ----------------------------------------------------
+// CREACIÓN DE CARD
+// ----------------------------------------------------
+
+function createCardHTML(item, index) {
+    let cardClass = '';
+    let labelHTML = '';
+    let panelStyle = ''; 
+    let labelText = 'Sin fecha'; 
+    let timeText = 'Sin editar';
+
+    if (item.last_edited_timestamp) {
+        const { text, diff } = timeAgo(item.last_edited_timestamp);
+        timeText = text;
+        
+        if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
+            cardClass = 'card-recent';
+            labelHTML = '<div class="card-label" style="background-color: var(--acento-rojo); color: white; display: block;">!EDITADO RECIENTEMENTE¡</div>';
+            panelStyle = `background: var(--tiempo-panel-rojo); color: var(--acento-rojo);`; 
+            labelText = ''; 
+        } else if (diff >= OLD_THRESHOLD_MS) {
+            cardClass = 'card-old';
+            labelHTML = '<div class="card-label" style="background-color: var(--acento-cian); color: var(--color-texto-principal); display: block;">Editado hace tiempo</div>';
+            panelStyle = `background: var(--tiempo-panel-cian); color: var(--acento-cian);`;
+            labelText = '';
+        } else {
+            panelStyle = `background: white; color: var(--color-texto-principal);`;
+            labelText = 'Actualizado';
+        }
+    }
+    
+    return `
+    <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
+        ${labelHTML}
+        
+        <span class="emoji">${item.emoji}</span>
+        <h3>${item.titulo}</h3>
+        <div class="card-content">
+            <p>${item.contenido}</p>
+        </div>
+        <div class="card-time-panel" data-id="${item.id}" style="${panelStyle}">
+            <strong>${labelText}</strong> (${timeText})
+        </div>
+    </div>
+    `;
+}
+
+function toggleEditing(enable) {
+    const cards = document.querySelectorAll(".card");
+    cards.forEach(card => {
+        const index = card.getAttribute('data-index');
+        const item = currentData[index];
+        const contentDiv = card.querySelector('.card-content');
+        
+        const emojiSpan = card.querySelector('.emoji');
+        const titleH3 = card.querySelector('h3');
+        const contentP = contentDiv.querySelector('p');
+        
+        let editableEmoji = card.querySelector('.editable-emoji');
+        let editableTitle = card.querySelector('.editable-title');
+        let editableContent = card.querySelector('.editable-content');
+
+        if (enable) {
+            card.removeEventListener('click', toggleTimePanel); 
+            card.classList.remove('card-recent', 'card-old');
+            card.style.background = 'white'; 
+            card.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; 
+            card.style.border = '1px solid #4f46e5'; 
+            card.querySelector('.card-time-panel').style.display = 'none';
+            const label = card.querySelector('.card-label');
+            if (label) label.style.display = 'none';
+
+            if (emojiSpan && titleH3 && contentP) {
+                emojiSpan.remove();
+                editableEmoji = document.createElement('input');
+                editableEmoji.className = 'editable-emoji';
+                editableEmoji.value = item.emoji;
+                editableEmoji.defaultValue = item.emoji;
+                editableEmoji.maxLength = 2;
+                editableEmoji.title = "Emoji";
+                card.insertBefore(editableEmoji, card.firstChild);
+                
+                titleH3.remove();
+                editableTitle = document.createElement('input');
+                editableTitle.className = 'editable-title';
+                editableTitle.value = item.titulo;
+                editableTitle.defaultValue = item.titulo;
+                editableTitle.title = "Título";
+                card.insertBefore(editableTitle, editableEmoji.nextSibling);
+
+                contentP.remove();
+                editableContent = document.createElement('textarea');
+                editableContent.className = 'editable-content';
+                editableContent.value = item.contenido;
+                editableContent.defaultValue = item.contenido;
+                editableContent.title = "Contenido";
+                contentDiv.appendChild(editableContent);
+            }
+        } else {
+            if (editableEmoji && editableTitle && editableContent) {
+                editableEmoji.remove();
+                const newEmojiSpan = document.createElement('span');
+                newEmojiSpan.className = 'emoji';
+                newEmojiSpan.textContent = editableEmoji.value;
+                card.insertBefore(newEmojiSpan, card.firstChild);
+                
+                editableTitle.remove();
+                const newTitleH3 = document.createElement('h3');
+                newTitleH3.textContent = editableTitle.value;
+                card.insertBefore(newTitleH3, newEmojiSpan.nextSibling);
+
+                editableContent.remove();
+                const newP = document.createElement('p');
+                newP.textContent = editableContent.value;
+                contentDiv.appendChild(newP);
+                
+                card.style.background = '';
+                card.style.boxShadow = '';
+                card.style.border = '';
+                card.querySelector('.card-time-panel').style.display = 'block';
+                const label = card.querySelector('.card-label');
+                if (label) label.style.display = 'block';
+            }
+        }
+    });
+}
+
+function toggleTimePanel(event) {
+    if (admin) return;
+    
+    const clickedCard = event.currentTarget;
+    const cardId = clickedCard.getAttribute('data-id'); 
+    
+    const allCards = document.querySelectorAll('.card');
+    allCards.forEach(card => {
+        const id = card.getAttribute('data-id');
+        if (id !== cardId) {
+            card.classList.remove('show-time-panel');
+        }
+        if (timePanelTimeouts.has(id)) {
+            clearTimeout(timePanelTimeouts.get(id));
+            timePanelTimeouts.delete(id);
+        }
+    });
+
+    const isShowing = clickedCard.classList.toggle('show-time-panel');
+
+    if (isShowing) {
+        const timeout = setTimeout(() => {
+            clickedCard.classList.remove('show-time-panel');
+            timePanelTimeouts.delete(cardId); 
+        }, TIME_PANEL_AUTOHIDE_MS);
+        
+        timePanelTimeouts.set(cardId, timeout); 
+    }
+}
+
+// ----------------------------------------------------
+// LÓGICA DE NOTICIAS 
+// ----------------------------------------------------
+
+function linkify(text) {
+    const urlPattern = /(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    return text.replace(urlPattern, (url) => {
+        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
+        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
+    });
+}
+
+async function loadNews() {
+    const { data: newsData, error } = await supabase
+        .from('noticias')
+        .select('id, text, timestamp')
+        .order('timestamp', { ascending: false });
+
+    if (error) {
+        console.error("Error al cargar noticias de Supabase:", error);
+        return;
+    }
+
+    const twentyFourHoursAgoTimestamp = Date.now() - RECENT_THRESHOLD_MS;
+    const validNews = [];
+    const deletePromises = [];
+
+    newsData.forEach(n => {
+        if (new Date(n.timestamp).getTime() < twentyFourHoursAgoTimestamp) {
+            deletePromises.push(supabase.from('noticias').delete().eq('id', n.id));
+        } else {
+            validNews.push(n);
+        }
+    });
+    if (deletePromises.length > 0) {
+        Promise.all(deletePromises).catch(err => console.error("Error al limpiar noticias antiguas:", err));
+    }
+
+    currentNews = validNews;
+    
+    if (validNews.length > 0) {
+        const newsHtml = validNews.map(n => {
+            const { text: timeInfo } = timeAgo(n.timestamp);
+            return `<span class="news-item">${linkify(n.text)} <small>(${timeInfo})</small></span>`;
+        }).join('<span class="news-item"> | </span>');
+        
+        const contentToMeasure = `${newsHtml}<span class="news-item"> | </span>`;
+        const repeatedContent = `${contentToMeasure}${newsHtml}`; 
+        
+        DOMElements.newsTicker.style.display = 'flex'; 
+        DOMElements.fixedLabel.textContent = 'NOTICIAS'; 
+        
+        DOMElements.newsTickerContent.style.animation = 'none'; 
+        DOMElements.newsTickerContent.style.transform = 'none';
+        DOMElements.newsTickerContent.innerHTML = repeatedContent;
+        DOMElements.newsTickerContent.offsetHeight; 
+
+        window.requestAnimationFrame(() => {
+            const totalContentWidth = DOMElements.newsTickerContent.scrollWidth; 
+            const uniqueContentWidth = totalContentWidth / 2;
+            if (uniqueContentWidth <= 0) return;
+
+            const durationSeconds = uniqueContentWidth / NEWS_SCROLL_SPEED_PX_PER_SEC;
+            DOMElements.dynamicTickerStyles.innerHTML = ''; 
+            const keyframesRule = `@keyframes ticker-move-dynamic { 
+                0% { transform: translateX(0); }
+                100% { transform: translateX(-${uniqueContentWidth}px); } 
+            }`;
+            DOMElements.dynamicTickerStyles.innerHTML = keyframesRule;
+
+            DOMElements.newsTickerContent.style.animationDuration = `${durationSeconds}s`;
+            DOMElements.newsTickerContent.style.animationName = 'ticker-move-dynamic';
+            DOMElements.newsTickerContent.style.animationPlayState = 'running';
+            DOMElements.newsTickerContent.style.animationIterationCount = 'infinite';
+            DOMElements.newsTickerContent.style.animationTimingFunction = 'linear';
+        });
+    } else {
+        const avisoText = 'Sin Noticias en estos momentos.... ||  🛡 Activa el modo edición para publicar una Noticia aquí';
+        const repeatedAviso = `<span class="news-item">${avisoText}</span><span class="news-item"> | </span><span class="news-item">${avisoText}</span>`;
+        DOMElements.newsTicker.style.display = 'flex'; 
+        DOMElements.fixedLabel.textContent = 'AVISO'; 
+        DOMElements.newsTickerContent.style.animation = 'none'; 
+        DOMElements.newsTickerContent.style.transform = 'none';
+        DOMElements.newsTickerContent.innerHTML = repeatedAviso;
+        DOMElements.newsTickerContent.style.animationDuration = `15s`; 
+        DOMElements.newsTickerContent.style.animationName = 'ticker-move-static';
+        DOMElements.newsTickerContent.style.animationPlayState = 'running';
+        DOMElements.newsTickerContent.style.animationIterationCount = 'infinite';
+        DOMElements.newsTickerContent.style.animationTimingFunction = 'linear';
+    }
+}
+
+async function addQuickNews() {
+    if (!admin) { alert("Acceso denegado."); return; }
+    const newsText = window.prompt("✍️ Escribe tu noticia aqui para agregarla al rodillo...");
+    if (newsText === null || newsText.trim() === "") return;
+    
+    const confirmSave = confirm(`¿Confirmas que deseas publicar: \n\n"${newsText.trim()}"\n\n(Se borrará automáticamente en 24 horas)`);
+
+    if (confirmSave) {
+        try {
+            const { error } = await supabase.from('noticias').insert([{ text: newsText.trim() }]);
+            if (error) throw error;
+            alert(`✅ Noticia publicada.`);
+            loadNews(); 
+        } catch (error) {
+            console.error("Error al guardar la noticia:", error);
+            alert("❌ Error al guardar la noticia. Revisa RLS.");
+        }
+    }
+}
+
+async function deleteNews() {
+    if (!admin) { alert("Acceso denegado."); return; }
+    if (currentNews.length === 0) {
+        alert("No hay noticias activas para eliminar.");
+        return;
+    }
+
+    const newsList = currentNews.map((n, index) => `${index + 1}. ${n.text}`).join('\n');
+    const choice = window.prompt(`Selecciona el número de la noticia que deseas eliminar:\n\n${newsList}`);
+    const indexToDelete = parseInt(choice) - 1;
+
+    if (isNaN(indexToDelete) || indexToDelete < 0 || indexToDelete >= currentNews.length) {
+        if (choice !== null) alert("Selección inválida.");
+        return;
+    }
+
+    const newsItem = currentNews[indexToDelete];
+    const confirmDelete = confirm(`¿Estás seguro de que quieres eliminar esta noticia?\n\n"${newsItem.text}"`);
+
+    if (confirmDelete) {
+        try {
+            const { error } = await supabase.from('noticias').delete().eq('id', newsItem.id); 
+            if (error) throw error;
+            alert(`✅ Noticia eliminada.`);
+            loadNews();
+        } catch (error) {
+            console.error("Error al eliminar la noticia:", error);
+            alert("❌ Error al eliminar la noticia. Revisa RLS.");
+        }
+    }
+}
+
+// ----------------------------------------------------
+// LÓGICA DE COMENTARIOS, HILOS Y LIKES 
+// ----------------------------------------------------
+
+function generateColorByName(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = hash % 360;
+    return `hsl(${h}, 70%, 50%)`; 
+}
+
+function formatCommentDate(timestamp) {
+    const date = new Date(timestamp); 
+    const options = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+    return new Intl.DateTimeFormat('es-ES', options).format(date) + ' h';
+}
+
+function createCommentHTML(comment, isLiked) {
+    const color = generateColorByName(comment.name.toLowerCase());
+    const likeClass = isLiked ? 'liked' : '';
+    const itemClass = comment.parent_id ? 'comment-item reply-style' : 'comment-item'; 
+    
+    return `
+        <div class="${itemClass}" data-comment-id="${comment.id}" style="--comment-color: ${color};">
+            <strong class="comment-name">${comment.name} dijo:</strong>
+            <div class="comment-content">${comment.text}</div>
+            
+            <div class="comment-actions">
+                <button class="like-button ${likeClass}" data-id="${comment.id}">
+                    <span class="heart">♥</span>
+                </button>
+                <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
+                ${!comment.parent_id ? 
+                    `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : 
+                    ''}
+                <span class="comment-date">Publicado: ${formatCommentDate(comment.timestamp)}</span>
+            </div>
+            
+            ${!comment.parent_id ? `
+                <div class="reply-form" data-reply-to="${comment.id}">
+                    <input type="text" class="reply-name" placeholder="Tu Nombre" required maxlength="30">
+                    <textarea class="reply-text" placeholder="Tu Respuesta (máx. 250)" required maxlength="250"></textarea>
+                    <button class="publish-reply-btn" data-parent-id="${comment.id}">Publicar Respuesta</button>
+                </div>
+                <div class="replies-container" data-parent-of="${comment.id}"></div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function drawReplies(container, replies, userLikesMap) {
+    container.innerHTML = ''; 
+    replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
+
+    replies.forEach((reply) => {
+        const isLiked = userLikesMap.get(reply.id) || false;
+        const replyWrapper = document.createElement('div');
+        replyWrapper.className = 'reply-item';
+        replyWrapper.innerHTML = createCommentHTML(reply, isLiked);
+        container.appendChild(replyWrapper);
+    });
+    
+    if (replies.length > 1) {
+        const remainingCount = replies.length - 1;
+        const toggle = document.createElement('span');
+        toggle.className = 'reply-toggle';
+        toggle.textContent = `Ver las ${remainingCount} respuestas más...`;
+        toggle.addEventListener('click', (e) => {
+            const parentContainer = e.target.closest('.replies-container');
+            parentContainer.classList.add('expanded');
+            e.target.style.display = 'none'; 
+        });
+        container.appendChild(toggle);
+    }
+}
+
+async function loadComments() {
+    const [commentsResponse, likesResponse] = await Promise.all([
+        supabase.from('comentarios')
+            .select('id, name, text, timestamp, parent_id, likes_count')
+            .order('timestamp', { ascending: false }),
+        supabase.from('likes')
+            .select('comment_id')
+            .eq('user_web_id', userWebId)
+    ]);
+    
+    if (commentsResponse.error) {
+        DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--acento-rojo); margin: 15px;">❌ Error de conexión al cargar comentarios. (Ver consola)</p>`;
+        console.error("Error al cargar comentarios:", commentsResponse.error);
+        return;
+    }
+    
+    const allComments = commentsResponse.data;
+    const userLikesMap = new Map();
+    if (likesResponse.data) {
+        likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
+    }
+    
+    const principalComments = allComments.filter(c => c.parent_id === null);
+    const repliesMap = allComments.reduce((map, comment) => {
+        if (comment.parent_id !== null) {
+            if (!map.has(comment.parent_id)) {
+                map.set(comment.parent_id, []);
+            }
+            map.get(comment.parent_id).push(comment);
+        }
+        return map;
+    }, new Map());
+    
+    if (principalComments.length === 0) {
+        DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Aún no hay comentarios activos. ¡Sé el primero!</p>`;
+        return; 
+    }
+    
+    DOMElements.commentsContainer.innerHTML = principalComments.map(comment => {
+        const isLiked = userLikesMap.get(comment.id) || false;
+        return createCommentHTML(comment, isLiked);
+    }).join('');
+
+    principalComments.forEach(comment => {
+        const replies = repliesMap.get(comment.id);
+        if (replies) {
+            const repliesContainer = document.querySelector(`.replies-container[data-parent-of="${comment.id}"]`);
+            if (repliesContainer) {
+                drawReplies(repliesContainer, replies, userLikesMap);
+            }
+        }
+    });
+
+    document.querySelectorAll('.reply-form-toggle').forEach(btn => {
+        btn.addEventListener('click', toggleReplyForm);
+    });
+    document.querySelectorAll('.publish-reply-btn').forEach(btn => {
+        btn.addEventListener('click', handlePublishReply);
+    });
+    document.querySelectorAll('.like-button').forEach(btn => {
+        btn.removeEventListener('click', handleLikeToggle);
+        btn.addEventListener('click', handleLikeToggle);
+    });
+}
+
+function toggleReplyForm(event) {
+    const commentId = event.target.getAttribute('data-id');
+    const form = document.querySelector(`.reply-form[data-reply-to="${commentId}"]`);
+    if (form) {
+        document.querySelectorAll('.reply-form').forEach(f => {
+            if (f !== form) f.style.display = 'none';
+        });
+        form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        if (form.style.display === 'block') {
+            form.querySelector('.reply-name').focus();
+        }
+    }
+}
+
+async function publishComment() {
+    const name = DOMElements.commenterName.value.trim();
+    const text = DOMElements.commentText.value.trim();
+    if (name.length < 2 || text.length < 5) {
+        alert("Por favor, ingresa un nombre válido (mín. 2) y un comentario (mín. 5).");
+        return;
+    }
+    DOMElements.publishCommentBtn.disabled = true;
+    DOMElements.publishCommentBtn.textContent = "Publicando...";
+
+    try {
+        const { error } = await supabase.from('comentarios').insert([{ name: name, text: text, parent_id: null, likes_count: 0 }]);
+        if (error) throw error;
+
+        DOMElements.commenterName.value = '';
+        DOMElements.commentText.value = '';
+        await loadComments(); 
+        const commentsWrap = document.querySelector('.comments-display-wrap');
+        if (commentsWrap) commentsWrap.scrollTop = 0;
+        alert("✅ Comentario publicado. Estará activo por 3 días.");
+    } catch (error) {
+        console.error("Error al publicar el comentario:", error);
+        alert("❌ Error al publicar en Supabase. Revisa RLS de INSERT.");
+    } finally {
+        DOMElements.publishCommentBtn.disabled = false;
+        DOMElements.publishCommentBtn.textContent = "Publicar Comentario";
+    }
+}
+
+async function handlePublishReply(event) {
+    const parentId = event.target.getAttribute('data-parent-id');
+    const form = event.target.closest('.reply-form');
+    const nameInput = form.querySelector('.reply-name');
+    const textInput = form.querySelector('.reply-text');
+    const name = nameInput.value.trim();
+    const text = textInput.value.trim();
+
+    if (name.length < 2 || text.length < 5) {
+        alert("Por favor, ingresa un nombre válido (mín. 2) y una respuesta (mín. 5).");
+        return;
+    }
+    event.target.disabled = true;
+    event.target.textContent = "Enviando...";
+
+    try {
+        const { error } = await supabase.from('comentarios').insert([{ name: name, text: text, parent_id: parentId, likes_count: 0 }]);
+        if (error) throw error;
+
+        nameInput.value = '';
+        textInput.value = '';
+        form.style.display = 'none';
+        await loadComments(); 
+        alert("✅ Respuesta publicada.");
+    } catch (error) {
+        console.error("Error al publicar la respuesta:", error);
+        alert("❌ Error al publicar la respuesta. Revisa RLS de INSERT.");
+    } finally {
+        event.target.disabled = false;
+        event.target.textContent = "Publicar Respuesta";
+    }
+}
+
+async function handleLikeToggle(event) {
+    const button = event.currentTarget;
+    const commentId = button.getAttribute('data-id');
+    const isLiked = button.classList.contains('liked');
+    const counterElement = document.querySelector(`.like-count[data-counter-id="${commentId}"]`);
+    
+    button.disabled = true;
+    let currentCount = parseInt(counterElement.textContent);
+
+    try {
+        if (isLiked) {
+            const { error: deleteError } = await supabase
+                .from('likes')
+                .delete()
+                .eq('comment_id', commentId)
+                .eq('user_web_id', userWebId);
+            if (deleteError) throw deleteError;
+
+            const newCount = Math.max(0, currentCount - 1); 
+            const { error: updateError } = await supabase.rpc('decrement_likes', { row_id: commentId }); 
+            if (updateError) throw updateError;
+            
+            button.classList.remove('liked');
+            counterElement.textContent = newCount;
+        } else {
+            const { error: insertError } = await supabase
+                .from('likes')
+                .insert([{ comment_id: commentId, user_web_id: userWebId }]);
+
+            if (insertError) {
+                if (insertError.code !== '23505') throw insertError; 
+                alert("Ya habías dado like a este comentario. El voto no se duplicó.");
+                return; 
+            }
+
+            const newCount = currentCount + 1;
+            const { error: updateError } = await supabase.rpc('increment_likes', { row_id: commentId }); 
+            if (updateError) throw updateError;
+
+            button.classList.add('liked');
+            counterElement.textContent = newCount;
+        }
+    } catch (error) {
+        console.error("Error en la operación de like/unlike:", error);
+        alert("❌ Error al procesar el voto. (Ver consola)");
+    } finally {
+        button.disabled = false;
+    }
+}
+
+// ----------------------------------------------------
+// --- FUNCIONES PARA CONTADOR DE VISTAS ---
+// ----------------------------------------------------
+
+const UNIQUE_VISIT_DURATION = 24 * 60 * 60 * 1000; 
+const VISIT_KEY = 'lastPageView';
+
+async function registerPageView() {
+    const lastVisitTimestamp = localStorage.getItem(VISIT_KEY);
+    const now = Date.now();
+    if (lastVisitTimestamp && (now - parseInt(lastVisitTimestamp)) < UNIQUE_VISIT_DURATION) {
+        return; 
+    }
+    try {
+        const { error } = await supabase.from('page_views').insert({}).select(); 
+        if (error) {
+            console.error("Error al registrar la vista (Supabase):", error.message);
+        } else {
+            localStorage.setItem(VISIT_KEY, now.toString());
+        }
+    } catch (e) {
+        console.error("Excepción al registrar la vista:", e);
+    }
+}
+
+async function getAndDisplayViewCount() {
+    const viewCounterElement = document.getElementById('viewCounter');
+    if (!viewCounterElement) return;
+
+    try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 1);
+        const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+
+        const { count, error } = await supabase
+            .from('page_views')
+            .select('*', { count: 'exact', head: true }) 
+            .gt('created_at', sevenDaysAgoISO); 
+
+        if (error) {
+            console.error("Error al obtener el conteo de vistas:", error.message);
+            viewCounterElement.textContent = '( 👁 - Error )';
+            return;
+        }
+        const formattedCount = count ? count.toLocaleString('es-ES') : '0';
+        viewCounterElement.textContent = `👀 - ${formattedCount} vistas en (24h)`;
+    } catch (e) {
+        console.error("Excepción al obtener/mostrar el conteo:", e);
+        viewCounterElement.textContent = '( 👁 - Error )';
+    }
+}
+// ----------------------------------------------------
 // FUNCIONES DE CARGA Y RENDERIZADO DEL PANEL DE ESTADO (MODIFICADO)
 // ----------------------------------------------------
 
