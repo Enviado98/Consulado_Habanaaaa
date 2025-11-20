@@ -1,44 +1,33 @@
-// script.js - FUSIÓN: LÓGICA ORIGINAL + GESTIÓN DE TARJETAS (ADD/DELETE/RESIZE)
+// script.js - VERSIÓN FINAL (CON AJUSTE VISUAL EN MODO ADMIN)
 // ----------------------------------------------------
-
-// 1. CONFIGURACIÓN
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
 
-// API ELTOQUE (Original con caché)
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variables de Estado
+// ----------------------------------------------------
+// ⚡ CONFIGURACIÓN Y ESTADO
+// ----------------------------------------------------
+const CACHE_DURATION = 600000; // 10 minutos
+const RECENT_THRESHOLD = 86400000; // 24 horas
+const OLD_THRESHOLD = 604800000; // 7 días
+const SCROLL_SPEED = 50; 
+
 let admin = false;
 let currentData = [];
 let currentNews = [];
-let currentStatus = {
-    deficit_mw: 'Cargando...',
-    dollar_cup: '...',
-    euro_cup: '...',
-    deficit_edited_at: null,
-    divisa_edited_at: null
-};
+let currentStatus = { deficit_mw: 'Cargando...', dollar_cup: '...', euro_cup: '...', deficit_edited_at: null, divisa_edited_at: null };
 
-// Constantes de Tiempo
-const ONE_HOUR = 3600000;
-const RECENT_THRESHOLD_MS = 24 * ONE_HOUR;
-const OLD_THRESHOLD_MS = 7 * 24 * ONE_HOUR;
-const NEWS_SCROLL_SPEED = 50;
-
-// Identificador de Usuario (para likes)
 const userWebId = localStorage.getItem('userWebId') || (() => {
     const id = crypto.randomUUID();
     localStorage.setItem('userWebId', id);
     return id;
 })();
 
-// Referencias DOM
 const DOM = {
     body: document.body,
     container: document.getElementById('contenedor'),
@@ -51,20 +40,12 @@ const DOM = {
     statusData: document.getElementById('statusDataContainer'),
     lastEdited: document.getElementById('lastEditedTime'),
     dynamicStyles: document.getElementById('dynamicTickerStyles'),
-    inputs: { 
-        name: document.getElementById('commenterName'), 
-        text: document.getElementById('commentText') 
-    },
-    btns: { 
-        save: document.getElementById('saveBtn'), 
-        addNews: document.getElementById('addNewsBtn'), 
-        delNews: document.getElementById('deleteNewsBtn'), 
-        publish: document.getElementById('publishCommentBtn') 
-    }
+    inputs: { name: document.getElementById('commenterName'), text: document.getElementById('commentText') },
+    btns: { save: document.getElementById('saveBtn'), addNews: document.getElementById('addNewsBtn'), delNews: document.getElementById('deleteNewsBtn'), publish: document.getElementById('publishCommentBtn') }
 };
 
 // ----------------------------------------------------
-// 2. UTILIDADES (TimeAgo, Linkify, Resize)
+// 🛠️ UTILIDADES
 // ----------------------------------------------------
 function timeAgo(timestamp) {
     if (!timestamp) return { text: 'Sin fecha', diff: -1 };
@@ -87,19 +68,18 @@ function timeAgo(timestamp) {
 const linkify = (text) => text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, 
     (url) => `<a href="${url.startsWith('http') ? url : 'http://' + url}" target="_blank">${url}</a>`);
 
-// FUNCIÓN NUEVA: AUTO-RESIZE PARA TEXTAREAS
+// FUNCIÓN DE AUTO-RESIZE (SOLUCIÓN #3)
 window.autoResize = function(textarea) {
     if (!textarea) return;
-    textarea.style.height = 'auto';
-    textarea.style.height = (textarea.scrollHeight + 5) + 'px';
+    textarea.style.height = 'auto'; 
+    textarea.style.height = (textarea.scrollHeight + 5) + 'px'; 
 }
 
 // ----------------------------------------------------
-// 3. API EL TOQUE (Lógica Original Preservada)
+// 💰 API EL TOQUE (CACHÉ)
 // ----------------------------------------------------
 async function fetchElToqueRates() {
     const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
-    // Si el dato es fresco (menos de 10 min), no llamar a la API
     if (Date.now() - lastUpdate < CACHE_DURATION) return;
 
     try {
@@ -110,37 +90,21 @@ async function fetchElToqueRates() {
         if (!res.ok) throw new Error(res.status);
         
         const data = await res.json();
-        let usd = '---', eur = '---';
+        const usd = parseFloat(data.tasas?.USD || data.USD || 0).toFixed(0);
+        const eur = parseFloat(data.tasas?.EUR || data.tasas?.ECU || data.EUR || 0).toFixed(0);
 
-        if (data.tasas) {
-            usd = data.tasas.USD; eur = data.tasas.EUR || data.tasas.ECU;
-        } else if (data.USD) {
-            usd = data.USD; eur = data.EUR;
-        }
-
-        // Guardar en BD solo si tenemos datos válidos
-        if (parseFloat(usd) > 0) {
-            const now = new Date().toISOString();
-            usd = parseFloat(usd).toFixed(0);
-            eur = parseFloat(eur).toFixed(0);
-            
-            currentStatus = { ...currentStatus, dollar_cup: usd, euro_cup: eur, divisa_edited_at: now };
-            renderStatusPanel(); // Actualizar UI inmediatamente
-
-            await supabase.from('status_data').update({ 
-                dollar_cup: usd, 
-                euro_cup: eur, 
-                divisa_edited_at: now 
-            }).eq('id', 1);
+        if (usd > 0 && eur > 0) {
+            const newTime = new Date().toISOString();
+            currentStatus = { ...currentStatus, dollar_cup: usd, euro_cup: eur, divisa_edited_at: newTime };
+            renderStatusPanel();
+            await supabase.from('status_data').update({ dollar_cup: usd, euro_cup: eur, divisa_edited_at: newTime }).eq('id', 1);
         }
     } catch (e) { console.error("⚠️ API Error:", e.message); }
 }
 
 // ----------------------------------------------------
-// 4. RENDERIZADO DE UI
+// 🖥️ RENDERIZADO (PANEL ESTADO AJUSTADO PARA CSS)
 // ----------------------------------------------------
-
-// Panel de Estado (Original Logic)
 function renderStatusPanel() {
     const { text: timeText } = timeAgo(currentStatus.deficit_edited_at);
     let timeHtml = `Última edición:<br> ${timeText}`;
@@ -151,14 +115,25 @@ function renderStatusPanel() {
     DOM.lastEdited.innerHTML = timeHtml;
 
     if (admin) {
-        // Modo Admin: Inputs editables
+        // ✅ MODO EDICIÓN LIMPIO:
+        // Ya no usamos estilos inline (style="..."). El CSS se encarga de todo.
+        // El atributo 'disabled' en Dollar y Euro activa el estilo gris/cursiva.
         DOM.statusData.innerHTML = `
-            <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}"></div>
-            <div class="status-item"><span class="label">Dollar (Auto):</span><input type="text" value="${currentStatus.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-            <div class="status-item"><span class="label">Euro (Auto):</span><input type="text" value="${currentStatus.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+            <div class="status-item">
+                <span class="label">Deficit (MW):</span>
+                <input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}" placeholder="---">
+            </div>
+            <div class="status-item">
+                <span class="label">USD (Auto):</span>
+                <input type="text" value="${currentStatus.dollar_cup}" disabled>
+            </div>
+            <div class="status-item">
+                <span class="label">EUR (Auto):</span>
+                <input type="text" value="${currentStatus.euro_cup}" disabled>
+            </div>
         `;
     } else {
-        // Modo Público: Texto estático
+        // MODO PÚBLICO
         DOM.statusData.innerHTML = `
             <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${currentStatus.deficit_mw || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${currentStatus.dollar_cup || '---'}</span></div>
@@ -166,79 +141,45 @@ function renderStatusPanel() {
     }
 }
 
-// Tarjetas (Nueva Lógica Híbrida)
-function renderCards() {
-    DOM.container.innerHTML = currentData.map((item, index) => {
-        // Si estamos en admin, renderizar campos editables
-        if (admin) return createAdminCardHTML(item, index);
-        // Si no, renderizar tarjeta normal (ocultando la tarjeta temporal)
-        if (item.id.toString().startsWith('temp_')) return ''; 
-        return createPublicCardHTML(item, index);
-    }).join('');
-    
-    // Inicializar los auto-resize si estamos en admin
-    if (admin) {
-        document.querySelectorAll('.editable-content').forEach(tx => window.autoResize(tx));
-    }
-}
-
-function createPublicCardHTML(item, index) {
+function createCardHTML(item, index) {
+    const isTemp = item.id.toString().startsWith('temp_');
+    let label = '', panelStyle = 'background: white; color: var(--color-texto-principal);', dateText = 'Actualizado';
     let cardClass = '';
-    let panelStyle = 'background: white; color: var(--color-texto-principal);';
-    let dateText = 'Actualizado';
-    let label = '';
 
-    if (item.last_edited_timestamp) {
+    if (isTemp) {
+        panelStyle = 'background: #f0f0f0; color: #888;';
+        dateText = 'Nueva Tarjeta';
+    } else if (item.last_edited_timestamp) {
         const { text, diff } = timeAgo(item.last_edited_timestamp);
         dateText = text;
-        if (diff < RECENT_THRESHOLD_MS) {
+        if (diff < RECENT_THRESHOLD) {
             cardClass = 'card-recent';
             label = '<div class="card-label" style="background-color: var(--acento-rojo); color: white; display: block;">!EDITADO RECIENTEMENTE¡</div>';
             panelStyle = `background: var(--tiempo-panel-rojo); color: var(--acento-rojo);`;
-        } else if (diff >= OLD_THRESHOLD_MS) {
+        } else if (diff >= OLD_THRESHOLD) {
             cardClass = 'card-old';
+            label = '<div class="card-label" style="background-color: var(--acento-cian); color: var(--color-texto-principal); display: block;">Editado hace tiempo</div>';
             panelStyle = `background: var(--tiempo-panel-cian); color: var(--acento-cian);`;
         }
     }
 
     return `
-    <div class="card ${cardClass}" data-id="${item.id}" onclick="toggleTimePanel(this)">
+    <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}" onclick="toggleTimePanel(this)">
         ${label}
         <span class="emoji">${item.emoji}</span>
         <h3>${item.titulo}</h3>
         <div class="card-content"><p>${item.contenido}</p></div>
         <div class="card-time-panel" style="${panelStyle}">
-            <strong>Actualizado</strong> (${dateText})
+            <strong>${isTemp ? 'Espacio Disponible' : 'Actualizado'}</strong> (${dateText})
         </div>
-    </div>`;
-}
-
-function createAdminCardHTML(item, index) {
-    const isTemp = item.id.toString().startsWith('temp_');
-    // Botón de eliminar (solo si no es la tarjeta temporal "Espacio Disponible")
-    const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="deleteCard('${item.id}')">×</button>`;
-    
-    // Estilo diferente para la tarjeta temporal
-    const cardStyle = isTemp ? 'opacity: 0.7; border: 2px dashed #ccc;' : '';
-
-    return `
-    <div class="card" style="${cardStyle}" data-index="${index}" data-id="${item.id}">
-        ${deleteBtn}
-        <input class="editable-emoji" value="${item.emoji}" maxlength="2" placeholder="Emoji">
-        <input class="editable-title" value="${item.titulo}" placeholder="Título">
-        <div class="card-content">
-            <textarea class="editable-content" oninput="autoResize(this)" placeholder="Escribe aquí el contenido...">${item.contenido}</textarea>
-        </div>
-        ${isTemp ? '<small style="display:block; margin-top:5px; color:#666; font-size:0.7rem">(Escribe para crear nueva tarjeta)</small>' : ''}
     </div>`;
 }
 
 // ----------------------------------------------------
-// 5. LÓGICA DE ADMINISTRACIÓN Y GUARDADO
+// ⚙️ LÓGICA ADMIN
 // ----------------------------------------------------
 function toggleAdminMode() {
     if (!admin) {
-        // Entrar a Admin
         admin = true;
         DOM.body.classList.add('admin-mode');
         DOM.adminPanel.style.display = "flex";
@@ -246,9 +187,10 @@ function toggleAdminMode() {
         DOM.statusMsg.style.color = "#0d9488";
         DOM.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN";
         DOM.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)";
+        renderStatusPanel();
+        renderAdminCards(true);
     } else {
-        // Salir de Admin
-        if (!confirm("✅️ ¿Guardar o descartar? (Los cambios no guardados se perderán)")) return;
+        if (!confirm("✅️ ¿Guardar o salir? Los cambios no guardados se perderán.")) return;
         admin = false;
         DOM.body.classList.remove('admin-mode');
         DOM.adminPanel.style.display = "none";
@@ -256,93 +198,108 @@ function toggleAdminMode() {
         DOM.statusMsg.style.color = "var(--color-texto-principal)";
         DOM.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN";
         DOM.toggleAdminBtn.style.backgroundColor = "#4f46e5";
-        loadData(); // Recargar datos originales para descartar cambios no guardados
+        loadData(); 
+        loadStatusData();
     }
-    renderStatusPanel();
-    renderCards();
 }
 
-// FUNCIÓN GLOBAL ELIMINAR
+function renderAdminCards(enable) {
+    document.querySelectorAll(".card").forEach(card => {
+        const index = card.dataset.index;
+        const item = currentData[index];
+        const isTemp = item.id.toString().startsWith('temp_');
+        
+        if (enable) {
+            card.removeAttribute('onclick');
+            
+            // Botón Eliminar interno
+            const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="event.stopPropagation(); deleteCard('${item.id}')">×</button>`;
+
+            card.innerHTML = `
+                ${deleteBtn}
+                <input class="editable-emoji" value="${item.emoji}" maxlength="2">
+                <input class="editable-title" value="${item.titulo}" placeholder="Título">
+                <div class="card-content">
+                    <textarea class="editable-content" oninput="autoResize(this)" placeholder="Contenido...">${item.contenido}</textarea>
+                </div>`;
+            
+            // Auto-resize inicial
+            const textarea = card.querySelector('.editable-content');
+            if(textarea) autoResize(textarea);
+        }
+    });
+}
+
+// FUNCIÓN ELIMINAR (Global)
 window.deleteCard = async (id) => {
     if (!confirm("⛔ ¿Estás seguro de ELIMINAR esta tarjeta permanentemente?")) return;
+
     try {
         const { error } = await supabase.from('items').delete().eq('id', id);
         if (error) throw error;
-        // Eliminar visualmente del array local y re-renderizar
-        currentData = currentData.filter(item => item.id != id);
-        renderCards();
-    } catch (e) { alert("Error al eliminar: " + e.message); }
+        alert("🗑️ Tarjeta eliminada.");
+        location.reload(); 
+    } catch (e) {
+        alert("Error al eliminar: " + e.message);
+    }
 };
 
-// FUNCIÓN GUARDAR CAMBIOS (Insertar nuevos o actualizar)
 async function saveChanges() {
     if (!admin) return;
-    
+    const editDeficit = document.getElementById('editDeficit');
+    const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
     const updates = [];
     const now = new Date().toISOString();
 
-    // 1. Guardar Estado (Deficit)
-    const newDeficit = document.getElementById('editDeficit').value;
-    if (newDeficit !== currentStatus.deficit_mw) {
-        updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: now }).eq('id', 1));
-    }
-
-    // 2. Guardar Tarjetas
-    const cards = document.querySelectorAll(".card");
-    cards.forEach(card => {
-        const id = card.dataset.id;
-        const idx = card.dataset.index;
-        
-        // Obtener valores nuevos
+    document.querySelectorAll(".card").forEach(card => {
         const emoji = card.querySelector('.editable-emoji').value.trim();
         const titulo = card.querySelector('.editable-title').value.trim();
         const contenido = card.querySelector('.editable-content').value.trim();
+        const id = card.dataset.id;
+        const idx = card.dataset.index;
         const original = currentData[idx];
 
-        // Detectar si hubo cambios
-        if (emoji !== original.emoji || titulo !== original.titulo || contenido !== original.contenido) {
-            
+        if (contenido !== original.contenido || titulo !== original.titulo || emoji !== original.emoji) {
             if (id.startsWith('temp_')) {
-                // ES NUEVA: Insertar (solo si se escribió algo)
                 if (titulo !== 'Espacio Disponible' || contenido !== '...') {
                     updates.push(supabase.from('items').insert([{ emoji, titulo, contenido, last_edited_timestamp: now }]));
                 }
             } else {
-                // ES EXISTENTE: Actualizar
                 updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: now }).eq('id', id));
             }
         }
     });
 
+    if (newDeficit !== currentStatus.deficit_mw) {
+        updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: now }).eq('id', 1));
+    }
+
     if (updates.length > 0) {
         await Promise.all(updates);
-        alert("✅ Todos los cambios han sido guardados.");
-        location.reload(); // Recargar para limpiar IDs temporales y actualizar todo
+        alert("✅ Cambios guardados exitosamente.");
+        location.reload();
     } else {
-        alert("No se detectaron cambios para guardar.");
+        alert("No se detectaron cambios.");
     }
 }
 
 // ----------------------------------------------------
-// 6. NOTICIAS Y COMENTARIOS
+// 📰 NOTICIAS Y COMENTARIOS
 // ----------------------------------------------------
 async function loadNews() {
     const { data, error } = await supabase.from('noticias').select('*').order('timestamp', { ascending: false });
     if (error) return;
 
-    const cutoff = Date.now() - RECENT_THRESHOLD_MS;
+    const cutoff = Date.now() - RECENT_THRESHOLD;
     const validNews = data.filter(n => new Date(n.timestamp).getTime() > cutoff);
-    
-    // Limpieza de noticias viejas
     data.forEach(n => { if (new Date(n.timestamp).getTime() <= cutoff) supabase.from('noticias').delete().eq('id', n.id); });
 
     currentNews = validNews;
     if (validNews.length > 0) {
         const html = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
-        DOM.newsContent.innerHTML = `${html}<span class="news-item"> | </span>${html}`; // Duplicado para scroll infinito
-        
+        DOM.newsContent.innerHTML = `${html}<span class="news-item"> | </span>${html}`;
         const width = DOM.newsContent.scrollWidth / 2;
-        const duration = width / NEWS_SCROLL_SPEED;
+        const duration = width / SCROLL_SPEED;
         DOM.dynamicStyles.innerHTML = `@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
         DOM.newsContent.style.animation = `ticker ${duration}s linear infinite`;
     } else {
@@ -355,7 +312,7 @@ async function loadNews() {
 async function newsActions(action) {
     if (!admin) return;
     if (action === 'add') {
-        const text = prompt("✍️ Nueva Noticia:");
+        const text = prompt("✍️ Noticia:");
         if (text) { await supabase.from('noticias').insert([{ text: text.trim() }]); loadNews(); }
     } else {
         if (currentNews.length === 0) return alert("No hay noticias.");
@@ -365,7 +322,7 @@ async function newsActions(action) {
 }
 
 // ----------------------------------------------------
-// 7. COMENTARIOS (Simplificado para el ejemplo)
+// 💬 COMENTARIOS
 // ----------------------------------------------------
 function generateColor(str) {
     let hash = 0;
@@ -376,7 +333,7 @@ function generateColor(str) {
 function createCommentDOM(c, isLiked) {
     const isReply = !!c.parent_id;
     return `
-        <div class="comment-item ${isReply ? 'reply-style' : ''}" style="--comment-color: ${generateColor(c.name.toLowerCase())};">
+        <div class="comment-item ${isReply ? 'reply-style' : ''}" data-id="${c.id}" style="--comment-color: ${generateColor(c.name.toLowerCase())};">
             <strong class="comment-name">${c.name} dijo:</strong>
             <div class="comment-content">${c.text}</div>
             <div class="comment-actions">
@@ -411,7 +368,6 @@ async function loadComments() {
 
     DOM.commentsContainer.innerHTML = parents.map(c => createCommentDOM(c, likesMap.has(c.id))).join('');
 
-    // Render Replies
     replies.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp)).forEach(r => {
         const container = document.getElementById(`replies-${r.parent_id}`);
         if (container) {
@@ -422,15 +378,14 @@ async function loadComments() {
         }
     });
     
-    // "Ver más" toggles
     parents.forEach(p => {
         const container = document.getElementById(`replies-${p.id}`);
-        if (container && container.children.length > 0) { // Mostrar toggle si hay al menos 1 respuesta
-            // Lógica de expandir simplificada: mostrar por defecto o botón
-            if(container.children.length > 1) {
-                 // Ocultar todos menos el primero y poner boton (Lógica visual extra opcional)
-            }
-            container.classList.add('expanded'); // Por defecto expandido en esta versión simple
+        if (container && container.children.length > 1) {
+            const btn = document.createElement('span');
+            btn.className = 'reply-toggle';
+            btn.textContent = `Ver ${container.children.length - 1} respuestas más...`;
+            btn.onclick = (e) => { container.classList.add('expanded'); e.target.style.display='none'; };
+            container.appendChild(btn);
         }
     });
 }
@@ -485,33 +440,22 @@ window.toggleReplyForm = (id) => {
 };
 
 window.toggleTimePanel = (card) => {
-    if (admin) return; // No abrir panel en modo edición
+    if (admin) return;
     const id = card.dataset.id;
-    // Cerrar otros
-    document.querySelectorAll('.card').forEach(c => {
-        if (c.dataset.id !== id) c.classList.remove('show-time-panel');
-    });
-    // Toggle actual
-    if (card.classList.toggle('show-time-panel')) {
-        setTimeout(() => card.classList.remove('show-time-panel'), 2000);
-    }
+    document.querySelectorAll('.card').forEach(c => c.dataset.id !== id && c.classList.remove('show-time-panel'));
+    if (card.classList.toggle('show-time-panel')) setTimeout(() => card.classList.remove('show-time-panel'), 2000);
 };
 
 // ----------------------------------------------------
-// 8. CARGA INICIAL DE DATOS
+// 🚀 CARGA DE DATOS
 // ----------------------------------------------------
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
     if (data) {
         currentData = data;
-        // AÑADIR TARJETA TEMPORAL PARA CREACIÓN (Solo visible en Admin)
-        currentData.push({ 
-            id: 'temp_new', 
-            emoji: '➕', 
-            titulo: 'Espacio Disponible', 
-            contenido: '...' 
-        });
-        renderCards();
+        // SOLUCIÓN #2: SOLO 1 TARJETA TEMPORAL AL FINAL
+        currentData.push({ id: 'temp_new', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
+        DOM.container.innerHTML = currentData.map((item, i) => createCardHTML(item, i)).join('');
     }
 }
 
@@ -519,7 +463,7 @@ async function loadStatusData() {
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
     if (data) currentStatus = { ...currentStatus, ...data };
     renderStatusPanel();
-    fetchElToqueRates(); // Iniciar chequeo de caché/API
+    fetchElToqueRates();
 }
 
 async function registerView() {
@@ -534,17 +478,12 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.btns.addNews.onclick = () => newsActions('add');
     DOM.btns.delNews.onclick = () => newsActions('del');
     DOM.btns.publish.onclick = () => window.postComment();
-    
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
     
     registerView();
     Promise.all([loadData(), loadNews(), loadComments(), loadStatusData()]);
     
-    // Contador visual (opcional)
     supabase.from('page_views').select('*', { count: 'exact', head: true })
         .gt('created_at', new Date(Date.now() - 86400000).toISOString())
-        .then(({ count }) => {
-            const el = document.getElementById('viewCounter');
-            if(el) el.textContent = `👀 ${count || 0} (24h)`;
-        });
+        .then(({ count }) => document.getElementById('viewCounter').textContent = `👀 ${count || 0} (24h)`);
 });
