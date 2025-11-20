@@ -1,4 +1,4 @@
-// script.js - VERSIÓN FINAL CORREGIDA (AUTO-RESIZE Y SOLO 1 TARJETA NUEVA)
+// script.js - VERSIÓN FINAL (CON DELETE BUTTON Y FIX ALINEACIÓN)
 // ----------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
@@ -68,10 +68,10 @@ function timeAgo(timestamp) {
 const linkify = (text) => text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, 
     (url) => `<a href="${url.startsWith('http') ? url : 'http://' + url}" target="_blank">${url}</a>`);
 
-// Función para auto-ajustar altura de textareas (Solución #3)
+// Función para auto-ajustar altura de textareas
 window.autoResize = function(textarea) {
-    textarea.style.height = 'auto'; // Resetear altura para recalcular
-    textarea.style.height = (textarea.scrollHeight + 5) + 'px'; // Ajustar al contenido real
+    textarea.style.height = 'auto'; 
+    textarea.style.height = (textarea.scrollHeight + 5) + 'px'; 
 }
 
 // ----------------------------------------------------
@@ -110,6 +110,7 @@ function renderStatusPanel() {
     if (!admin && currentStatus.divisa_edited_at) timeHtml += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${timeAgo(currentStatus.divisa_edited_at).text}</small>`;
     DOM.lastEdited.innerHTML = timeHtml;
 
+    // En modo ADMIN, usamos inputs pero controlados por CSS para que no rompan el layout
     if (admin) {
         DOM.statusData.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}"></div>
@@ -124,9 +125,7 @@ function renderStatusPanel() {
 }
 
 function createCardHTML(item, index) {
-    // Detectar si es tarjeta temporal (Placeholder)
     const isTemp = item.id.toString().startsWith('temp_');
-    
     let label = '', panelStyle = 'background: white; color: var(--color-texto-principal);', dateText = 'Actualizado';
     let cardClass = '';
 
@@ -191,23 +190,41 @@ function renderAdminCards(enable) {
     document.querySelectorAll(".card").forEach(card => {
         const index = card.dataset.index;
         const item = currentData[index];
+        const isTemp = item.id.toString().startsWith('temp_');
         
         if (enable) {
             card.removeAttribute('onclick');
-            // Solución #3: oninput="autoResize(this)" para ajuste dinámico
+            // Botón Eliminar (Cruz Roja)
+            const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="deleteCard('${item.id}')">×</button>`;
+
             card.innerHTML = `
+                ${deleteBtn}
                 <input class="editable-emoji" value="${item.emoji}" maxlength="2">
                 <input class="editable-title" value="${item.titulo}" placeholder="Título">
                 <div class="card-content">
                     <textarea class="editable-content" oninput="autoResize(this)" placeholder="Contenido...">${item.contenido}</textarea>
                 </div>`;
             
-            // Disparar el resize inicial para que se ajuste al contenido existente
             const textarea = card.querySelector('.editable-content');
             if(textarea) autoResize(textarea);
         }
     });
 }
+
+// NUEVA FUNCIÓN: ELIMINAR TARJETA
+window.deleteCard = async (id) => {
+    if (!confirm("⛔ ¿Estás seguro de ELIMINAR esta tarjeta permanentemente?")) return;
+
+    try {
+        const { error } = await supabase.from('items').delete().eq('id', id);
+        if (error) throw error;
+        alert("🗑️ Tarjeta eliminada.");
+        // Recargamos para refrescar la vista
+        location.reload();
+    } catch (e) {
+        alert("Error al eliminar: " + e.message);
+    }
+};
 
 async function saveChanges() {
     if (!admin) return;
@@ -224,17 +241,12 @@ async function saveChanges() {
         const idx = card.dataset.index;
         const original = currentData[idx];
 
-        // Detectar cambios
         if (contenido !== original.contenido || titulo !== original.titulo || emoji !== original.emoji) {
-            
-            // Si es tarjeta temporal, INSERTAR
             if (id.startsWith('temp_')) {
-                // Solo insertar si no está vacía por defecto
                 if (titulo !== 'Espacio Disponible' || contenido !== '...') {
                     updates.push(supabase.from('items').insert([{ emoji, titulo, contenido, last_edited_timestamp: now }]));
                 }
             } else {
-                // Si es real, ACTUALIZAR
                 updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: now }).eq('id', id));
             }
         }
@@ -247,7 +259,7 @@ async function saveChanges() {
     if (updates.length > 0) {
         await Promise.all(updates);
         alert("✅ Cambios guardados exitosamente.");
-        location.reload(); // Recargar para obtener los nuevos IDs reales
+        location.reload();
     } else {
         alert("No se detectaron cambios.");
     }
@@ -417,16 +429,13 @@ window.toggleTimePanel = (card) => {
 };
 
 // ----------------------------------------------------
-// 🚀 CARGA DE DATOS (MODIFICADA)
+// 🚀 CARGA DE DATOS
 // ----------------------------------------------------
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
     if (data) {
         currentData = data;
-        
-        // Solución #2: AGREGAR SOLO 1 TARJETA VACÍA (PLACEHOLDER) AL FINAL
         currentData.push({ id: 'temp_new', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
-
         DOM.container.innerHTML = currentData.map((item, i) => createCardHTML(item, i)).join('');
     }
 }
@@ -453,8 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
     
     registerView();
-    
-    // Carga paralela
     Promise.all([loadData(), loadNews(), loadComments(), loadStatusData()]);
     
     supabase.from('page_views').select('*', { count: 'exact', head: true })
