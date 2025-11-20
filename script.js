@@ -1,4 +1,4 @@
-// script.js - VERSIÓN FINAL OPTIMIZADA (CON TARJETAS VACÍAS)
+// script.js - VERSIÓN FINAL CORREGIDA (AUTO-RESIZE Y SOLO 1 TARJETA NUEVA)
 // ----------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
@@ -67,6 +67,12 @@ function timeAgo(timestamp) {
 
 const linkify = (text) => text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, 
     (url) => `<a href="${url.startsWith('http') ? url : 'http://' + url}" target="_blank">${url}</a>`);
+
+// Función para auto-ajustar altura de textareas (Solución #3)
+window.autoResize = function(textarea) {
+    textarea.style.height = 'auto'; // Resetear altura para recalcular
+    textarea.style.height = (textarea.scrollHeight + 5) + 'px'; // Ajustar al contenido real
+}
 
 // ----------------------------------------------------
 // 💰 API EL TOQUE (CACHÉ)
@@ -188,10 +194,17 @@ function renderAdminCards(enable) {
         
         if (enable) {
             card.removeAttribute('onclick');
+            // Solución #3: oninput="autoResize(this)" para ajuste dinámico
             card.innerHTML = `
                 <input class="editable-emoji" value="${item.emoji}" maxlength="2">
                 <input class="editable-title" value="${item.titulo}" placeholder="Título">
-                <div class="card-content"><textarea class="editable-content" placeholder="Contenido...">${item.contenido}</textarea></div>`;
+                <div class="card-content">
+                    <textarea class="editable-content" oninput="autoResize(this)" placeholder="Contenido...">${item.contenido}</textarea>
+                </div>`;
+            
+            // Disparar el resize inicial para que se ajuste al contenido existente
+            const textarea = card.querySelector('.editable-content');
+            if(textarea) autoResize(textarea);
         }
     });
 }
@@ -214,13 +227,14 @@ async function saveChanges() {
         // Detectar cambios
         if (contenido !== original.contenido || titulo !== original.titulo || emoji !== original.emoji) {
             
-            // LÓGICA NUEVA: Si es tarjeta temporal, INSERTAR. Si es real, ACTUALIZAR.
+            // Si es tarjeta temporal, INSERTAR
             if (id.startsWith('temp_')) {
                 // Solo insertar si no está vacía por defecto
                 if (titulo !== 'Espacio Disponible' || contenido !== '...') {
                     updates.push(supabase.from('items').insert([{ emoji, titulo, contenido, last_edited_timestamp: now }]));
                 }
             } else {
+                // Si es real, ACTUALIZAR
                 updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: now }).eq('id', id));
             }
         }
@@ -410,9 +424,8 @@ async function loadData() {
     if (data) {
         currentData = data;
         
-        // AGREGAR 2 TARJETAS VACÍAS (PLACEHOLDERS) AL FINAL
-        currentData.push({ id: 'temp_1', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
-        currentData.push({ id: 'temp_2', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
+        // Solución #2: AGREGAR SOLO 1 TARJETA VACÍA (PLACEHOLDER) AL FINAL
+        currentData.push({ id: 'temp_new', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
 
         DOM.container.innerHTML = currentData.map((item, i) => createCardHTML(item, i)).join('');
     }
