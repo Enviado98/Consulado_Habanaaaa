@@ -1,384 +1,156 @@
-/* news_styles.css - VERSIÓN ULTRA COMPACTA, MINIMALISTA Y FUNCIONAL */
+/* news_styles.css - FINAL OPTIMIZADO */
 
-/* ----------------------------------------------------------------
-   AJUSTES GENERALES Y FUENTES
-   ---------------------------------------------------------------- */
-
-body {
-    background-color: var(--fondo-principal, #e6ffe6); 
-    color: var(--color-texto-principal, #2b2d42);
-    font-family: 'Nunito', sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
+/* Contenedor Principal */
 .news-container {
-    max-width: 800px; /* Ancho compacto */
-    margin: 0 auto;
-    padding: 10px; 
+    max-width: 800px; margin: 0 auto; padding: 10px;
 }
 
 /* ----------------------------------------------------------------
-   HEADER Y NAVEGACIÓN
+   HEADER & NAVEGACIÓN
    ---------------------------------------------------------------- */
-
 .news-header {
-    background-color: var(--color-principal, #4f46e5);
-    color: white;
-    padding: 20px 15px 10px; 
-    text-align: center;
-    position: relative;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #4f46e5; color: white;
+    padding: 20px 15px 10px; text-align: center;
+    position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
-.news-header h1 {
-    font-size: 1.8em; 
-    margin-bottom: 2px;
-}
-
-.news-header p {
-    font-size: 0.95em; 
-    margin-top: 0;
-}
+.news-header h1 { font-size: 1.6em; margin: 5px 0; line-height: 1.2; }
+.news-header p { font-size: 0.9em; margin: 0; opacity: 0.9; }
 
 .back-btn {
-    position: absolute;
-    top: 10px;
-    left: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.8em;
-    transition: background 0.3s ease;
+    position: absolute; top: 15px; left: 15px;
+    background: rgba(255,255,255,0.2); color: white;
+    padding: 6px 14px; border-radius: 20px; text-decoration: none;
+    font-size: 0.85em; font-weight: 700; transition: background 0.3s;
 }
-
-.back-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
+.back-btn:hover { background: rgba(255,255,255,0.4); }
 
 /* ----------------------------------------------------------------
-   CONTROLES DE ADMINISTRACIÓN (BOTONES ESTILO MINIMALISTA PULIDO)
+   PANEL DE ADMINISTRACIÓN
    ---------------------------------------------------------------- */
+.news-admin-controls { margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+#newsAdminPanel { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
 
-.news-admin-controls {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-#newsAdminPanel {
-    display: flex; 
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 10px;
+.primary-admin-btn, .admin-btn {
+    border: none; padding: 8px 16px; border-radius: 20px;
+    font-weight: 700; cursor: pointer; font-size: 0.8em;
+    text-transform: uppercase; transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Estilo Base para todos los botones de administración/formulario */
-.primary-admin-btn, 
-.admin-btn, 
-.form-actions button {
-    font-size: 0.85em;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 20px; /* Bordes redondeados consistentes */
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+/* Botones Específicos */
+.primary-admin-btn { background-color: var(--acento-verde, #0d9488); color: white; }
+.primary-admin-btn:hover { background-color: #0b7060; transform: translateY(-1px); }
 
-/* 🟢 Estilo para el botón principal (ACTIVAR EDICIÓN / Salir en el panel) */
-.primary-admin-btn {
-    background-color: var(--acento-verde, #0d9488);
-    color: white;
-    text-transform: uppercase;
-}
-.primary-admin-btn:hover {
-    background-color: #0b7060;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-}
+#exitAdminBtn { background-color: var(--acento-rojo, #ef233c); }
+#exitAdminBtn:hover { background-color: #d11e32; }
 
-/* 🔵 Estilo para botones secundarios (Añadir/Cancelar/Publicar) */
-.admin-btn {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    text-transform: uppercase;
-}
-.admin-btn:hover {
-    background-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-1px);
-}
-
-/* 🔴 Estilo Específico para el botón de "Salir del Modo Edición" (en el panel) */
-#exitAdminBtn {
-    background-color: var(--acento-rojo, #ef233c);
-    color: white;
-    font-weight: 700;
-}
-#exitAdminBtn:hover {
-    background-color: #d11e32;
-}
+.admin-btn { background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.5); }
+.admin-btn:hover { background: rgba(255,255,255,0.4); transform: translateY(-1px); }
 
 /* ----------------------------------------------------------------
-   FORMULARIO DE CREACIÓN DE PANCARTA
+   FORMULARIO DE CREACIÓN
    ---------------------------------------------------------------- */
-
 .banner-form-section {
-    max-width: 700px;
-    margin: 20px auto; 
-    padding: 15px; 
-    background-color: white;
-    border-radius: 8px; 
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); 
+    max-width: 600px; margin: 20px auto; padding: 20px;
+    background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease-out;
 }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-.banner-form-section h2 {
-    font-size: 1.2em; 
-    padding-bottom: 5px;
-    margin-bottom: 10px;
+.banner-form-section h2 { margin-top: 0; font-size: 1.2em; color: #333; }
+.banner-form-section input, .banner-form-section textarea {
+    width: 100%; padding: 10px; margin-bottom: 10px;
+    border: 1px solid #ddd; border-radius: 6px; font-family: inherit; box-sizing: border-box;
 }
-
-.banner-form-section input[type="text"],
-.banner-form-section textarea {
-    width: 100%;
-    padding: 8px; 
-    margin-bottom: 8px;
-    font-size: 0.9em; 
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-sizing: border-box;
-}
-
-.form-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-.form-actions .admin-btn {
-    background-color: #ccc; /* Gris para cancelar en el formulario */
-    color: var(--color-texto-principal);
-    border: none;
-}
-.form-actions .admin-btn:hover {
-    background-color: #bbb;
-}
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.form-actions .admin-btn { background: #ccc; color: #333; border: none; }
+.form-actions .admin-btn:hover { background: #bbb; }
 
 /* ----------------------------------------------------------------
-   ESTILOS DE PANCARTAS (NOTICIAS)
+   PANCARTAS DE NOTICIAS (BANNERS)
    ---------------------------------------------------------------- */
-
-.banners-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; 
-}
+.banners-list-container { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
 
 .news-banner {
-    padding: 15px 20px; 
-    color: white; /* Aseguramos texto blanco dentro del banner de color */
-    border-radius: 8px; 
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative;
-    overflow: hidden;
+    padding: 20px; color: white; border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15); position: relative;
+    transition: transform 0.2s;
 }
+.news-banner:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
 
-.news-banner:hover {
-    transform: translateY(-1px); 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-}
-
-.banner-title {
-    font-size: 1.3em; 
-    font-weight: 700;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
-    padding-bottom: 5px;
-    margin-bottom: 8px; 
-}
-
-.banner-date {
-    font-size: 0.85em; 
-    opacity: 0.8;
-    margin-top: -5px;
-    margin-bottom: 10px;
-}
-
-.banner-text {
-    font-size: 0.95em; 
-    line-height: 1.4;
-}
-.banner-text a {
-    color: #ffeb3b; /* Amarillo para enlaces */
-    text-decoration: underline;
-    font-weight: 600;
-}
-
+/* Botón Eliminar Noticia */
 .delete-banner-btn {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--acento-rojo);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    font-size: 1em;
-    line-height: 20px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    z-index: 10;
+    position: absolute; top: -10px; right: -10px;
+    background: var(--acento-rojo); color: white; border: 3px solid white;
+    border-radius: 50%; width: 32px; height: 32px; font-size: 18px; line-height: 1;
+    cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* ----------------------------------------------------------------
-   ESTILOS DE COMENTARIOS (MINIMALISTA Y FUNCIONAL)
-   ---------------------------------------------------------------- */
+.banner-title { font-size: 1.4em; margin: 0 0 8px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 8px; }
+.banner-date { font-size: 0.8em; opacity: 0.9; margin-bottom: 15px; font-style: italic; }
+.banner-text { line-height: 1.5; margin-bottom: 20px; word-wrap: break-word; }
+.banner-text a { color: #ffeb3b; font-weight: 700; text-decoration: underline; }
 
+/* ----------------------------------------------------------------
+   SECCIÓN DE COMENTARIOS (Dentro del Banner)
+   ---------------------------------------------------------------- */
 .banner-footer {
-    padding-top: 10px; 
-    margin-top: 10px;
-    background-color: rgba(255, 255, 255, 0.1); /* Fondo claro sutil para el footer */
-    padding: 10px;
-    border-radius: 6px;
+    background: rgba(0,0,0,0.15); padding: 15px;
+    border-radius: 8px; margin-top: 10px;
 }
 
-.comment-controls {
-    margin-bottom: 5px; 
-    font-size: 0.9em;
-    font-weight: 600;
+/* Botón "Ver más comentarios" */
+.comment-controls button {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    padding: 5px 12px; border-radius: 15px; cursor: pointer;
+    font-size: 0.85em; font-weight: 700; width: 100%; text-align: left;
 }
+.comment-controls button:hover { background: rgba(255,255,255,0.3); }
 
-/* Botones de Like y Ver Más */
-.like-btn, .view-comments-btn {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-    border: none;
-    border-radius: 15px;
-    padding: 3px 8px; 
-    font-size: 0.85em; 
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s;
-}
-.like-btn.liked {
-    background: var(--acento-rojo);
-}
-.like-btn:hover, .view-comments-btn:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
+/* Lista de comentarios (Oculta/Visible) */
+.comments-list { display: none; margin-top: 10px; padding-top: 5px; border-top: 1px dashed rgba(255,255,255,0.3); }
+.comments-list.expanded { display: block; animation: expandList 0.3s ease; }
+@keyframes expandList { from { opacity: 0; } to { opacity: 1; } }
 
-/* Contenedor de Comentarios Desplegable */
-.comments-list {
-    display: none; /* Oculto por defecto */
-    margin-top: 5px;
-    padding-top: 5px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.5);
-}
-.comments-list.expanded {
-    display: block;
-}
-
-/* Estilo del Ítem de Comentario */
 .comment-item {
-    padding: 6px 8px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-    font-size: 0.85em; 
-    background-color: rgba(255, 255, 255, 0.8); /* Fondo claro para el texto de comentario */
-    color: var(--color-texto-principal);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    border-left: 3px solid var(--acento-cian, #00bcd4);
+    background: rgba(255,255,255,0.95); color: #333;
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 0.9em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;
 }
-.comment-item strong {
-    font-weight: 700;
-    color: #333;
-}
+.comment-item strong { color: #00796b; } /* Verde oscuro para nombres */
+.comment-item small { display: block; font-size: 0.75em; color: #666; margin-bottom: 2px; }
 
-/* Ocultar el primer comentario en el modo expandido para evitar duplicación */
-.comments-list.expanded .comment-item:first-child {
-    display: none;
-}
-/* Estilo para el comentario visible (el primer comentario de la lista) */
-/* Lo mostramos siempre, y la lista desplegada oculta su duplicado. */
-.comment-item:last-of-type:not(.first-comment) {
-    margin-top: 5px;
-}
+.first-comment-wrap { margin-top: 10px; } /* Espacio para el primer comentario visible */
 
-
-.comment-form {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
+/* Botón Like */
+.like-btn {
+    background: none; border: none; cursor: pointer; font-size: 0.9em; padding: 2px 5px;
+    color: #555; font-weight: bold; border-radius: 4px; transition: 0.2s;
 }
+.like-btn:hover { background: #eee; }
+.like-btn.liked { color: var(--acento-rojo); }
 
-.comment-form input[type="text"],
-.comment-form textarea {
-    width: 100%;
-    padding: 5px 8px; 
-    font-size: 0.85em;
-    margin-bottom: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
+/* Formulario para Comentar */
+.comment-form { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+.comment-form input, .comment-form textarea {
+    border: none; padding: 10px; border-radius: 5px; font-family: inherit; font-size: 0.9em;
 }
+.comment-form textarea { height: 60px; resize: none; }
 
-.comment-form textarea {
-    min-height: 50px;
-    resize: vertical;
+.pub-btn {
+    background: var(--acento-verde); color: white; border: none;
+    padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer;
+    text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.5px;
 }
-
-.comment-form button {
-    padding: 6px 12px;
-    font-size: 0.9em;
-    background-color: var(--acento-verde);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    width: 100%;
-    font-weight: 700;
-    cursor: pointer;
-}
+.pub-btn:hover { background: #0b7060; }
 
 /* ----------------------------------------------------------------
-   RESPONSIVE (Ajustes para móvil)
+   RESPONSIVE
    ---------------------------------------------------------------- */
-
 @media (max-width: 600px) {
-    .news-header h1 {
-        font-size: 1.6em;
-    }
-    .news-banner {
-        padding: 15px;
-    }
-    .banner-title {
-        font-size: 1.2em;
-    }
-    .banner-text {
-        font-size: 0.9em;
-    }
-    .back-btn {
-        position: static;
-        display: block;
-        margin: 0 auto 10px;
-        font-size: 0.9em;
-    }
-    .news-header {
-        padding: 15px 10px;
-    }
-    
-    .comment-form button {
-        width: 100%;
-    }
-
-    .primary-admin-btn, .admin-btn {
-        width: 100%;
-        max-width: none;
-    }
-                                  }
+    .news-header h1 { font-size: 1.4em; }
+    .back-btn { position: relative; top: 0; left: 0; display: inline-block; margin-bottom: 10px; }
+    .news-banner { padding: 15px; }
+    .comment-form input, .comment-form textarea, .pub-btn { font-size: 16px; } /* Previene zoom iOS */
+}
