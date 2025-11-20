@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------
-   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORREGIDO FINAL)
+   ESTILOS OPTIMIZADOS - CONSULADO HABANA (CORREGIDO FINAL V2)
    ---------------------------------------------------------------- */
 :root {
   --color-texto-principal: #2b2d42;
@@ -7,8 +7,8 @@
   --acento-rojo: #ef233c;
   --acento-verde: #0d9488;
   --acento-cian: #00bcd4;
-  --fondo-principal: #e6ffe6; /* Verde claro */
-  --fondo-panel-status: #FFD700; /* Amarillo intenso */
+  --fondo-principal: #e6ffe6;
+  --fondo-panel-status: #FFD700;
   --borde-panel-status: #ff9800;
   --glass-bg: rgba(255, 255, 255, 0.4);
   --glass-border: rgba(255, 255, 255, 0.6);
@@ -63,7 +63,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   background-color: rgba(0, 0, 0, 0.4); white-space: nowrap; z-index: 10;
 }
 
-/* --- PANEL DE ESTADO (CORREGIDO PROBLEMA #1) --- */
+/* --- PANEL DE ESTADO --- */
 .status-panel-container {
   width: 95%; max-width: 800px; margin: 8px auto;
   background-color: var(--fondo-panel-status);
@@ -71,8 +71,8 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   border-radius: 10px; font-size: 0.85rem; color: var(--color-texto-principal);
   font-weight: 700; box-shadow: 0 2px 4px var(--sombra-suave);
   padding: 8px 10px;
-  transition: padding 0.3s;
 }
+
 .status-panel-header {
   display: flex; justify-content: space-between; align-items: center;
   padding-bottom: 3px; margin-bottom: 5px;
@@ -89,48 +89,44 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-panel-data {
   display: flex; justify-content: space-between; align-items: center;
   gap: 5px; font-size: 0.9rem; font-weight: 800; text-align: center;
-  overflow-x: auto;
+  overflow-x: auto; /* Permite scroll si es muy pequeño el móvil */
 }
 .status-item {
   display: flex; flex-direction: column; align-items: center;
-  padding: 3px 5px; border-radius: 6px; min-width: 95px; flex-shrink: 0;
+  padding: 3px 5px; border-radius: 6px; min-width: 90px; flex-shrink: 0;
+  position: relative;
 }
 .status-item .value { display: block; font-size: 1rem; font-weight: 900; margin-top: 2px; }
 .status-item.deficit .value { color: var(--acento-rojo); }
 .status-item.divisa .value { color: #008000; }
 .status-item .label { font-size: 0.7rem; font-weight: 600; color: #555; }
 
-/* --- MODO ADMIN (SOLUCIÓN #1 - Diseño Original) --- */
-/* Eliminamos los estilos que rompían la fila. Ahora los inputs se adaptan al contenedor */
-
-.status-panel-container.admin-mode {
-  /* Solo un borde para indicar modo edición, sin cambiar layout drástico */
-  border: 2px dashed var(--acento-rojo);
+/* --- CORRECCIÓN MODO ADMIN (PANEL ESTADO) --- */
+.status-panel-container.admin-mode .status-panel-data {
+    /* Forzamos que NO cambie la disposición flex */
+    display: flex; 
+    flex-direction: row !important;
+    justify-content: space-between;
 }
 
-.status-panel-container.admin-mode input {
-  background-color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(0,0,0,0.2);
-  border-radius: 4px;
-  padding: 2px;
-  font-size: 0.9rem;
-  font-weight: 800;
-  text-align: center;
-  color: #333;
-  width: 100%;
-  max-width: 100px; /* Evita que se hagan gigantes */
-  margin-top: 2px;
+.status-panel-container.admin-mode .status-item input {
+    width: 100%;
+    max-width: 80px; /* Ancho máximo contenido */
+    background: rgba(255,255,255,0.5);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 0.9rem;
+    padding: 2px;
+    margin-top: 2px;
+    color: inherit;
+    /* Truco para que parezca texto normal */
+    font-family: inherit;
 }
-
-.status-panel-container.admin-mode input:disabled {
-  background-color: transparent;
-  border: none;
-  color: #555;
-  opacity: 0.8;
-  cursor: default;
+.status-panel-container.admin-mode .status-item input:disabled {
+    background: transparent; border: none; color: #333; opacity: 1;
 }
-
-/* --------------------------------------- */
 
 /* --- TICKER NOTICIAS --- */
 .news-ticker-container {
@@ -182,13 +178,9 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 
 /* --- CARDS --- */
 .container {
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Ajustado para mejor distribución */
-  gap: 15px; 
-  width: 95%; 
-  max-width: 800px; 
-  padding: 15px;
-  align-items: stretch; /* Hace que todas las tarjetas de la fila tengan la misma altura */
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px; width: 95%; max-width: 800px; padding: 15px;
+  align-items: stretch;
 }
 .card {
   background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -196,12 +188,29 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   box-shadow: 0 6px 15px var(--sombra-suave);
   padding: 12px; padding-top: 15px; text-align: center;
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, background 0.3s;
-  min-height: 110px; 
-  height: 100%; /* Ocupa toda la altura disponible en el grid */
-  display: flex; 
-  flex-direction: column;
-  position: relative; cursor: pointer; overflow: hidden;
+  min-height: 110px; height: 100%;
+  display: flex; flex-direction: column;
+  position: relative; cursor: pointer; overflow: visible; /* Visible para que la cruz salga */
 }
+
+/* --- BOTÓN ELIMINAR TARJETA (CRUZ ROJA) --- */
+.delete-card-btn {
+  position: absolute; 
+  top: -10px; right: -10px;
+  background: var(--acento-rojo); color: white; 
+  border: 3px solid white;
+  border-radius: 50%; 
+  width: 28px; height: 28px; 
+  font-size: 16px; line-height: 1;
+  cursor: pointer; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+  transition: transform 0.2s;
+}
+.delete-card-btn:hover { transform: scale(1.1); background-color: #d00000; }
+
+/* --- ESTILOS TARJETAS --- */
 .card-recent:not(.admin-mode) {
   background: rgba(239, 35, 60, 0.1);
   box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
@@ -227,24 +236,13 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
 .card-content p { margin: 4px 0 0; font-size: 0.8rem; color: #333; white-space: pre-wrap; text-align: center; }
 
-/* --- SOLUCIÓN #3: EDIT FIELDS (TEXTAREA GRANDE) --- */
+/* --- EDIT FIELDS --- */
 .card .editable-content {
-  width: 100%; 
-  border: 1px solid #ccc; 
-  border-radius: 8px; 
-  padding: 8px;
-  font-size: 0.85rem; 
-  font-family: inherit;
-  margin-top: 5px; 
-  
-  /* Mejora Visual: Que se vea todo el texto */
-  min-height: 120px; /* Altura base más grande */
-  height: auto;      /* Permitir crecimiento (controlado por JS) */
-  resize: none;      /* Evitar el control manual feo */
-  overflow: hidden;  /* Ocultar scrollbars */
+  width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 8px;
+  font-size: 0.85rem; font-family: inherit; margin-top: 5px; 
+  min-height: 120px; height: auto; resize: none; overflow: hidden;
   background: rgba(255,255,255,0.8);
 }
-
 .card .editable-title, .card .editable-emoji {
   border: 1px solid #4f46e5; padding: 4px; border-radius: 4px;
   text-align: center; font-weight: 700; margin-bottom: 5px; font-family: inherit;
