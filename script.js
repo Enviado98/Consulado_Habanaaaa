@@ -1,4 +1,4 @@
-// script.js - VERSIÓN FINAL (AUTO-RESIZE, DELETE INTERNO, 1 TARJETA VACÍA)
+// script.js - VERSIÓN FINAL (PANEL ESTADO ORIGINAL RESTAURADO + FIXES TARJETAS)
 // ----------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
@@ -103,21 +103,26 @@ async function fetchElToqueRates() {
 }
 
 // ----------------------------------------------------
-// 🖥️ RENDERIZADO
+// 🖥️ RENDERIZADO (PANEL ESTADO RESTAURADO AL ORIGINAL)
 // ----------------------------------------------------
 function renderStatusPanel() {
     const { text: timeText } = timeAgo(currentStatus.deficit_edited_at);
     let timeHtml = `Última edición:<br> ${timeText}`;
-    if (!admin && currentStatus.divisa_edited_at) timeHtml += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${timeAgo(currentStatus.divisa_edited_at).text}</small>`;
+    
+    if (!admin && currentStatus.divisa_edited_at) {
+        timeHtml += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${timeAgo(currentStatus.divisa_edited_at).text}</small>`;
+    }
     DOM.lastEdited.innerHTML = timeHtml;
 
-    // MODO ADMIN: Inputs transparentes y pequeños para no romper layout
     if (admin) {
+        // ✅ RESTAURADO: Estilo original con fondo gris y texto gris para modo edición
         DOM.statusData.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}"></div>
-            <div class="status-item"><span class="label">Dollar:</span><input type="text" value="${currentStatus.dollar_cup}" disabled></div>
-            <div class="status-item"><span class="label">Euro:</span><input type="text" value="${currentStatus.euro_cup}" disabled></div>`;
+            <div class="status-item"><span class="label">Dollar (Auto):</span><input type="text" value="${currentStatus.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+            <div class="status-item"><span class="label">Euro (Auto):</span><input type="text" value="${currentStatus.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+        `;
     } else {
+        // MODO PÚBLICO
         DOM.statusData.innerHTML = `
             <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${currentStatus.deficit_mw || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${currentStatus.dollar_cup || '---'}</span></div>
@@ -196,8 +201,7 @@ function renderAdminCards(enable) {
         if (enable) {
             card.removeAttribute('onclick');
             
-            // Botón Eliminar con stopPropagation para no activar efectos raros
-            // Solo aparece si NO es la tarjeta temporal
+            // Botón Eliminar interno
             const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="event.stopPropagation(); deleteCard('${item.id}')">×</button>`;
 
             card.innerHTML = `
@@ -208,7 +212,7 @@ function renderAdminCards(enable) {
                     <textarea class="editable-content" oninput="autoResize(this)" placeholder="Contenido...">${item.contenido}</textarea>
                 </div>`;
             
-            // Auto-resize inicial para que se vea todo el texto al entrar en edición
+            // Auto-resize inicial
             const textarea = card.querySelector('.editable-content');
             if(textarea) autoResize(textarea);
         }
@@ -223,7 +227,7 @@ window.deleteCard = async (id) => {
         const { error } = await supabase.from('items').delete().eq('id', id);
         if (error) throw error;
         alert("🗑️ Tarjeta eliminada.");
-        location.reload(); // Recarga segura
+        location.reload(); 
     } catch (e) {
         alert("Error al eliminar: " + e.message);
     }
@@ -246,7 +250,6 @@ async function saveChanges() {
 
         if (contenido !== original.contenido || titulo !== original.titulo || emoji !== original.emoji) {
             if (id.startsWith('temp_')) {
-                // Solo insertar la temporal si se ha escrito algo real en ella
                 if (titulo !== 'Espacio Disponible' || contenido !== '...') {
                     updates.push(supabase.from('items').insert([{ emoji, titulo, contenido, last_edited_timestamp: now }]));
                 }
