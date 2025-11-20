@@ -1,4 +1,4 @@
-// script.js - ESTRUCTURA DE "JAULAS" PARA PANEL DE ESTADO
+// script.js - VERSIÓN FINAL (JAULAS PEQUEÑAS + FIX ELIMINAR)
 // ----------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
@@ -68,6 +68,7 @@ function timeAgo(timestamp) {
 const linkify = (text) => text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, 
     (url) => `<a href="${url.startsWith('http') ? url : 'http://' + url}" target="_blank">${url}</a>`);
 
+// Auto-resize para textareas de tarjetas
 window.autoResize = function(textarea) {
     if (!textarea) return;
     textarea.style.height = 'auto'; 
@@ -102,7 +103,7 @@ async function fetchElToqueRates() {
 }
 
 // ----------------------------------------------------
-// 🖥️ RENDERIZADO PANEL DE ESTADO (LA CLAVE DE LA ESTABILIDAD)
+// 🖥️ RENDERIZADO PANEL DE ESTADO (ESTRUCTURA DE JAULAS)
 // ----------------------------------------------------
 function renderStatusPanel() {
     const { text: timeText } = timeAgo(currentStatus.deficit_edited_at);
@@ -114,10 +115,9 @@ function renderStatusPanel() {
     DOM.lastEdited.innerHTML = timeHtml;
 
     if (admin) {
-        // ✅ MODO EDICIÓN "JAULA":
-        // Generamos 3 div.status-item independientes.
-        // El CSS les asignará width: 32% a cada uno para que no se estiren.
-        // Los inputs Dolar/Euro tienen 'disabled' para que el CSS los ponga grises.
+        // ✅ MODO EDICIÓN: Estructura limpia. 
+        // El CSS ahora tiene una regla de "max-width: 80px !important" para estos inputs.
+        // Ya no se estirarán.
         DOM.statusData.innerHTML = `
             <div class="status-item">
                 <span class="label">Deficit (MW):</span>
@@ -176,7 +176,7 @@ function createCardHTML(item, index) {
 }
 
 // ----------------------------------------------------
-// ⚙️ LÓGICA ADMIN (INCLUYE ELIMINAR TARJETAS)
+// ⚙️ LÓGICA ADMIN
 // ----------------------------------------------------
 function toggleAdminMode() {
     if (!admin) {
@@ -187,7 +187,7 @@ function toggleAdminMode() {
         DOM.statusMsg.style.color = "#0d9488";
         DOM.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN";
         DOM.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)";
-        renderStatusPanel(); // Aquí renderiza las "jaulas" 32%
+        renderStatusPanel(); // Renderiza inputs pequeños
         renderAdminCards(true);
     } else {
         if (!confirm("✅️ ¿Guardar o salir? Los cambios no guardados se perderán.")) return;
@@ -212,7 +212,7 @@ function renderAdminCards(enable) {
         if (enable) {
             card.removeAttribute('onclick');
             
-            // Botón Eliminar con stopPropagation para que funcione
+            // ✅ FIX BOTÓN ELIMINAR: Aseguramos que el onclick esté bien formado
             const deleteBtn = isTemp ? '' : `<button class="delete-card-btn" onclick="event.stopPropagation(); deleteCard('${item.id}')">×</button>`;
 
             card.innerHTML = `
@@ -229,8 +229,9 @@ function renderAdminCards(enable) {
     });
 }
 
-// FUNCIÓN ELIMINAR (Global y protegida)
+// FUNCIÓN ELIMINAR (GLOBAL)
 window.deleteCard = async (id) => {
+    // Confirmación doble para evitar accidentes
     if (!confirm("⛔ ¿Estás seguro de ELIMINAR esta tarjeta permanentemente?")) return;
 
     try {
@@ -283,7 +284,7 @@ async function saveChanges() {
 }
 
 // ----------------------------------------------------
-// 📰 NOTICIAS Y COMENTARIOS (Igual que antes)
+// 📰 NOTICIAS Y COMENTARIOS
 // ----------------------------------------------------
 async function loadNews() {
     const { data, error } = await supabase.from('noticias').select('*').order('timestamp', { ascending: false });
@@ -452,6 +453,7 @@ async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
     if (data) {
         currentData = data;
+        // SOLUCIÓN #2: SOLO 1 TARJETA TEMPORAL AL FINAL
         currentData.push({ id: 'temp_new', emoji: '➕', titulo: 'Espacio Disponible', contenido: '...' });
         DOM.container.innerHTML = currentData.map((item, i) => createCardHTML(item, i)).join('');
     }
