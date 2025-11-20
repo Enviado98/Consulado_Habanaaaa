@@ -64,7 +64,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .news-btn-v2:hover { background-color: #0c8276; box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4); transform: translateY(-2px); }
 .news-btn-v2:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); background-color: #0b7060; }
 
-/* --- PANEL DE ESTADO --- */
+/* --- PANEL DE ESTADO (ESTRUCTURA GENERAL) --- */
 .status-panel-container {
     width: 95%; max-width: 800px; margin: 8px auto;
     background-color: var(--fondo-panel-status);
@@ -87,6 +87,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     font-size: 0.55rem; font-weight: 700; flex-shrink: 0;
 }
 
+/* ESTILO NORMAL (VISUALIZACIÓN) */
 .status-panel-data {
     display: flex; justify-content: space-between; align-items: center;
     gap: 5px; font-size: 0.9rem; font-weight: 800; text-align: center;
@@ -103,51 +104,54 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-item.divisa .value { color: #008000; }
 .status-item .label { font-size: 0.7rem; font-weight: 600; color: #555; margin-bottom: 2px; }
 
-/* --- CORRECCIÓN MODO ADMIN (RESTAURANDO LÓGICA "JAULA") --- */
+/* ---------------------------------------------------------
+   🚨 CORRECCIÓN DEFINITIVA MODO ADMIN (CAJAS PEQUEÑAS) 🚨
+   --------------------------------------------------------- */
 .status-panel-container.admin-mode {
     border: 2px dashed var(--acento-rojo);
-    padding: 8px;
+    padding: 5px 8px; /* Padding reducido */
 }
 
-/* 1. El contenedor fuerza la fila horizontal */
+/* 1. El contenedor: FLEXIBLE pero SIN SCROLL */
 .status-panel-container.admin-mode .status-panel-data {
-    display: flex; 
-    flex-direction: row !important; /* Fila obligatoria */
-    flex-wrap: nowrap !important;   /* No permitir bajar de línea */
-    justify-content: space-between; /* Espacio entre jaulas */
-    gap: 2px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important; /* Espacio equitativo */
+    gap: 4px !important;
+    overflow: hidden !important; /* PROHIBIDO DESLIZAR */
 }
 
-/* 2. LA JAULA (Encapsulamiento): Cada item ocupa el 32% fijo */
+/* 2. Los Items: OCUPAN ESPACIO PERO SE ENCOGEN SI ES NECESARIO */
 .status-panel-container.admin-mode .status-item {
-    width: 32%;        /* <--- LA CLAVE: 32% * 3 = 96% (Cabe perfecto) */
-    flex: 0 0 auto;    /* No crecer, no encoger */
-    min-width: 0;      /* Permitir encogerse si es crítico */
-    
+    flex: 1 1 auto !important; /* Crecer y encoger */
+    min-width: 0 !important;   /* Permite que se hagan pequeños en pantallas diminutas */
+    width: auto !important;    /* Quita anchos fijos */
     background-color: rgba(255,255,255,0.6);
     border: 1px solid #ccc;
-    padding: 4px;
-    margin: 0;
-    display: flex;
-    flex-direction: column; /* Input debajo del label */
-    align-items: center;
+    padding: 4px 2px !important;
+    margin: 0 !important;
 }
 
-/* 3. EL INPUT: Llena su jaula al 100% */
+/* 3. EL INPUT: TAMAÑO LIMITADO EN PIXELES (LA SOLUCIÓN) */
 .status-panel-container.admin-mode input {
-    width: 100%;       /* <--- Llenar la jaula del 32% */
-    max-width: 100%;
+    width: 100% !important;
+    
+    /* ESTO ES LO QUE PIDES: CAJITA PEQUEÑA */
+    max-width: 80px !important; 
+    
+    display: block;
+    margin: 2px auto 0 auto !important; /* Centrado absoluto */
     border: 1px solid var(--acento-rojo); 
-    padding: 2px;
+    padding: 2px 0;
     border-radius: 4px; 
     font-size: 0.85rem; 
     font-weight: 700;
     text-align: center; 
-    margin-top: 2px;
     font-family: inherit;
 }
 
-/* Estilo para inputs deshabilitados (Automáticos) */
+/* Estilo gris y cursiva para automáticos */
 .status-panel-container.admin-mode input:disabled {
     background-color: #e9ecef; 
     color: #6c757d; 
@@ -156,6 +160,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     font-style: italic;
     opacity: 0.9;
 }
+
 
 /* --- TICKER NOTICIAS --- */
 .news-ticker-container {
@@ -218,21 +223,15 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
   min-height: 110px; height: 100%;
   display: flex; flex-direction: column;
   position: relative; cursor: pointer;
-  /* CRUCIAL: overflow hidden para esconder el panel deslizante */
   overflow: hidden; 
 }
 
-/* Botón Eliminar (Cruz) - ADENTRO de la tarjeta */
+/* Botón Eliminar */
 .delete-card-btn {
-  position: absolute; 
-  top: 5px; right: 5px; 
-  background: var(--acento-rojo); color: white; 
-  border: 2px solid white; border-radius: 50%; 
-  width: 24px; height: 24px; 
-  font-size: 14px; line-height: 1;
-  cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 50;
+  position: absolute; top: 5px; right: 5px; background: var(--acento-rojo); color: white; 
+  border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; 
+  font-size: 14px; line-height: 1; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
 }
 .delete-card-btn:hover { transform: scale(1.1); background-color: #d00000; }
 
@@ -337,27 +336,13 @@ footer { padding: 20px 15px; background: var(--glass-bg); backdrop-filter: blur(
     #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 8px 10px; }
     .admin-group button { width: 100%; min-width: auto; }
 
-    .status-panel-container { font-size: 0.8rem; padding: 8px 10px; }
-    
-    /* MÓVIL FINAL: Asegurar que el modo admin no rompa */
-    .status-panel-data { 
-        flex-direction: row; 
-        overflow-x: auto;
-        gap: 5px;
-    }
-    .status-item { 
-        min-width: 95px; 
-        flex-shrink: 0; 
-    }
-    
-    /* CORRECCIÓN CRÍTICA PARA MÓVIL EN ADMIN: Respetar la jaula */
-    .status-panel-container.admin-mode .status-item {
-        width: 32% !important; /* Forzar el 32% en móvil */
-        min-width: 0 !important; /* Eliminar min-width que causa desborde */
-    }
-
     .comments-section h2 { font-size: 1.1rem; }
     .comment-actions { font-size: 0.7rem; gap: 5px; }
     .replies-container { padding-left: 10px; }
     .comment-item { padding: 8px; }
+    
+    /* Ajuste Status Panel en móvil para asegurar que las "cajitas" se vean bien */
+    .status-panel-container.admin-mode input {
+        max-width: 70px !important; /* Un poco más pequeñas en móvil */
+    }
 }
