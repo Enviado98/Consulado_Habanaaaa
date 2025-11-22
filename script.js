@@ -229,8 +229,11 @@ function toggleEditing(enable) {
         
         if (enable) {
             card.removeEventListener('click', toggleTimePanel); 
+            
+            // ⭐ APLICAR CLASE ADMIN-MODE EN LUGAR DE ESTILOS INLINE ⭐
+            card.classList.add('admin-mode'); 
             card.classList.remove('card-recent', 'card-old');
-            card.style.background = 'white'; card.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; card.style.border = '1px solid #4f46e5'; 
+            
             card.querySelector('.card-time-panel').style.display = 'none';
             if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'none';
 
@@ -268,7 +271,9 @@ function toggleEditing(enable) {
                 newP.textContent = item.contenido;
                 contentDiv.appendChild(newP);
                 
-                card.style.background = ''; card.style.boxShadow = ''; card.style.border = '';
+                // ⭐ QUITAR CLASE ADMIN-MODE EN LUGAR DE ESTILOS INLINE ⭐
+                card.classList.remove('admin-mode'); 
+
                 card.querySelector('.card-time-panel').style.display = 'block';
                 if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'block';
             }
