@@ -68,15 +68,15 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .status-panel-container {
     width: 95%;
     max-width: 800px;
-    margin: 8px auto; /* Más compacto */
+    margin: 6px auto; /* Margen reducido */
     background-color: var(--fondo-panel-status); /* Usa el AMARILLO INTENSO */
     border: 1px solid var(--borde-panel-status); 
     border-radius: 10px; 
-    font-size: 0.85rem; /* Más pequeño */
+    font-size: 0.8rem; /* Reducido de 0.85rem */
     color: var(--color-texto-principal); 
     font-weight: 700;
     box-shadow: 0 2px 4px var(--sombra-suave);
-    padding: 8px 10px; /* Más compacto */
+    padding: 6px 8px; /* Padding reducido */
 }
 
 .status-panel-header {
@@ -84,9 +84,9 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     justify-content: space-between;
     align-items: center;
     padding-bottom: 3px; /* Más compacto */
-    margin-bottom: 5px;
+    margin-bottom: 4px; /* Margen reducido */
     border-bottom: 1px dashed rgba(0,0,0,0.1);
-    font-size: 0.75rem; /* Más pequeño */
+    font-size: 0.7rem; /* Reducido de 0.75rem */
     color: #555;
 }
 
@@ -96,13 +96,13 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     background-color: var(--acento-rojo); 
     color: white; 
     border-radius: 6px; 
-    padding: 3px 5px; /* Compacto */
+    padding: 2px 4px; /* Compacto */
     display: inline-block; /* Necesario para que el cuadro encierre el texto */
     text-align: center;
     line-height: 1.1; /* Compacta las líneas */
 
     /* REQUISITO: Reducir tamaño (aprox 30% menos del 0.75rem del padre) */
-    font-size: 0.55rem; 
+    font-size: 0.5rem; /* Ligeramente más pequeño */
     font-weight: 700;
     flex-shrink: 0;
 }
@@ -124,8 +124,8 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     justify-content: space-between; /* Distribución uniforme y compacta */
     align-items: center;
     flex-wrap: nowrap; /* Asegura que se mantenga en fila */
-    gap: 5px; /* Más compacto */
-    font-size: 0.9rem;
+    gap: 4px; /* Gap reducido */
+    font-size: 0.85rem; /* Reducido de 0.9rem */
     font-weight: 800;
     text-align: center;
     overflow-x: auto; /* Por si acaso en móvil extremo */
@@ -135,18 +135,18 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 3px 5px; /* Más compacto */
+    padding: 2px 4px; /* Padding reducido */
     border-radius: 6px;
-    min-width: 95px; /* Ancho mínimo para mantener compacto */
+    min-width: 85px; /* Ancho mínimo reducido de 95px */
     flex-shrink: 0; /* No se encoge fácilmente */
 }
 
 /* Estilos de valores específicos */
 .status-item .value {
     display: block;
-    font-size: 1rem; /* Más pequeño */
+    font-size: 0.95rem; /* Reducido de 1rem */
     font-weight: 900;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .status-item.deficit .value {
@@ -154,47 +154,46 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .status-item.divisa .value {
     color: #008000; /* Verde para divisas */
-    font-size: 1rem;
 }
 
 .status-item .label {
-    font-size: 0.7rem; /* Más pequeño */
+    font-size: 0.65rem; /* Reducido de 0.7rem */
     font-weight: 600;
     color: #555;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 /* Modo Admin: Campos de edición para el panel */
 .status-panel-container.admin-mode {
-    padding: 10px;
+    padding: 8px;
     border: 2px dashed var(--acento-rojo); 
 }
 .status-panel-container.admin-mode .status-panel-data {
     flex-direction: row; /* ⭐ MANTIENE FILA EN ADMIN MODE ⭐ */
     flex-wrap: wrap; 
-    gap: 5px;
+    gap: 4px;
 }
 .status-panel-container.admin-mode .status-item {
     width: 23%; /* ⭐ ACTUALIZADO: Divide el espacio en 4 columnas para MLC */
     flex-direction: column; /* Cambiado a columna para que el input sea 100% del item */
     justify-content: center;
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 5px;
+    padding: 4px;
     border: 1px solid #ccc;
 }
 .status-panel-container.admin-mode input {
     border: 1px solid var(--acento-rojo);
-    padding: 3px 6px;
+    padding: 2px 5px;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-align: center; /* Centrado en columna */
     width: 100%; /* Ocupa todo el item */
-    margin-top: 5px;
+    margin-top: 4px;
 }
 .status-panel-container.admin-mode .status-item .label {
     color: var(--color-texto-principal);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 
 
@@ -541,8 +540,8 @@ footer {
 
     /* ⭐ AJUSTES ESPECÍFICOS PARA MANTENER EL PANEL COMPACTO Y HORIZONTAL EN MÓVIL ⭐ */
     .status-panel-container {
-        font-size: 0.8rem;
-        padding: 8px 10px;
+        font-size: 0.75rem; /* Reducido de 0.8rem */
+        padding: 6px 8px; /* Padding reducido */
     }
     .status-panel-data {
         flex-direction: row; /* MANTIENE EN FILA */
@@ -550,13 +549,13 @@ footer {
         overflow-x: auto; /* Permite desplazamiento si los 3 no caben */
     }
     .status-item {
-        min-width: 90px; /* Ancho fijo para que todos quepan */
+        min-width: 85px; /* Ancho mínimo reducido de 90px */
         flex-shrink: 0;
     }
     .status-panel-container.admin-mode .status-panel-data {
         flex-direction: row; 
         flex-wrap: wrap; 
-        gap: 5px;
+        gap: 4px;
     }
     .status-panel-container.admin-mode .status-item {
         flex-direction: column; 
