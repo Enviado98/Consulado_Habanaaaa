@@ -10,8 +10,6 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
-// ⏱️ TIEMPO DE CACHÉ: 10 Minutos (en milisegundos)
-// Si el dato en la BD tiene menos de este tiempo, NO gastamos llamada a la API.
 const CACHE_DURATION = 10 * 60 * 1000; 
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -19,7 +17,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let admin = false; 
 
-// Variables y constantes de tiempo
+// Variables y constantes
 const ONE_HOUR = 3600000;
 const ONE_DAY = 24 * ONE_HOUR;
 const RECENT_THRESHOLD_MS = ONE_DAY; 
@@ -29,14 +27,13 @@ const TIME_PANEL_AUTOHIDE_MS = 2000;
 
 let currentData = [];
 let currentNews = []; 
-// Inicializamos status
 let currentStatus = {
     deficit_mw: 'Cargando...', 
     dollar_cup: '...', 
     euro_cup: '...',
-    mlc_cup: '...', // ✅ NUEVO: Inicializamos MLC
+    mlc_cup: '...',
     deficit_edited_at: null,
-    divisa_edited_at: null // Importante para el caché
+    divisa_edited_at: null
 }; 
 const timePanelTimeouts = new Map(); 
 
@@ -52,7 +49,6 @@ const DOMElements = {
     contenedor: document.getElementById('contenedor'),
     newsTicker: document.getElementById('newsTicker'),
     newsTickerContent: document.getElementById('newsTickerContent'),
-    fixedLabel: document.querySelector('.news-ticker-fixed-label'),
     commentsContainer: document.getElementById('commentsContainer'),
     commenterName: document.getElementById('commenterName'),
     commentText: document.getElementById('commentText'),
@@ -65,8 +61,7 @@ const DOMElements = {
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
     statusPanel: document.getElementById('statusPanel'),
-    statusDataContainer: document.getElementById('statusDataContainer'),
-    lastEditedTime: document.getElementById('lastEditedTime') // Aún lo referenciamos para evitar errores, aunque esté oculto
+    statusDataContainer: document.getElementById('statusDataContainer')
 };
 
 function timeAgo(timestamp) {
@@ -92,121 +87,86 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 LÓGICA API ELTOQUE CON CACHÉ INTELIGENTE Y MLC
+// 💰 LÓGICA API ELTOQUE
 // ----------------------------------------------------
-
 async function fetchElToqueRates() {
     try {
-        // 1. Verificar la edad del dato en la BD
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
         const now = Date.now();
-        
-        // Si el dato tiene menos de 10 minutos, NO llamamos a la API.
-        if ((now - lastUpdate) < CACHE_DURATION) {
-            return; 
-        }
+        if ((now - lastUpdate) < CACHE_DURATION) return; 
 
-        // 2. Si es viejo, llamamos a la API
         const proxyUrl = "https://corsproxy.io/?"; 
         const targetUrl = encodeURIComponent(ELTOQUE_API_URL);
 
         const response = await fetch(proxyUrl + targetUrl, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${ELTOQUE_TOKEN}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': `Bearer ${ELTOQUE_TOKEN}`, 'Content-Type': 'application/json' }
         });
-
         if (!response.ok) throw new Error(`Error API: ${response.status}`);
-
         const data = await response.json();
         
-        let usdPrice = '---';
-        let eurPrice = '---';
-        let mlcPrice = '---'; // ✅ Variable MLC
-
+        let usdPrice = '---', eurPrice = '---', mlcPrice = '---';
         if (data.tasas) {
-            usdPrice = data.tasas.USD || '---';
-            eurPrice = data.tasas.EUR || data.tasas.ECU || '---';
-            mlcPrice = data.tasas.MLC || '---'; // ✅ Capturamos MLC
+            usdPrice = data.tasas.USD || '---'; eurPrice = data.tasas.EUR || data.tasas.ECU || '---'; mlcPrice = data.tasas.MLC || '---';
         } else if (data.USD) {
-             usdPrice = data.USD;
-             eurPrice = data.EUR || data.ECU;
-             mlcPrice = data.MLC; // ✅ Capturamos MLC
+             usdPrice = data.USD; eurPrice = data.EUR || data.ECU; mlcPrice = data.MLC;
         }
 
-        // Formatear a entero
         usdPrice = parseFloat(usdPrice).toFixed(0);
         eurPrice = parseFloat(eurPrice).toFixed(0);
-        mlcPrice = parseFloat(mlcPrice).toFixed(0); // ✅ Formatear MLC
+        mlcPrice = parseFloat(mlcPrice).toFixed(0);
 
-        if (isNaN(usdPrice)) usdPrice = '---';
-        if (isNaN(eurPrice)) eurPrice = '---';
-        if (isNaN(mlcPrice)) mlcPrice = '---';
-
-        // 3. GUARDAR EN BASE DE DATOS (Aquí ocurre la magia)
-        // Si obtuvimos datos válidos, actualizamos Supabase para todos los demás
         if (usdPrice !== '---' && eurPrice !== '---') {
             const newTime = new Date().toISOString();
-            
-            // Actualizamos el objeto local inmediatamente para que se vea rápido
             currentStatus.dollar_cup = usdPrice;
             currentStatus.euro_cup = eurPrice;
-            currentStatus.mlc_cup = mlcPrice; // ✅ Actualizar local
+            currentStatus.mlc_cup = mlcPrice;
             currentStatus.divisa_edited_at = newTime;
             
             renderStatusPanel(currentStatus, admin);
 
-            // Enviamos el dato nuevo a la nube (INCLUYENDO MLC)
-            const { error } = await supabase
-                .from('status_data')
-                .update({ 
-                    dollar_cup: usdPrice, 
-                    euro_cup: eurPrice,
-                    mlc_cup: mlcPrice, // ✅ Guardar en DB
-                    divisa_edited_at: newTime
-                })
-                .eq('id', 1);
-
-            if (error) console.error("⚠️ Error al guardar caché en DB:", error.message);
+            await supabase.from('status_data').update({ 
+                    dollar_cup: usdPrice, euro_cup: eurPrice, mlc_cup: mlcPrice, divisa_edited_at: newTime
+            }).eq('id', 1);
         }
-
-    } catch (error) {
-        console.error("⚠️ Error silencioso API:", error.message);
-    }
+    } catch (error) { console.error("⚠️ Error API:", error.message); }
 }
-// ----------------------------------------------------
-// FUNCIONES DE UI Y LOGIN
-// ----------------------------------------------------
 
+// ----------------------------------------------------
+// FUNCIONES DE UI Y LOGIN (MEJORADAS)
+// ----------------------------------------------------
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
     if (isAdmin) {
         DOMElements.body.classList.add('admin-mode');
         DOMElements.adminControlsPanel.style.display = "flex";
+        
         DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
         DOMElements.statusMessage.style.color = "#0d9488"; 
+        
+        // Cambiar estilos de botón usando clases (DRY)
         DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
+        DOMElements.toggleAdminBtn.classList.remove('btn-primary');
+        DOMElements.toggleAdminBtn.classList.add('btn-danger');
+        
         enableEditing(); 
     } else {
         DOMElements.body.classList.remove('admin-mode');
         DOMElements.adminControlsPanel.style.display = "none";
+        
         DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        
+        // Restaurar estilos de botón
         DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
+        DOMElements.toggleAdminBtn.classList.remove('btn-danger');
+        DOMElements.toggleAdminBtn.classList.add('btn-primary');
+        
         disableEditing(); 
     }
     
-    if (isAdmin) {
-        DOMElements.statusPanel.classList.add('admin-mode');
-        renderStatusPanel(currentStatus, true); 
-    } else {
-        DOMElements.statusPanel.classList.remove('admin-mode');
-        renderStatusPanel(currentStatus, false); 
-    }
+    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
+    renderStatusPanel(currentStatus, isAdmin); 
 }
 
 function toggleAdminMode() {
@@ -216,8 +176,7 @@ function toggleAdminMode() {
     } else {
         if (!confirm("✅️ ¿Terminar la edición?")) return;
         updateAdminUI(false);
-        loadData(); 
-        loadStatusData(); 
+        loadData(); loadStatusData(); 
     }
 }
 
@@ -227,7 +186,6 @@ function disableEditing() { toggleEditing(false); }
 // ----------------------------------------------------
 // CREACIÓN DE CARD
 // ----------------------------------------------------
-
 function createCardHTML(item, index) {
     let cardClass = '', labelHTML = '', panelStyle = '', labelText = 'Sin fecha', timeText = 'Sin editar';
     if (item.last_edited_timestamp) {
@@ -268,48 +226,38 @@ function toggleEditing(enable) {
         const contentDiv = card.querySelector('.card-content');
         const emojiSpan = card.querySelector('.emoji');
         const titleH3 = card.querySelector('h3');
-        const contentP = contentDiv.querySelector('p');
         
         if (enable) {
             card.removeEventListener('click', toggleTimePanel); 
             card.classList.remove('card-recent', 'card-old');
-            card.style.background = 'white'; 
-            card.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; 
-            card.style.border = '1px solid #4f46e5'; 
+            card.style.background = 'white'; card.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; card.style.border = '1px solid #4f46e5'; 
             card.querySelector('.card-time-panel').style.display = 'none';
-            const label = card.querySelector('.card-label');
-            if (label) label.style.display = 'none';
+            if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'none';
 
-            if (emojiSpan && titleH3 && contentP) {
-                emojiSpan.remove(); titleH3.remove(); contentP.remove();
+            if (emojiSpan && titleH3) {
+                emojiSpan.remove(); titleH3.remove(); contentDiv.querySelector('p').remove();
                 
                 const editableEmoji = document.createElement('input');
-                editableEmoji.className = 'editable-emoji';
-                editableEmoji.value = item.emoji;
-                editableEmoji.maxLength = 2;
+                editableEmoji.className = 'editable-emoji'; editableEmoji.value = item.emoji; editableEmoji.maxLength = 2;
                 card.insertBefore(editableEmoji, card.firstChild);
                 
                 const editableTitle = document.createElement('input');
-                editableTitle.className = 'editable-title';
-                editableTitle.value = item.titulo;
+                editableTitle.className = 'editable-title'; editableTitle.value = item.titulo;
                 card.insertBefore(editableTitle, editableEmoji.nextSibling);
 
                 const editableContent = document.createElement('textarea');
-                editableContent.className = 'editable-content';
-                editableContent.value = item.contenido;
+                editableContent.className = 'editable-content'; editableContent.value = item.contenido;
                 contentDiv.appendChild(editableContent);
             }
         } else {
             const editableEmoji = card.querySelector('.editable-emoji');
-            const editableTitle = card.querySelector('.editable-title');
-            const editableContent = card.querySelector('.editable-content');
-            
-            if (editableEmoji && editableTitle && editableContent) {
+            if (editableEmoji) {
+                const editableTitle = card.querySelector('.editable-title');
+                const editableContent = card.querySelector('.editable-content');
                 editableEmoji.remove(); editableTitle.remove(); editableContent.remove();
                 
                 const newEmojiSpan = document.createElement('span');
-                newEmojiSpan.className = 'emoji';
-                newEmojiSpan.textContent = item.emoji; 
+                newEmojiSpan.className = 'emoji'; newEmojiSpan.textContent = item.emoji; 
                 card.insertBefore(newEmojiSpan, card.firstChild);
                 
                 const newTitleH3 = document.createElement('h3');
@@ -322,8 +270,7 @@ function toggleEditing(enable) {
                 
                 card.style.background = ''; card.style.boxShadow = ''; card.style.border = '';
                 card.querySelector('.card-time-panel').style.display = 'block';
-                const label = card.querySelector('.card-label');
-                if (label) label.style.display = 'block';
+                if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'block';
             }
         }
     });
@@ -337,15 +284,12 @@ function toggleTimePanel(event) {
         if (card.getAttribute('data-id') !== cardId) card.classList.remove('show-time-panel');
     });
     const isShowing = clickedCard.classList.toggle('show-time-panel');
-    if (isShowing) {
-        setTimeout(() => clickedCard.classList.remove('show-time-panel'), TIME_PANEL_AUTOHIDE_MS);
-    }
+    if (isShowing) setTimeout(() => clickedCard.classList.remove('show-time-panel'), TIME_PANEL_AUTOHIDE_MS);
 }
 
 // ----------------------------------------------------
 // LÓGICA DE NOTICIAS 
 // ----------------------------------------------------
-
 function linkify(text) {
     return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
         let fullUrl = url.startsWith('http') ? url : 'http://' + url;
@@ -356,23 +300,19 @@ function linkify(text) {
 async function loadNews() {
     const { data: newsData, error } = await supabase.from('noticias').select('id, text, timestamp').order('timestamp', { ascending: false });
     if (error) return;
-
     const validNews = [];
     const cutoff = Date.now() - RECENT_THRESHOLD_MS;
-    
     newsData.forEach(n => {
         if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n);
         else supabase.from('noticias').delete().eq('id', n.id);
     });
-
     currentNews = validNews;
     if (validNews.length > 0) {
         const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
         DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`;
         DOMElements.newsTicker.style.display = 'flex';
         
-        DOMElements.newsTickerContent.style.animation = 'none';
-        DOMElements.newsTickerContent.offsetHeight; 
+        DOMElements.newsTickerContent.style.animation = 'none'; DOMElements.newsTickerContent.offsetHeight; 
         const width = DOMElements.newsTickerContent.scrollWidth / 2;
         const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
         DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker-move-dynamic { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
@@ -404,24 +344,20 @@ async function deleteNews() {
 }
 
 // ----------------------------------------------------
-// LÓGICA DE COMENTARIOS, HILOS Y LIKES (COMPLETA)
+// LÓGICA DE COMENTARIOS (DRY & Clean)
 // ----------------------------------------------------
-
 function generateColorByName(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
     return `hsl(${hash % 360}, 70%, 50%)`; 
 }
-
 function formatCommentDate(timestamp) {
     return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(timestamp)) + ' h';
 }
-
 function createCommentHTML(comment, isLiked) {
     const color = generateColorByName(comment.name.toLowerCase());
     const likeClass = isLiked ? 'liked' : '';
     const itemClass = comment.parent_id ? 'comment-item reply-style' : 'comment-item'; 
-    
     return `
         <div class="${itemClass}" data-comment-id="${comment.id}" style="--comment-color: ${color};">
             <strong class="comment-name">${comment.name} dijo:</strong>
@@ -436,74 +372,56 @@ function createCommentHTML(comment, isLiked) {
                 <div class="reply-form" data-reply-to="${comment.id}">
                     <input type="text" class="reply-name" placeholder="Tu Nombre" required maxlength="30">
                     <textarea class="reply-text" placeholder="Tu Respuesta (máx. 250)" required maxlength="250"></textarea>
-                    <button class="publish-reply-btn" data-parent-id="${comment.id}">Publicar Respuesta</button>
+                    <button class="btn btn-sm btn-success publish-reply-btn" data-parent-id="${comment.id}">Publicar Respuesta</button>
                 </div>
                 <div class="replies-container" data-parent-of="${comment.id}"></div>
             ` : ''}
         </div>`;
 }
-
 function drawReplies(container, replies, userLikesMap) {
     container.innerHTML = ''; 
     replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
     replies.forEach((reply) => {
         const isLiked = userLikesMap.get(reply.id) || false;
-        const wrapper = document.createElement('div');
-        wrapper.className = 'reply-item';
-        wrapper.innerHTML = createCommentHTML(reply, isLiked);
-        container.appendChild(wrapper);
+        const wrapper = document.createElement('div'); wrapper.className = 'reply-item';
+        wrapper.innerHTML = createCommentHTML(reply, isLiked); container.appendChild(wrapper);
     });
     if (replies.length > 1) {
         const remaining = replies.length - 1;
-        const toggle = document.createElement('span');
-        toggle.className = 'reply-toggle';
+        const toggle = document.createElement('span'); toggle.className = 'reply-toggle';
         toggle.textContent = `Ver las ${remaining} respuestas más...`;
-        toggle.addEventListener('click', (e) => {
-            e.target.closest('.replies-container').classList.add('expanded');
-            e.target.style.display = 'none'; 
-        });
+        toggle.addEventListener('click', (e) => { e.target.closest('.replies-container').classList.add('expanded'); e.target.style.display = 'none'; });
         container.appendChild(toggle);
     }
 }
-
 async function loadComments() {
     const [commentsResponse, likesResponse] = await Promise.all([
         supabase.from('comentarios').select('*').order('timestamp', { ascending: false }),
         supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
     ]);
-    
     if (commentsResponse.error) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--acento-rojo);">❌ Error al cargar comentarios.</p>`;
-    
     const allComments = commentsResponse.data;
     const userLikesMap = new Map();
     if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
     
     const principalComments = allComments.filter(c => c.parent_id === null);
     const repliesMap = allComments.reduce((map, comment) => {
-        if (comment.parent_id !== null) {
-            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []);
-            map.get(comment.parent_id).push(comment);
-        }
+        if (comment.parent_id !== null) { if (!map.has(comment.parent_id)) map.set(comment.parent_id, []); map.get(comment.parent_id).push(comment); }
         return map;
     }, new Map());
     
     if (principalComments.length === 0) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--color-texto-secundario);">Aún no hay comentarios activos. ¡Sé el primero!</p>`;
-    
     DOMElements.commentsContainer.innerHTML = principalComments.map(c => createCommentHTML(c, userLikesMap.get(c.id))).join('');
 
     principalComments.forEach(comment => {
         const replies = repliesMap.get(comment.id);
-        if (replies) {
-            const container = document.querySelector(`.replies-container[data-parent-of="${comment.id}"]`);
-            if (container) drawReplies(container, replies, userLikesMap);
-        }
+        if (replies) { const container = document.querySelector(`.replies-container[data-parent-of="${comment.id}"]`); if (container) drawReplies(container, replies, userLikesMap); }
     });
 
     document.querySelectorAll('.reply-form-toggle').forEach(btn => btn.addEventListener('click', toggleReplyForm));
     document.querySelectorAll('.publish-reply-btn').forEach(btn => btn.addEventListener('click', handlePublishReply));
     document.querySelectorAll('.like-button').forEach(btn => btn.addEventListener('click', handleLikeToggle));
 }
-
 function toggleReplyForm(event) {
     const form = document.querySelector(`.reply-form[data-reply-to="${event.target.getAttribute('data-id')}"]`);
     if (form) {
@@ -512,67 +430,40 @@ function toggleReplyForm(event) {
         if (form.style.display === 'block') form.querySelector('.reply-name').focus();
     }
 }
-
 async function publishComment() {
-    const name = DOMElements.commenterName.value.trim();
-    const text = DOMElements.commentText.value.trim();
+    const name = DOMElements.commenterName.value.trim(); const text = DOMElements.commentText.value.trim();
     if (name.length < 2 || text.length < 5) return alert("Datos insuficientes.");
-    
     DOMElements.publishCommentBtn.disabled = true;
     const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0 }]);
-    if (!error) {
-        DOMElements.commenterName.value = ''; DOMElements.commentText.value = '';
-        await loadComments();
-        alert("✅ Comentario publicado.");
-    } else { alert("❌ Error al publicar."); }
+    if (!error) { DOMElements.commenterName.value = ''; DOMElements.commentText.value = ''; await loadComments(); alert("✅ Comentario publicado."); } else { alert("❌ Error al publicar."); }
     DOMElements.publishCommentBtn.disabled = false;
 }
-
 async function handlePublishReply(event) {
-    const parentId = event.target.getAttribute('data-parent-id');
-    const form = event.target.closest('.reply-form');
-    const name = form.querySelector('.reply-name').value.trim();
-    const text = form.querySelector('.reply-text').value.trim();
-
+    const parentId = event.target.getAttribute('data-parent-id'); const form = event.target.closest('.reply-form');
+    const name = form.querySelector('.reply-name').value.trim(); const text = form.querySelector('.reply-text').value.trim();
     if (name.length < 2 || text.length < 5) return alert("Datos insuficientes.");
-    
     event.target.disabled = true;
     const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0 }]);
-    if (!error) {
-        form.style.display = 'none';
-        await loadComments();
-        alert("✅ Respuesta publicada.");
-    } else { alert("❌ Error al responder."); }
+    if (!error) { form.style.display = 'none'; await loadComments(); alert("✅ Respuesta publicada."); } else { alert("❌ Error al responder."); }
     event.target.disabled = false;
 }
-
 async function handleLikeToggle(event) {
-    const btn = event.currentTarget;
-    const id = btn.getAttribute('data-id');
-    const isLiked = btn.classList.contains('liked');
-    const counter = document.querySelector(`.like-count[data-counter-id="${id}"]`);
+    const btn = event.currentTarget; const id = btn.getAttribute('data-id'); const isLiked = btn.classList.contains('liked'); const counter = document.querySelector(`.like-count[data-counter-id="${id}"]`);
     btn.disabled = true;
-
     try {
         if (isLiked) {
-            await supabase.from('likes').delete().eq('comment_id', id).eq('user_web_id', userWebId);
-            await supabase.rpc('decrement_likes', { row_id: id });
-            btn.classList.remove('liked');
-            counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
+            await supabase.from('likes').delete().eq('comment_id', id).eq('user_web_id', userWebId); await supabase.rpc('decrement_likes', { row_id: id });
+            btn.classList.remove('liked'); counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
         } else {
             const { error } = await supabase.from('likes').insert([{ comment_id: id, user_web_id: userWebId }]);
-            if (!error || error.code === '23505') {
-                if (!error) await supabase.rpc('increment_likes', { row_id: id });
-                btn.classList.add('liked');
-                counter.textContent = parseInt(counter.textContent) + 1;
-            }
+            if (!error || error.code === '23505') { if (!error) await supabase.rpc('increment_likes', { row_id: id }); btn.classList.add('liked'); counter.textContent = parseInt(counter.textContent) + 1; }
         }
     } catch (e) { console.error(e); }
     btn.disabled = false;
 }
 
 // ----------------------------------------------------
-// --- CONTADOR DE VISTAS (MODIFICADO: ESTILO PREMIUM) ---
+// VISTAS & ESTADO
 // ----------------------------------------------------
 const VISIT_KEY = 'lastPageView';
 async function registerPageView() {
@@ -581,110 +472,64 @@ async function registerPageView() {
     const { error } = await supabase.from('page_views').insert({});
     if (!error) localStorage.setItem(VISIT_KEY, Date.now());
 }
-
 async function getAndDisplayViewCount() {
-    const el = document.getElementById('viewCounter');
-    if (!el) return;
+    const el = document.getElementById('viewCounter'); if (!el) return;
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
-    // ⭐ MODIFICADO: Texto limpio para diseño tipo cápsula (Sin guiones, todo mayúscula visualmente por CSS)
     el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} VISTAS (24H)`;
 }
-
-// ----------------------------------------------------
-// RENDERIZADO ESTADO Y EVENTOS
-// ----------------------------------------------------
-
 function renderStatusPanel(status, isAdminMode) {
-    // 🔴 MODIFICACIÓN: Ya no actualizamos "DOMElements.lastEditedTime" porque ahora es ESTÁTICO (EN VIVO)
-    // Se eliminó la lógica de timeAgo para el panel superior.
-
     if (isAdminMode) {
-        // MODO ADMIN: Inputs para editar déficit, divisas deshabilitadas (INCLUYE MLC)
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
-            <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-            <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-            <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-        `;
+            <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
+            <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
+            <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>`;
     } else {
-        // MODO PÚBLICO: Visualización normal (INCLUYE MLC)
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>
-        `;
+            <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>`;
     }
 }
-
 async function loadStatusData() {
-    // Aquí cargamos todos los campos, incluyendo divisa_edited_at, para el caché
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
     if (data) currentStatus = { ...currentStatus, ...data };
-    
-    // 1. Renderizamos el panel con los datos que ya tenemos (Divisas del caché viejo)
-    renderStatusPanel(currentStatus, admin);
-    
-    // 2. Ejecutamos la función de caché inteligente. 
-    // Esta función decidirá si debe actualizar desde la API o no.
-    fetchElToqueRates(); 
+    renderStatusPanel(currentStatus, admin); fetchElToqueRates(); 
 }
-
 async function saveChanges() {
     if (!admin) return;
     const editDeficit = document.getElementById('editDeficit');
     const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
-    
     const updates = [];
     document.querySelectorAll(".card").forEach(card => {
         const emoji = card.querySelector('.editable-emoji').value;
         const titulo = card.querySelector('.editable-title').value;
         const contenido = card.querySelector('.editable-content').value;
-        const id = card.dataset.id;
-        const idx = card.dataset.index;
-        
+        const id = card.dataset.id; const idx = card.dataset.index;
         if (contenido !== currentData[idx].contenido || titulo !== currentData[idx].titulo || emoji !== currentData[idx].emoji) {
              updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: new Date().toISOString() }).eq('id', id));
         }
     });
-
     if (newDeficit !== currentStatus.deficit_mw) {
         updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() }).eq('id', 1));
     }
-
-    if (updates.length > 0) {
-        await Promise.all(updates);
-        alert("✅ Guardado.");
-        location.reload(); 
-    } else {
-        alert("No hay cambios.");
-    }
+    if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else { alert("No hay cambios."); }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     DOMElements.saveBtn.addEventListener('click', saveChanges);
     DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
     DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
     DOMElements.publishCommentBtn.addEventListener('click', publishComment);
-    
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
-    
-    registerPageView();
-    getAndDisplayViewCount();
-    loadData(); loadNews(); loadComments(); 
-    
-    // 🚨 MODIFICACIÓN CLAVE: Quitamos el setInterval porque el caché ahora se actualiza al cargar la página.
-    // Solo actualizaremos si el usuario está en modo admin (opcional) o si se requiere un update forzado.
-    loadStatusData(); 
+    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData(); 
 });
-
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
     if (data) {
-        currentData = data;
-        DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
+        currentData = data; DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
 }
