@@ -1,63 +1,63 @@
-// news_script.js - VERSIÓN HÍBRIDA: DISEÑO MODERNO + BASE DE DATOS ANTIGUA
-// ----------------------------------------------------------------
-const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
+// script.js - COMPATIBLE DB ANTIGUA (SIN COMENTARIOS EN HOME)
+// ----------------------------------------------------
+const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
+
+const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
+const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
+const CACHE_DURATION = 10 * 60 * 1000; 
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ----------------------------------------------------
-// 🎨 PALETA DE COLORES NEÓN
-// ----------------------------------------------------
 const NEON_PALETTE = [
     '#00ffff', '#ff00ff', '#00ff00', '#ffff00', '#ff0099', 
     '#9D00FF', '#FF4D00', '#00E5FF', '#76ff03', '#ff1744'
 ];
 
-// Estado Global
-let isAdmin = false; 
-
-// Referencias DOM
-const DOM = {
-    container: document.getElementById('newsBannersContainer'),
-    toggleBtn: document.getElementById('toggleNewsAdminBtn'),
-    exitBtn: document.getElementById('exitAdminBtn'),
-    adminPanel: document.getElementById('newsAdminPanel'),
-    formSection: document.getElementById('bannerCreationSection'),
-    titleInput: document.getElementById('bannerTitle'),
-    contentInput: document.getElementById('bannerContent'),
-    publishBtn: document.getElementById('publishBannerBtn'),
-    addBannerBtn: document.getElementById('addBannerBtn'),
-    cancelBannerBtn: document.getElementById('cancelBannerBtn')
-};
-
-// ----------------------------------------------------------------
-// 🛠️ UTILIDADES
-// ----------------------------------------------------------------
-
-function getBannerColor(id) {
+function getCardColor(id) {
     let hash = 0;
     const str = String(id);
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash) % NEON_PALETTE.length;
-    return NEON_PALETTE[index];
+    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    return NEON_PALETTE[Math.abs(hash) % NEON_PALETTE.length];
 }
 
-function linkify(text) {
-    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
-        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
-        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
-    });
-}
+let admin = false; 
+const ONE_DAY = 24 * 3600000;
+const RECENT_THRESHOLD_MS = ONE_DAY; 
+const OLD_THRESHOLD_MS = 7 * ONE_DAY;
+const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
+const TIME_PANEL_AUTOHIDE_MS = 3000;
 
-// Adaptado para usar 'created_at' de la DB antigua
+let currentData = [];
+let currentNews = []; 
+let currentStatus = {
+    deficit_mw: 'Cargando...', 
+    dollar_cup: '...', euro_cup: '...', mlc_cup: '...',
+    deficit_edited_at: null, divisa_edited_at: null
+}; 
+
+const DOMElements = {
+    body: document.body,
+    contenedor: document.getElementById('contenedor'),
+    newsTicker: document.getElementById('newsTicker'),
+    newsTickerContent: document.getElementById('newsTickerContent'),
+    // Comentarios eliminados de HOME para evitar error de tabla inexistente
+    adminControlsPanel: document.getElementById('adminControlsPanel'),
+    statusMessage: document.getElementById('statusMessage'),
+    toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
+    saveBtn: document.getElementById('saveBtn'),
+    addNewsBtn: document.getElementById('addNewsBtn'),
+    deleteNewsBtn: document.getElementById('deleteNewsBtn'),
+    dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
+    statusPanel: document.getElementById('statusPanel'),
+    statusDataContainer: document.getElementById('statusDataContainer')
+};
+
 function timeAgo(timestamp) {
     if (!timestamp) return { text: 'Sin fecha.', diff: -1, date: null };
     const then = new Date(timestamp).getTime();
-    const now = Date.now();
-    const diff = now - then;
+    const diff = Date.now() - then;
     if (diff < 0) return { text: 'Ahora mismo', diff: 0, date: new Date(timestamp) }; 
     
     const SECONDS = Math.floor(diff / 1000);
@@ -76,317 +76,291 @@ function timeAgo(timestamp) {
     return { text, diff, date: new Date(timestamp) };
 }
 
-function generateColorByName(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${hash % 360}, 70%, 50%)`; 
-}
+// ----------------------------------------------------
+// API ELTOQUE
+// ----------------------------------------------------
+async function fetchElToqueRates() {
+    try {
+        const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
+        if ((Date.now() - lastUpdate) < CACHE_DURATION) return; 
 
-function getInitials(name) {
-    return name ? name.charAt(0).toUpperCase() : '?';
-}
+        const proxyUrl = "https://corsproxy.io/?"; 
+        const targetUrl = encodeURIComponent(ELTOQUE_API_URL);
 
-// ----------------------------------------------------------------
-// 🗣️ RENDERING DE COMENTARIOS (ADAPTADO A ESTRUCTURA ANTIGUA)
-// ----------------------------------------------------------------
+        const response = await fetch(proxyUrl + targetUrl, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${ELTOQUE_TOKEN}`, 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error(`Error API: ${response.status}`);
+        const data = await response.json();
+        
+        let usd = '---', eur = '---', mlc = '---';
+        if (data.tasas) { usd = data.tasas.USD; eur = data.tasas.EUR || data.tasas.ECU; mlc = data.tasas.MLC; } 
+        else if (data.USD) { usd = data.USD; eur = data.EUR || data.ECU; mlc = data.MLC; }
 
-function createCommentHTML(comment, isLiked) {
-    // Mapeo de columnas antiguas a variables nuevas
-    const name = comment.commenter_name; //
-    const text = comment.comment_text;   //
-    const likes = comment.likes || 0;    //
-    const dateStr = comment.created_at;  //
-
-    const color = generateColorByName(name);
-    const initial = getInitials(name);
-    const likeClass = isLiked ? 'liked' : '';
-    const dateText = timeAgo(dateStr).text;
-
-    return `
-        <div class="comment-item" data-comment-id="${comment.id}">
-            <div class="comment-avatar" style="--comment-color: ${color};">${initial}</div>
+        if (usd && eur) {
+            const newTime = new Date().toISOString();
+            currentStatus.dollar_cup = parseFloat(usd).toFixed(0);
+            currentStatus.euro_cup = parseFloat(eur).toFixed(0);
+            currentStatus.mlc_cup = parseFloat(mlc).toFixed(0);
+            currentStatus.divisa_edited_at = newTime;
             
-            <div class="comment-body">
-                <div class="comment-header">
-                    <span class="comment-author">${name}</span>
-                    <span class="comment-date">${dateText}</span>
-                </div>
-                
-                <div class="comment-text">${text}</div>
-                
-                <div class="comment-actions">
-                    <button class="action-btn like-button ${likeClass}" data-id="${comment.id}">
-                        <span class="icon">♥</span> <span class="like-count" data-counter-id="${comment.id}">${likes}</span>
-                    </button>
-                    </div>
-            </div>
-        </div>`;
+            renderStatusPanel(currentStatus, admin);
+            // TABLA ANTIGUA: status_data (id=1)
+            await supabase.from('status_data').update({ 
+                dollar_cup: currentStatus.dollar_cup, 
+                euro_cup: currentStatus.euro_cup, 
+                mlc_cup: currentStatus.mlc_cup, 
+                divisa_edited_at: newTime
+            }).eq('id', 1);
+        }
+    } catch (error) { console.error("⚠️ Error API:", error.message); }
 }
 
-// ----------------------------------------------------------------
-// ⚙️ LÓGICA DE COMENTARIOS POR BANNERS
-// ----------------------------------------------------------------
-
-async function loadCommentsForBanner(bannerId) {
-    const bannerContainer = document.querySelector(`.banner-item[data-id="${bannerId}"]`);
-    const commentsListContainer = bannerContainer.querySelector(`.comments-list[data-banner-id="${bannerId}"]`);
-    
-    if (!commentsListContainer) return;
-
-    // CONSULTA A LA TABLA ANTIGUA 'banner_comments'
-    const { data, error } = await supabase
-        .from('banner_comments')
-        .select('*')
-        .eq('banner_id', bannerId)
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error("Error comments:", error);
-        return commentsListContainer.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error: ${error.message}</p>`;
-    }
-    
-    const allComments = data || [];
-    
-    // Renderizado (Sin hilos, lista plana para compatibilidad)
-    if (allComments.length === 0) {
-        commentsListContainer.innerHTML = `<p style="text-align: center; color: #eee; font-size: 0.9rem; padding: 10px;">Sé el primero en comentar esta noticia.</p>`;
-    } else {
-        // Verificamos likes locales (localStorage simple)
-        commentsListContainer.innerHTML = allComments.map(c => {
-            const isLiked = localStorage.getItem(`like_${c.id}`) === 'true';
-            return createCommentHTML(c, isLiked);
-        }).join('');
-    }
-    
-    // Actualizar contador
-    const toggleBtn = bannerContainer.querySelector('.toggle-comments-btn');
-    if(toggleBtn) toggleBtn.textContent = `🗣️ Ver Comentarios (${allComments.length})`;
-}
-
-function toggleComments(bannerId) {
-    const wrap = document.querySelector(`.comments-container-wrap[data-id="${bannerId}"]`);
-    if (wrap) {
-        const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
-        wrap.style.display = isHidden ? 'block' : 'none';
-    }
-}
-
-async function handlePublishComment(bannerId, formElement) {
-    const nameVal = formElement.querySelector('.comment-name').value.trim();
-    const textVal = formElement.querySelector('.comment-text').value.trim();
-    const publishBtn = formElement.querySelector('.pub-btn');
-
-    if (nameVal.length < 2 || textVal.length < 2) return alert("Escribe un nombre y mensaje válidos.");
-
-    publishBtn.disabled = true;
-    
-    // INSERTAR EN TABLA ANTIGUA 'banner_comments'
-    const { error } = await supabase.from('banner_comments').insert([{ 
-        banner_id: bannerId, 
-        commenter_name: nameVal, // Columna antigua
-        comment_text: textVal,   // Columna antigua
-        likes: 0 
-    }]);
-    
-    if (!error) {
-        formElement.querySelector('.comment-name').value = '';
-        formElement.querySelector('.comment-text').value = '';
-        await loadCommentsForBanner(bannerId);
-    } else { 
-        console.error(error);
-        alert("❌ Error al publicar: " + error.message); 
-    }
-    publishBtn.disabled = false;
-}
-
-async function handleLikeToggle(event) {
-    const btn = event.currentTarget;
-    const id = btn.getAttribute('data-id');
-    const counter = btn.querySelector('.like-count');
-    
-    // Lógica simple de Likes (Local + Update Integer) compatible con DB antigua
-    const key = `like_${id}`;
-    const isLiked = localStorage.getItem(key) === 'true';
-    let currentCount = parseInt(counter.textContent) || 0;
-
-    btn.disabled = true;
-
-    if (isLiked) {
-        currentCount = Math.max(0, currentCount - 1);
-        btn.classList.remove('liked');
-        localStorage.removeItem(key);
-    } else {
-        currentCount++;
-        btn.classList.add('liked');
-        localStorage.setItem(key, 'true');
-    }
-    counter.textContent = currentCount;
-
-    // Actualizar columna 'likes' en tabla 'banner_comments'
-    await supabase.from('banner_comments').update({ likes: currentCount }).eq('id', id);
-    
-    btn.disabled = false;
-}
-
-// ----------------------------------------------------------------
-// 📰 LÓGICA DE PANCARTAS (BANNERS)
-// ----------------------------------------------------------------
-
-function createBannerHTML(banner) {
-    const neonColor = getBannerColor(banner.id);
-    const linkedContent = linkify(banner.content);
-    // Usar created_at
-    const isNew = (Date.now() - new Date(banner.created_at).getTime()) < (7 * 24 * 60 * 60 * 1000);
-    const deleteBtnStyle = isAdmin ? 'display: flex;' : 'display: none;';
-
-    return `
-        <div class="banner-item" data-id="${banner.id}">
-            <button class="delete-banner-btn btn-danger" data-id="${banner.id}" style="${deleteBtnStyle}">×</button>
-            
-            <h2 style="--card-neon: ${neonColor}">
-                ${banner.title} 
-                ${isNew ? '<span class="new-tag">¡NUEVO!</span>' : ''}
-            </h2>
-            
-            <div class="banner-meta">
-                <span>📅 Publicado: ${timeAgo(banner.created_at).text}</span>
-            </div>
-            
-            <div class="banner-content">${linkedContent}</div>
-            
-            <div class="banner-actions">
-                <button class="toggle-comments-btn btn btn-secondary btn-sm" data-id="${banner.id}">
-                    🗣️ Cargar Comentarios
-                </button>
-            </div>
-
-            <div class="comments-container-wrap" data-id="${banner.id}">
-                <div class="comment-form-container">
-                    <input type="text" class="comment-name" placeholder="Tu Nombre" required maxlength="30">
-                    <textarea class="comment-text" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250"></textarea>
-                    <button class="pub-btn btn btn-success" data-id="${banner.id}">Publicar Comentario</button>
-                </div>
-
-                <div class="comments-list" data-banner-id="${banner.id}">
-                    <p style="text-align: center; color: #eee; margin: 15px;">Cargando...</p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-async function loadBanners() {
-    // CONSULTA A LA TABLA ANTIGUA 'news_banners'
-    const { data, error } = await supabase
-        .from('news_banners')
-        .select('*')
-        .order('created_at', { ascending: false }); // columna created_at
-
-    if (error) {
-        DOM.container.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error: ${error.message}</p>`;
-        return;
-    }
-    if (!data || data.length === 0) {
-        DOM.container.innerHTML = `<p style="text-align: center; color: white;">No hay noticias publicadas aún.</p>`;
-        return;
-    }
-
-    DOM.container.innerHTML = data.map(createBannerHTML).join('');
-    data.forEach(banner => loadCommentsForBanner(banner.id));
-}
-
-// ----------------------------------------------------------------
-// 🛡️ ADMIN & EVENTOS
-// ----------------------------------------------------------------
-
-async function handlePublishBanner() {
-    if (!isAdmin) return;
-    const title = DOM.titleInput.value.trim();
-    const content = DOM.contentInput.value.trim();
-    
-    if (title.length < 5 || content.length < 10) return alert("Título (min 5) y contenido (min 10) requeridos.");
-    
-    DOM.publishBtn.disabled = true;
-    // INSERTAR EN TABLA ANTIGUA 'news_banners'
-    // Nota: La DB antigua a veces pide 'color', enviamos dummy si es necesario, o dejamos que postgres ponga default
-    const { error } = await supabase.from('news_banners').insert([{ 
-        title, 
-        content,
-        color: '#ffffff' // Compatibilidad legacy
-    }]);
-    
-    if (!error) {
-        DOM.titleInput.value = '';
-        DOM.contentInput.value = '';
-        DOM.formSection.style.display = 'none';
-        await loadBanners();
-    } else {
-        console.error(error);
-        alert("Error al publicar: " + error.message);
-    }
-    DOM.publishBtn.disabled = false;
-}
-
-async function handleDeleteBanner(id) {
-    if (!isAdmin || !confirm("¿Confirmar borrado de la pancarta?\n⚠️ ¡Esto también borra todos los comentarios asociados!")) return;
-    
-    // Borrar comentarios en 'banner_comments'
-    await supabase.from('banner_comments').delete().eq('banner_id', id); 
-    // Borrar noticia en 'news_banners'
-    const { error } = await supabase.from('news_banners').delete().eq('id', id);
-    
-    if (!error) await loadBanners();
-    else alert("Error al borrar.");
-}
-
-function toggleAdmin(forceExit = false) {
-    if (forceExit && isAdmin) {
-        if (!confirm("✅️ ¿Terminar la edición?")) return;
-        isAdmin = false;
-    } else if (!isAdmin) {
-        isAdmin = true;
-        alert("¡🔴 MODO EDICIÓN ACTIVO!");
-    } else {
-        return; 
-    }
+// ----------------------------------------------------
+// UI ADMIN
+// ----------------------------------------------------
+function updateAdminUI(isAdmin) {
+    admin = isAdmin;
+    DOMElements.body.classList.toggle('admin-mode', isAdmin);
+    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
     
     if (isAdmin) {
-        DOM.adminPanel.style.display = 'flex';
-        DOM.toggleBtn.style.display = 'none';
-        document.querySelectorAll('.delete-banner-btn').forEach(b => b.style.display = 'flex');
+        DOMElements.adminControlsPanel.style.display = "flex";
+        DOMElements.statusMessage.textContent = "¡🔴 MODO EDICIÓN ACTIVO!";
+        DOMElements.statusMessage.style.color = "#ef233c"; 
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR"; 
+        DOMElements.toggleAdminBtn.className = 'btn btn-danger';
+        enableEditing(); 
     } else {
-        DOM.adminPanel.style.display = 'none';
-        DOM.toggleBtn.style.display = 'block';
-        DOM.formSection.style.display = 'none';
-        document.querySelectorAll('.delete-banner-btn').forEach(b => b.style.display = 'none');
+        DOMElements.adminControlsPanel.style.display = "none";
+        DOMElements.statusMessage.textContent = "Modo lectura activo"; 
+        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EDICIÓN"; 
+        DOMElements.toggleAdminBtn.className = 'btn btn-primary';
+        disableEditing(); 
+    }
+    renderStatusPanel(currentStatus, isAdmin); 
+}
+
+function toggleAdminMode() {
+    if (!admin) {
+        updateAdminUI(true);
+        alert("¡🔴 EDITA CON RESPONSABILIDAD!\nCualquier cambio será visible para todos.");
+    } else {
+        if (!confirm("✅️ ¿Terminar la edición?")) return;
+        updateAdminUI(false);
+        loadData(); loadStatusData(); 
     }
 }
 
-// ----------------------------------------------------------------
-// 🚀 INICIALIZACIÓN
-// ----------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    loadBanners();
-
-    DOM.toggleBtn.onclick = () => toggleAdmin();
-    if (DOM.exitBtn) DOM.exitBtn.onclick = () => toggleAdmin(true);
-    DOM.addBannerBtn.onclick = () => DOM.formSection.style.display = 'block';
-    DOM.cancelBannerBtn.onclick = () => DOM.formSection.style.display = 'none';
-    DOM.publishBtn.onclick = handlePublishBanner;
-
-    DOM.container.onclick = (e) => {
-        const target = e.target;
-        const btn = target.closest('button'); 
-        
-        if (!btn) return;
-        if (btn.classList.contains('delete-banner-btn')) { handleDeleteBanner(btn.dataset.id); return; }
-        if (btn.classList.contains('toggle-comments-btn')) { toggleComments(btn.dataset.id); return; }
-        if (btn.classList.contains('pub-btn')) {
-            const form = btn.closest('.comment-form-container');
-            const bannerId = btn.dataset.id;
-            if(form && bannerId) handlePublishComment(bannerId, form);
-            return;
+// ----------------------------------------------------
+// CARDS & EDITING (TABLA 'items')
+// ----------------------------------------------------
+function createCardHTML(item, index) {
+    let cardClass = '', labelHTML = '', labelText = 'Actualizado', timeText = 'Sin editar';
+    
+    if (item.last_edited_timestamp) {
+        const { text, diff } = timeAgo(item.last_edited_timestamp);
+        timeText = text;
+        if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
+            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!NUEVO!</div>'; labelText = 'Reciente';
+        } else if (diff >= OLD_THRESHOLD_MS) {
+            cardClass = 'card-old'; labelHTML = '<div class="card-label">Antiguo</div>'; labelText = 'Antiguo';
         }
-        if (btn.classList.contains('like-button')) { handleLikeToggle(e); return; }
-    };
+    }
+    const neonColor = getCardColor(item.id);
+
+    return `
+    <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
+        ${labelHTML}
+        <span class="emoji">${item.emoji}</span>
+        <h3 style="--card-neon: ${neonColor}">${item.titulo}</h3>
+        <div class="card-content"><p>${item.contenido}</p></div>
+        <div class="card-time-panel" data-id="${item.id}">
+            <strong>${labelText}</strong> (${timeText})
+        </div>
+    </div>`;
+}
+
+function enableEditing() { 
+    document.querySelectorAll(".card").forEach(card => {
+        const index = card.getAttribute('data-index');
+        const item = currentData[index];
+        card.classList.add('editing-active');
+        card.removeEventListener('click', toggleTimePanel); 
+        
+        card.innerHTML = `
+            <input class="editable-emoji" value="${item.emoji}" maxlength="2">
+            <input class="editable-title" value="${item.titulo}">
+            <div class="card-content"><textarea class="editable-content">${item.contenido}</textarea></div>
+        `;
+    });
+}
+
+function disableEditing() { /* Se recarga con loadData() */ }
+
+function toggleTimePanel(event) {
+    if (admin) return;
+    const clickedCard = event.currentTarget;
+    const isShowing = clickedCard.classList.toggle('show-time-panel');
+    if (isShowing) setTimeout(() => clickedCard.classList.remove('show-time-panel'), TIME_PANEL_AUTOHIDE_MS);
+}
+
+// ----------------------------------------------------
+// NEWS TICKER (TABLA 'noticias')
+// ----------------------------------------------------
+function linkify(text) {
+    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
+        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
+        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
+    });
+}
+
+async function loadNews() {
+    // TABLA ANTIGUA: 'noticias'
+    const { data: newsData, error } = await supabase.from('noticias').select('*').order('timestamp', { ascending: false });
+    if (error) return;
+    
+    const validNews = [];
+    const cutoff = Date.now() - RECENT_THRESHOLD_MS; 
+    
+    newsData.forEach(n => {
+        if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n);
+        else supabase.from('noticias').delete().eq('id', n.id);
+    });
+    currentNews = validNews;
+    
+    if (validNews.length > 0) {
+        const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
+        DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`;
+        DOMElements.newsTicker.style.display = 'flex';
+        
+        const width = DOMElements.newsTickerContent.scrollWidth / 2;
+        const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
+        DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker-move-dynamic { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
+        DOMElements.newsTickerContent.style.animation = `ticker-move-dynamic ${duration}s linear infinite`;
+    } else {
+        DOMElements.newsTickerContent.innerHTML = `<span class="news-item">Sin Noticias recientes... || 🛡 Activa el modo edición para publicar</span>`.repeat(2);
+        DOMElements.newsTickerContent.style.animation = `ticker-move-static 15s linear infinite`;
+    }
+}
+
+async function addQuickNews() {
+    if (!admin) return;
+    const text = prompt("✍️ Escribe tu noticia (Cinta Roja):");
+    if (text && confirm("¿Publicar?")) {
+        await supabase.from('noticias').insert([{ text: text.trim() }]);
+        loadNews();
+    }
+}
+
+async function deleteNews() {
+    if (!admin || currentNews.length === 0) return alert("No hay noticias.");
+    const list = currentNews.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
+    const idx = parseInt(prompt(`Eliminar número:\n${list}`)) - 1;
+    if (currentNews[idx] && confirm("¿Eliminar?")) {
+        await supabase.from('noticias').delete().eq('id', currentNews[idx].id);
+        loadNews();
+    }
+}
+
+// ----------------------------------------------------
+// COMENTARIOS ELIMINADOS DE HOME (SOLO EN NOTICIAS)
+// ----------------------------------------------------
+// La base de datos antigua no tiene tabla 'comentarios' general.
+// Para evitar errores, ocultamos esa sección si existe en HTML o no hacemos nada.
+
+// ----------------------------------------------------
+// VISTAS & ESTADO
+// ----------------------------------------------------
+const VISIT_KEY = 'lastPageView';
+async function registerPageView() {
+    const last = localStorage.getItem(VISIT_KEY);
+    if (last && (Date.now() - parseInt(last)) < 24 * 60 * 60 * 1000) return;
+    const { error } = await supabase.from('page_views').insert({});
+    if (!error) localStorage.setItem(VISIT_KEY, Date.now());
+}
+async function getAndDisplayViewCount() {
+    const el = document.getElementById('viewCounter'); if (!el) return;
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
+    el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} `;
+}
+
+function renderStatusPanel(status, isAdminMode) {
+    const html = isAdminMode ? `
+        <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
+        <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
+        <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
+        <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>
+    ` : `
+        <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
+        <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
+        <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
+        <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>
+    `;
+    DOMElements.statusDataContainer.innerHTML = html;
+}
+
+async function loadStatusData() {
+    // TABLA ANTIGUA: 'status_data'
+    const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
+    if (data) currentStatus = { ...currentStatus, ...data };
+    renderStatusPanel(currentStatus, admin); fetchElToqueRates(); 
+}
+
+async function saveChanges() {
+    if (!admin) return;
+    const editDeficit = document.getElementById('editDeficit');
+    const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
+    const updates = [];
+    
+    document.querySelectorAll(".card").forEach(card => {
+        if (!card.classList.contains('editing-active')) return;
+        const emoji = card.querySelector('.editable-emoji').value;
+        const titulo = card.querySelector('.editable-title').value;
+        const contenido = card.querySelector('.editable-content').value;
+        const id = card.dataset.id;
+        // TABLA ANTIGUA: 'items'
+        updates.push(supabase.from('items').update({ 
+            emoji, titulo, contenido, 
+            last_edited_timestamp: new Date().toISOString() 
+        }).eq('id', id));
+    });
+
+    if (newDeficit !== currentStatus.deficit_mw) {
+        updates.push(supabase.from('status_data').update({ 
+            deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() 
+        }).eq('id', 1));
+    }
+    
+    if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); }
+    else { alert("No hay cambios."); }
+}
+
+async function loadData() {
+    // TABLA ANTIGUA: 'items'
+    const { data } = await supabase.from('items').select('*').order('id');
+    if (data) {
+        currentData = data; 
+        DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
+        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
+    DOMElements.saveBtn.addEventListener('click', saveChanges);
+    DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
+    DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
+    
+    const fechaSpan = document.getElementById('fecha-actualizacion');
+    if(fechaSpan) fechaSpan.textContent = new Date().toLocaleDateString();
+    
+    // Ocultar sección de comentarios en el HTML si existe (ya que no hay tabla)
+    const commentsSection = document.querySelector('.comments-section');
+    if(commentsSection) commentsSection.style.display = 'none';
+
+    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadStatusData(); 
 });
