@@ -1,470 +1,306 @@
-/* ----------------------------------------------------------------
-   ESTILOS BASE - FUSIONADOS Y OPTIMIZADOS
-   ---------------------------------------------------------------- */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
+/* =========================================
+   1. CONFIGURACIÓN Y VARIABLES GLOBALES
+   ========================================= */
 :root {
-  --color-texto-principal: #2b2d42;
-  --color-texto-secundario: #8d99ae;
-  --acento-rojo: #ef233c; 
-  --acento-verde: #10b981; 
-  --acento-morado: #4f46e5;
-  
-  --fondo-principal: #e6ffe6; 
-  --fondo-gradiente: var(--fondo-principal); 
-  
-  --sombra-fuerte: rgba(0, 0, 0, 0.25);
-  --sombra-suave: rgba(0, 0, 0, 0.1);
-  
-  /* ⭐ GLASSMORHPISM AVANZADO ⭐ */
-  --glass-bg: rgba(255, 255, 255, 0.3); /* Menos opaco para ver más el fondo */
-  --glass-border: rgba(255, 255, 255, 0.6); 
-  
-  --acento-cian: #00bcd4; 
-  --tiempo-panel-rojo: #f7a2ab; 
-  --tiempo-panel-cian: #a2d9e0; 
-
-  --color-comentario-fondo: #f8f9fa;
-  --color-respuesta-fondo: #f0f3f5;
-  --color-borde-hilo: #b3cdd1;
-  
-  --fondo-panel-status: #FFD700; 
-  --borde-panel-status: #ff9800;
-
-  /* ⭐ FUENTES MODERNAS ⭐ */
-  --font-principal: 'Nunito', sans-serif;
-  --font-titulo: 'Poppins', sans-serif;
+    /* Colores Base (Fondo oscuro profundo) */
+    --bg-dark: #050509;
+    --bg-panel: #0f0f16;
+    
+    /* Valores por defecto (serán sobrescritos por JS por tarjeta) */
+    --hue: 220;
+    --sat: 100%;
+    --lig: 50%;
+    --primary: hsl(var(--hue), var(--sat), var(--lig));
+    --primary-dim: hsla(var(--hue), var(--sat), var(--lig), 0.1);
+    --primary-glow: hsla(var(--hue), var(--sat), var(--lig), 0.6);
+    
+    /* Animaciones */
+    --transition-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Reset Básico */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  margin: 0;
-  padding: 0; 
-  font-family: var(--font-principal);
-  background: var(--fondo-gradiente);
-  color: var(--color-texto-principal);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  overflow-x: hidden; 
+    background-color: var(--bg-dark);
+    font-family: 'Outfit', sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    /* Fondo sutil ambiental */
+    background-image: radial-gradient(circle at 50% 0%, #1a1a24 0%, #000 80%);
 }
 
-/* --- HEADER --- */
-header {
-  width: 100%;
-  text-align: center;
-  padding: 1rem; 
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
-  color: white;
-  box-shadow: 0 4px 10px var(--sombra-fuerte);
-  position: relative;
+.main-wrapper {
+    padding: 40px;
+    width: 100%;
+    max-width: 1400px;
 }
-header h1 { 
-    margin: 0; 
-    font-size: 1.3rem; 
-    font-weight: 900; /* Más peso */
-    font-family: var(--font-titulo); /* Poppins para el título principal */
-}
-header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
-#fecha-actualizacion { font-weight: 900; color: #ffd700; }
 
-/* ----------------------------------------------------------------
-   ⚡ SISTEMA DE BOTONES PREMIUM (OPTIMIZADO) ⚡
-   ---------------------------------------------------------------- */
-/* Clase Base (Estructura) */
-.btn {
-    display: inline-flex;
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    perspective: 1000px; /* Habilita 3D */
+}
+
+/* =========================================
+   2. TARJETA MAESTRA (STRUCTURE)
+   ========================================= */
+.card {
+    /* Variables locales para esta tarjeta (JS las llenará) */
+    --card-hue: var(--hue); 
+    --card-primary: hsl(var(--card-hue), 90%, 60%);
+    
+    position: relative;
+    width: 340px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    
+    /* El corazón del Glassmorphism */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.4s var(--transition-smooth), 
+                box-shadow 0.4s var(--transition-smooth),
+                border-color 0.4s ease;
+                
+    /* Sombra inicial */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    isolation: isolate; /* Crea un nuevo contexto de apilamiento */
+}
+
+/* Efecto Hover en la Tarjeta */
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.7),
+                0 0 0 1px var(--card-primary) inset; /* Borde interior brillante */
+    border-color: rgba(255, 255, 255, 0.3);
+    z-index: 10;
+}
+
+/* =========================================
+   3. FONDO Y AMBIENTACIÓN (LAYERS)
+   ========================================= */
+.card-bg-elements {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* La figura premium (Blob) */
+.card-blob {
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--card-primary) 0%, transparent 70%);
+    opacity: 0.4;
+    filter: blur(60px);
+    border-radius: 50%;
+    transition: all 0.6s ease;
+    animation: floatBlob 10s infinite alternate ease-in-out;
+}
+
+/* Textura de Ruido (Noise) para calidad visual */
+.card-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+}
+
+/* Brillo superficial animado */
+.card-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg);
+    pointer-events: none;
+    transition: left 0.5s;
+    z-index: 0;
+}
+
+.card:hover .card-shine {
+    left: 150%; /* Pasa el brillo rápidamente al hacer hover */
+    transition: left 0.7s ease-in-out;
+}
+
+.card:hover .card-blob {
+    opacity: 0.6;
+    transform: scale(1.2) translate(-20px, 20px);
+}
+
+/* =========================================
+   4. CONTENIDO INTERNO
+   ========================================= */
+.card-content {
+    padding: 30px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 1;
+}
+
+/* Header de la tarjeta */
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.chip {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+}
+
+.icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 12px; 
-    font-family: var(--font-principal);
-    font-weight: 800;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    gap: 8px; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    position: relative;
-    overflow: hidden;
-    line-height: 1.2;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--card-primary);
+    font-size: 1.4rem;
+    transition: all 0.3s ease;
 }
 
-/* Efecto de Click (Hundimiento) */
-.btn:active {
-    transform: scale(0.96);
-    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+.card:hover .icon-box {
+    background: var(--card-primary);
+    color: #000;
+    box-shadow: 0 0 20px var(--card-primary);
 }
 
-/* Efecto Hover Genérico */
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    filter: brightness(1.1);
+/* =========================================
+   5. FUENTE GLASSMORPHISM (REQUERIMIENTO CLAVE)
+   ========================================= */
+.card-body {
+    margin-top: auto;
+    margin-bottom: 20px;
 }
 
-/* --- VARIANTES DE COLOR --- */
-
-/* 1. Botón de Noticias (Especial) */
-.btn-news {
-    background: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
-    color: white;
-    font-size: 1rem; 
+.glass-title {
+    font-family: 'Syncopate', sans-serif; /* Tech font */
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-bottom: 5px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid rgba(255,255,255,0.2);
-    margin: 10px auto 20px; 
-    width: auto;
+    letter-spacing: -1px;
+    
+    /* 1. Transparencia interna */
+    color: rgba(255, 255, 255, 0.02);
+    
+    /* 2. Borde fino (Stroke) */
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.8);
+    
+    /* 3. Resplandor difuso */
+    text-shadow: 0 0 30px var(--card-primary);
+    
+    position: relative;
+    transition: all 0.3s ease;
 }
 
-/* 2. Botón Principal (Admin Toggle / Login) */
-.btn-primary {
-    background-color: var(--acento-morado);
-    color: white;
+.sub-title {
+    font-size: 1rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--card-primary);
+    margin-bottom: 15px;
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--card-primary);
+}
+
+.description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 300;
+}
+
+/* Efecto hover en texto */
+.card:hover .glass-title {
+    -webkit-text-stroke: 1px var(--card-primary); /* Borde toma color */
+    color: rgba(255, 255, 255, 0.1); /* Se llena un poco */
+    filter: drop-shadow(0 0 10px var(--card-primary));
+}
+
+/* =========================================
+   6. BOTÓN DE ACCIÓN
+   ========================================= */
+.card-footer {
+    margin-top: 20px;
+}
+
+.action-btn {
     width: 100%;
-    max-width: 400px;
-}
-
-/* 3. Botón de Éxito (Guardar / Publicar) */
-.btn-success {
-    background-color: var(--acento-verde);
+    padding: 15px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
     color: white;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
 }
 
-/* 4. Botón de Peligro/Salida (Salir Admin / Borrar) */
-.btn-danger {
-    background-color: var(--acento-rojo);
-    color: white;
+.action-btn:hover {
+    background: var(--card-primary);
+    color: #000; /* Contraste oscuro sobre color neón */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    padding-right: 25px; /* Animación de flecha */
 }
 
-/* 5. Botón Secundario (Controles Admin menores) */
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.6);
-    color: var(--color-texto-principal);
-    border: 1px solid rgba(0,0,0,0.1);
-    font-size: 0.8rem;
-}
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.9);
+.action-btn i {
+    transition: transform 0.3s ease;
 }
 
-/* Tamaño Pequeño (para paneles densos) */
-.btn-sm {
-    padding: 8px 12px;
-    font-size: 0.75rem;
-    border-radius: 8px;
+.action-btn:hover i {
+    transform: translateX(5px);
 }
 
-/* ----------------------------------------------------------------
-   PANEL DE ESTADO DINÁMICO
-   ---------------------------------------------------------------- */
-.status-panel-container {
-    width: 95%; max-width: 800px; margin: 6px auto;
-    background-color: var(--fondo-panel-status);
-    border: 1px solid var(--borde-panel-status); 
-    border-radius: 10px; font-size: 0.8rem; color: var(--color-texto-principal); 
-    font-weight: 700; box-shadow: 0 2px 4px var(--sombra-suave); padding: 6px 8px;
-}
-.status-panel-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-bottom: 3px; margin-bottom: 4px; border-bottom: 1px dashed rgba(0,0,0,0.1);
-    font-size: 0.7rem; color: #555;
-}
-.live-container {
-    display: flex; align-items: center; gap: 6px; background-color: white;
-    border: 1px solid var(--acento-rojo); color: var(--acento-rojo);
-    padding: 3px 8px; border-radius: 20px; font-size: 0.6rem; font-weight: 900;
-    text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.live-dot {
-    width: 8px; height: 8px; background-color: var(--acento-rojo); border-radius: 50%;
-    display: block; animation: live-pulse 1.5s infinite ease-in-out;
-}
-@keyframes live-pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 35, 60, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 35, 60, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 35, 60, 0); }
-}
-.status-panel-container.admin-mode input:disabled {
-    background-color: #e9ecef; color: #6c757d; border-color: #ced4da;
-    cursor: not-allowed; font-style: italic; opacity: 0.8;
-}
-.status-panel-data {
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: nowrap; gap: 4px; font-size: 0.85rem; font-weight: 800;
-    text-align: center; overflow-x: auto;
-}
-.status-item {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 2px 4px; border-radius: 6px; min-width: 85px; flex-shrink: 0;
-}
-.status-item .value { display: block; font-size: 0.95rem; font-weight: 900; margin-top: 1px; }
-.status-item.deficit .value { color: var(--acento-rojo); }
-.status-item.divisa .value { color: #008000; }
-.status-item .label { font-size: 0.65rem; font-weight: 600; color: #555; margin-bottom: 1px; }
-
-/* Modo Admin Panel Estado */
-.status-panel-container.admin-mode { padding: 8px; border: 2px dashed var(--acento-rojo); }
-.status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 4px; }
-.status-panel-container.admin-mode .status-item {
-    width: 23%; flex-direction: column; justify-content: center;
-    background-color: rgba(255, 255, 255, 0.7); padding: 4px; border: 1px solid #ccc;
-}
-.status-panel-container.admin-mode input {
-    border: 1px solid var(--acento-rojo); padding: 2px 5px; border-radius: 4px;
-    font-size: 0.75rem; font-weight: 700; text-align: center; width: 100%; margin-top: 4px;
+/* =========================================
+   7. KEYFRAMES
+   ========================================= */
+@keyframes floatBlob {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(20px, -20px) scale(1.1); }
 }
 
-/* ----------------------------------------------------------------
-   PANCARTA DE NOTICIAS (NEWS TICKER) 
-   ---------------------------------------------------------------- */
-.news-ticker-container {
-    width: 100%; background: linear-gradient(90deg, #d90429 0%, var(--acento-rojo) 100%); 
-    color: white; box-shadow: 0 2px 5px var(--sombra-fuerte); overflow: hidden; 
-    padding: 5px 0; margin-bottom: 15px; display: flex; align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.5); border-bottom: 1px solid rgba(0, 0, 0, 0.3); 
-    position: sticky; top: 0; z-index: 998; 
+/* Responsive */
+@media (max-width: 768px) {
+    .card { width: 100%; height: auto; min-height: 450px; }
+    .glass-title { font-size: 2.2rem; }
 }
-.news-ticker-fixed-label {
-    font-weight: 900; margin-right: 8px; padding: 0 7px; font-size: 0.75rem; 
-    background-color: rgba(0, 0, 0, 0.35); border-radius: 4px; flex-shrink: 0; line-height: 1.2; z-index: 2; 
-}
-.news-ticker-wrap { overflow: hidden; flex-grow: 1; position: relative; height: 100%; }
-.news-ticker-content { white-space: nowrap; font-size: 0.8rem; display: inline-block; }
-.news-item { padding: 0 20px; display: inline-block; color: #f8f9fa; font-weight: 700; text-shadow: 0 0 2px rgba(0, 0, 0, 0.4); }
-.news-item small { font-weight: 600; opacity: 0.9; margin-left: 5px; font-size: 0.7rem; color: #1a1a1a; background-color: #ffc107; padding: 2px 5px; border-radius: 4px;}
-.news-item a { color: #ffcc00; text-decoration: underline; font-weight: 800; }
-@keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-/* ----------------------------------------------------------------
-   LOGIN Y ADMIN CONTROLES
-   ---------------------------------------------------------------- */
-.login-controls {
-  display: flex; flex-direction: column; align-items: center; gap: 10px; width: 95%; max-width: 550px; 
-  background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
-  padding: 1.2rem; border-radius: 16px; border: 1px solid var(--glass-border); 
-  box-shadow: 0 4px 12px var(--sombra-fuerte); margin-bottom: 20px; z-index: 10; 
-}
-.login-message { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; text-align: center; }
-
-/* Panel de Administracion (Botones internos) */
-#adminControlsPanel { 
-    display: none; justify-content: center; align-items: center; gap: 8px; 
-    padding: 10px; width: 100%; flex-wrap: wrap; 
-    background-color: rgba(255, 255, 255, 0.3); border-radius: 12px; overflow-x: hidden; margin-top: 10px;
-}
-
-/* Agrupación de botones */
-.admin-group {
-    display: flex; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap;
-}
-.admin-group button { flex-grow: 1; }
-
-/* ----------------------------------------------------------------
-   TARJETAS (CARDS) - GLASSMORPHISM AVANZADO
-   ---------------------------------------------------------------- */
-.container {
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Más ancho */
-  gap: 15px; /* Más espacio entre ellas */
-  width: 95%; max-width: 800px; padding: 15px; 
-}
-
-.card {
-  /* GLASSMORHPISM BASE */
-  background: var(--glass-bg); 
-  backdrop-filter: blur(15px); /* Más blur para efecto de cristal */
-  -webkit-backdrop-filter: blur(15px); 
-  border: 1px solid var(--glass-border); 
-  border-radius: 20px; /* Bordes más suaves y modernos */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
-  padding: 10px; 
-  text-align: center; 
-  color: var(--color-texto-principal);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición global más suave */
-  min-height: 120px; 
-  display: flex; flex-direction: column; 
-  position: relative; 
-  cursor: pointer; 
-  overflow: hidden; 
-}
-
-/* EFECTO HOVER */
-.card:hover:not(.admin-mode) {
-  transform: translateY(-8px) scale(1.02); /* Efecto 3D de levitación */
-  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-  background: rgba(255, 255, 255, 0.5); /* Se aclara al pasar el ratón */
-}
-
-/* ESTILOS INTERNOS */
-.card span.emoji { 
-    font-size: 2rem; /* Emojis más grandes */
-    display: block; 
-    margin-bottom: 5px; 
-}
-.card h3 { 
-    font-family: var(--font-titulo); /* Títulos con Poppins (más prominente) */
-    margin: 0; 
-    font-size: 1rem; /* Títulos más prominentes */
-    font-weight: 800; 
-    color: #1a1a1a; 
-    margin-top: 5px; 
-}
-.card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-.card-content p { 
-    margin: 6px 0 0; 
-    font-size: 0.85rem; 
-    color: #333; 
-    white-space: pre-wrap; 
-    text-align: center; 
-    font-weight: 600; /* Texto más legible */
-}
-
-/* VARIANTES DE ESTADO (OPTIMIZADAS) */
-.card-label {
-    position: absolute; top: -1px; right: -1px; font-weight: 900; padding: 2px 6px;
-    border-radius: 0 19px 0 15px; z-index: 10; font-size: 0.55rem; line-height: 1; display: none; 
-}
-
-/* Tarjeta Reciente (ROJO) */
-.card-recent:not(.admin-mode) {
-    border: 2px solid var(--acento-rojo); /* Borde acentuado */
-    box-shadow: 0 0 12px rgba(239, 35, 60, 0.7);
-}
-
-/* Tarjeta Antigua (CIAN) */
-.card-old:not(.admin-mode) {
-    border: 2px solid var(--acento-cian); 
-    box-shadow: 0 0 10px rgba(0, 188, 212, 0.6);
-}
-
-/* Panel de Tiempo */
-.card-time-panel {
-    position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px 8px; 
-    font-size: 0.7rem; font-weight: 700; color: #1a1a1a; font-family: var(--font-principal); 
-    background: white; transition: transform 0.3s ease-out; transform: translateY(100%); 
-    border-radius: 0 0 20px 20px; /* Ajuste al nuevo radio */
-    text-align: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-}
-.card.show-time-panel {
-    transform: translateY(-4px); /* Movimiento reducido al mostrar panel */
-}
-.card.show-time-panel .card-time-panel { transform: translateY(0); }
-
-/* Edición en Cards */
-.card.admin-mode { 
-    border: 2px dashed var(--acento-morado) !important; 
-    box-shadow: 0 0 15px rgba(79, 70, 229, 0.5) !important;
-    background: #fff9f9; /* Fondo más claro para indicar modo edición */
-    cursor: default;
-}
-.card .editable-content {
-    width: 100%; border: 2px dashed var(--acento-morado); border-radius: 8px; padding: 10px; 
-    font-size: 0.95rem; resize: vertical; min-height: 115px; margin-top: 5px;
-    font-family: var(--font-principal); box-sizing: border-box; background-color: #fff; line-height: 1.3;
-}
-.card .editable-title {
-    border: 2px dashed var(--acento-morado); padding: 5px; border-radius: 4px; text-align: center; 
-    font-weight: 700; margin-bottom: 8px; background-color: #fff;
-    font-size: 0.9rem; width: 100%; padding: 8px; font-family: var(--font-titulo);
-}
-.card .editable-emoji {
-    border: 2px dashed var(--acento-morado); padding: 5px; border-radius: 4px; text-align: center; 
-    font-weight: 700; margin-bottom: 8px; background-color: #fff;
-    width: 50%; height: 3rem; font-size: 2rem; margin: 0 auto 5px; display: block;
-}
-
-/* ----------------------------------------------------------------
-   COMENTARIOS Y HILOS
-   ---------------------------------------------------------------- */
-.comments-section {
-    width: 95%; max-width: 800px; padding: 20px; margin: 20px 0;
-    background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 4px 15px var(--sombra-suave);
-}
-.comments-section h2 { font-size: 1.3rem; margin-bottom: 15px; }
-.comments-display-wrap { max-height: 400px; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.85); overflow-y: auto; border-radius: 8px; border: 1px solid var(--color-borde-hilo); }
-.comment-item { 
-    border-bottom: 1px dashed #ccc; padding: 12px; margin-bottom: 10px; 
-    background-color: var(--color-comentario-fondo); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.comment-item:last-child { border-bottom: none; }
-.comment-item > strong.comment-name { 
-    font-size: 1rem; font-weight: 900; border-bottom: 2px solid #ddd; padding-bottom: 4px;
-    margin-bottom: 5px; color: var(--comment-color, #333); display: block; 
-}
-.comment-content { font-size: 0.85rem; color: #333; margin-left: 0; margin-top: 5px; }
-.comment-date { font-size: 0.65rem; color: var(--color-texto-secundario); display: block; text-align: right; }
-.comment-form-container input, .comment-form-container textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-principal); box-sizing: border-box; }
-
-/* Botón de publicar comentario: Usar clase btn btn-success, pero mantenemos selectores legacy por si acaso */
-#publishCommentBtn { 
-    width: 100%; /* Sobrescribir ancho específico */
-}
-
-/* Actions */
-.comment-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 5px; font-size: 0.8rem; }
-.like-button { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px 5px; line-height: 1; transition: transform 0.1s ease; }
-.like-button:hover { transform: scale(1.1); }
-.like-button .heart { color: #ccc; }
-.like-button.liked .heart { color: var(--acento-rojo); }
-.like-count { font-weight: 700; color: var(--color-texto-principal); }
-.reply-form-toggle { display: inline-block; margin-left: 10px; font-size: 0.75rem; color: var(--acento-verde); cursor: pointer; font-weight: 700; }
-.reply-form { display: none; margin-top: 10px; padding: 10px; background: rgba(240, 240, 240, 0.8); border-radius: 8px; }
-.reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.75rem; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: var(--font-principal); box-sizing: border-box; }
-
-.replies-container { padding-left: 15px; margin-top: 10px; border-left: 3px solid var(--color-borde-hilo); }
-.reply-item { 
-    margin-top: 10px; padding: 8px; background-color: var(--color-respuesta-fondo);
-    border-radius: 6px; border-top: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-.reply-item > span.comment-name { font-weight: 800; font-size: 0.9rem; color: var(--comment-color, #444); display: inline; }
-.replies-container .reply-item:not(:first-child) { display: none; }
-.replies-container.expanded .reply-item { display: block; }
-.reply-toggle { display: block; margin: 8px 0; font-size: 0.75rem; color: var(--acento-cian); cursor: pointer; font-weight: 800; text-decoration: underline; }
-
-/* FOOTER */
-footer {
-    padding: 20px 15px; background: var(--glass-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border-radius: 16px 16px 0 0; border-top: 1px solid var(--glass-border); margin-top: 25px; 
-    width: 100%; max-width: 800px; text-align: center; font-size: 0.8rem; color: var(--color-texto-principal);
-}
-
-/* MEDIA QUERIES */
-@media (max-width: 600px) {
-    header h1 { font-size: 1.2rem; }
-    .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
-    .card { min-height: 110px; padding: 8px; border-radius: 16px; }
-    .card span.emoji { font-size: 1.5rem; }
-    .card h3 { font-size: 0.9rem; }
-    .card-content p { font-size: 0.8rem; }
-    
-    /* Ajuste de botones en móvil */
-    .btn { padding: 8px 16px; font-size: 0.8rem; }
-    .btn-news { width: 90%; font-size: 0.9rem; }
-
-    .comments-section h2 { font-size: 1.1rem; }
-    .comment-actions { font-size: 0.7rem; gap: 5px; }
-    .replies-container { padding-left: 10px; }
-    
-    /* Panel estado móvil */
-    .status-panel-container { font-size: 0.75rem; padding: 6px 8px; }
-    .status-panel-data { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
-    .status-item { min-width: 85px; flex-shrink: 0; }
-    .status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 4px; }
-    .status-panel-container.admin-mode .status-item { flex-direction: column; width: 48%; }
-}
-
-/* CONTADOR DE VISTAS (PREMIUM CAPSULE) */
-.view-counter {
-    position: absolute; bottom: 8px; left: 10px; display: inline-flex; align-items: center; justify-content: center;
-    gap: 6px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.4); color: #ffffff; font-size: 0.75rem; font-weight: 800;
-    letter-spacing: 0.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); z-index: 20; transition: all 0.3s ease; cursor: default;
-}
-.view-counter:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
