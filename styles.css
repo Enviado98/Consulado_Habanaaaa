@@ -57,6 +57,7 @@ header {
   background: linear-gradient(135deg, #4f46e5, #9333ea);
   color: white;
   box-shadow: 0 4px 10px var(--sombra-fuerte);
+  position: relative; /* Necesario para el contador absoluto */
 }
 header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
 header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
@@ -650,25 +651,44 @@ footer {
 .news-btn-v2 .emoji {
     margin-right: 8px;
 }
-/* --- NUEVOS ESTILOS PARA EL CONTADOR DE VISTAS (DISCRETO) --- */
+/* --- NUEVOS ESTILOS PARA EL CONTADOR DE VISTAS (PREMIUM / EN VIVO STYLE) --- */
 
-/* Asegurar que el header sea el contenedor de referencia para posicionamiento absoluto */
-header {
-    position: relative; 
-}
-
-/* Estilos para el contador de vistas */
 .view-counter {
     position: absolute;
-    bottom: 5px; /* Ajuste a la esquina inferior */
-    left: 10px; /* Ajuste a la esquina izquierda */
-    color: white; /* Fuente blanca como se solicitó */
-    font-size: 0.8em; /* Pequeño y discreto */
-    font-weight: 600; 
-    opacity: 0.85; /* Ligeramente transparente para ser discreto */
-    z-index: 10; /* Asegurar que esté por encima de otros elementos del header */
-    padding: 2px 5px;
-    border-radius: 3px;
-    background-color: rgba(0, 0, 0, 0.4); /* Un fondo sutil para contraste */
-    white-space: nowrap; /* Evita que el texto se rompa */
-   }
+    bottom: 8px; /* Un poco más arriba para respirar */
+    left: 10px;
+    
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* Espacio entre texto y elementos */
+    
+    /* Glassmorphism con borde blanco sutil */
+    background: rgba(255, 255, 255, 0.15); 
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Soporte Safari */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    
+    padding: 4px 12px;
+    border-radius: 20px; /* Bordes totalmente redondos (Pill shape) */
+    
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.view-counter:hover {
+    background: rgba(255, 255, 255, 0.3); /* Más brillante al pasar el ratón */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Opcional: si quieres forzar un icono antes del texto vía CSS */
+/* .view-counter::before { content: '👀'; margin-right: 2px; } */
