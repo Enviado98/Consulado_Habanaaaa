@@ -1,4 +1,4 @@
-// news_script.js - LÓGICA UNIFICADA DE COMENTARIOS
+// news_script.js - LÓGICA DE NOTICIAS Y COMENTARIOS POR PANCARTA (DEFINITIVO)
 // ----------------------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA";
@@ -7,13 +7,14 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ----------------------------------------------------
-// 🎨 PALETA DE COLORES NEÓN & COMENTARIOS UNIFICADOS
+// 🎨 PALETA DE COLORES NEÓN
 // ----------------------------------------------------
 const NEON_PALETTE = [
     '#00ffff', '#ff00ff', '#00ff00', '#ffff00', '#ff0099', 
     '#9D00FF', '#FF4D00', '#00E5FF', '#76ff03', '#ff1744'
 ];
 
+// Estado Global
 let isAdmin = false; 
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
@@ -21,6 +22,7 @@ if (!userWebId) {
     localStorage.setItem('userWebId', userWebId);
 }
 
+// Referencias DOM
 const DOM = {
     container: document.getElementById('newsBannersContainer'),
     toggleBtn: document.getElementById('toggleNewsAdminBtn'),
@@ -29,8 +31,14 @@ const DOM = {
     formSection: document.getElementById('bannerCreationSection'),
     titleInput: document.getElementById('bannerTitle'),
     contentInput: document.getElementById('bannerContent'),
-    publishBtn: document.getElementById('publishBannerBtn')
+    publishBtn: document.getElementById('publishBannerBtn'),
+    addBannerBtn: document.getElementById('addBannerBtn'),
+    cancelBannerBtn: document.getElementById('cancelBannerBtn')
 };
+
+// ----------------------------------------------------------------
+// 🛠️ UTILIDADES
+// ----------------------------------------------------------------
 
 function getBannerColor(id) {
     let hash = 0;
@@ -72,10 +80,6 @@ function timeAgo(timestamp) {
     return { text, diff, date: new Date(timestamp) };
 }
 
-// ----------------------------------------------------------------
-// 🗣️ FUNCIONES DE COMENTARIO UNIFICADAS (Iguales a script.js)
-// ----------------------------------------------------------------
-
 function generateColorByName(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -86,13 +90,16 @@ function getInitials(name) {
     return name ? name.charAt(0).toUpperCase() : '?';
 }
 
+// ----------------------------------------------------------------
+// 🗣️ RENDERING DE COMENTARIOS (Idéntico a script.js pero contextual)
+// ----------------------------------------------------------------
+
 function createCommentHTML(comment, isLiked) {
     const color = generateColorByName(comment.name);
     const initial = getInitials(comment.name);
     const likeClass = isLiked ? 'liked' : '';
     const dateText = timeAgo(comment.timestamp).text;
 
-    // Nota: Usamos 'comment-item' que está definido en styles.css
     return `
         <div class="comment-item" data-comment-id="${comment.id}">
             <div class="comment-avatar" style="--comment-color: ${color};">${initial}</div>
@@ -127,28 +134,95 @@ function createCommentHTML(comment, isLiked) {
 function drawReplies(container, replies, userLikesMap) {
     container.innerHTML = ''; 
     replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
-    
     replies.forEach((reply) => {
         const isLiked = userLikesMap.get(reply.id) || false;
         container.insertAdjacentHTML('beforeend', createCommentHTML(reply, isLiked));
     });
 }
 
-function toggleReplyForm(event) {
-    const id = event.target.getAttribute('data-id');
-    const form = document.querySelector(`.reply-form[data-reply-to="${id}"]`);
-    if (form) {
-        document.querySelectorAll('.reply-form').forEach(f => { if(f !== form) f.style.display = 'none'; });
+// ----------------------------------------------------------------
+// ⚙️ LÓGICA DE COMENTARIOS POR BANNERS
+// ----------------------------------------------------------------
+
+async function loadCommentsForBanner(bannerId) {
+    const bannerContainer = document.querySelector(`.banner-item[data-id="${bannerId}"]`);
+    const commentsListContainer = bannerContainer.querySelector(`.comments-list[data-banner-id="${bannerId}"]`);
+    
+    if (!commentsListContainer) return;
+
+    // Fetch: Comentarios filtrados por banner_id y Likes del usuario
+    const [commentsResponse, likesResponse] = await Promise.all([
+        supabase.from('comentarios').select('*').eq('banner_id', bannerId).order('timestamp', { ascending: false }),
+        supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
+    ]);
+
+    if (commentsResponse.error) return commentsListContainer.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error al cargar comentarios.</p>`;
+    
+    const allComments = commentsResponse.data;
+    const userLikesMap = new Map();
+    if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
+    
+    const principalComments = allComments.filter(c => c.parent_id === null);
+    const repliesMap = allComments.reduce((map, comment) => {
+        if (comment.parent_id !== null) {
+            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []);
+            map.get(comment.parent_id).push(comment);
+        }
+        return map;
+    }, new Map());
+    
+    // Renderizado
+    if (principalComments.length === 0) {
+        commentsListContainer.innerHTML = `<p style="text-align: center; color: #eee; font-size: 0.9rem; padding: 10px;">Sé el primero en comentar esta noticia.</p>`;
+    } else {
+        commentsListContainer.innerHTML = principalComments.map(c => createCommentHTML(c, userLikesMap.get(c.id))).join('');
         
-        const isVisible = form.style.display === 'block';
-        form.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible) form.querySelector('.reply-name').focus();
+        principalComments.forEach(comment => {
+            const replies = repliesMap.get(comment.id);
+            if (replies) {
+                const container = commentsListContainer.querySelector(`.replies-container[data-parent-of="${comment.id}"]`);
+                if (container) drawReplies(container, replies, userLikesMap);
+            }
+        });
     }
+    
+    // Actualizar contador de comentarios en el botón
+    const toggleBtn = bannerContainer.querySelector('.toggle-comments-btn');
+    if(toggleBtn) toggleBtn.textContent = `🗣️ Ver Comentarios (${allComments.length})`;
+}
+
+function toggleComments(bannerId) {
+    const wrap = document.querySelector(`.comments-container-wrap[data-id="${bannerId}"]`);
+    if (wrap) {
+        const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+        wrap.style.display = isHidden ? 'block' : 'none';
+        // Si se abre y está vacío o desactualizado, se podría recargar, pero loadCommentsForBanner ya se llama al inicio.
+    }
+}
+
+// Funciones de interacción (Likes, Reply, Publish) DELEGADAS
+async function handlePublishComment(bannerId, formElement) {
+    const name = formElement.querySelector('.comment-name').value.trim();
+    const text = formElement.querySelector('.comment-text').value.trim();
+    const publishBtn = formElement.querySelector('.pub-btn');
+
+    if (name.length < 2 || text.length < 2) return alert("Escribe un nombre y mensaje válidos.");
+
+    publishBtn.disabled = true;
+    // Insertamos con banner_id
+    const { error } = await supabase.from('comentarios').insert([{ name, text, banner_id: bannerId, likes_count: 0 }]);
+    
+    if (!error) {
+        formElement.querySelector('.comment-name').value = '';
+        formElement.querySelector('.comment-text').value = '';
+        await loadCommentsForBanner(bannerId); // Recarga local
+    } else { alert("❌ Error al publicar."); }
+    publishBtn.disabled = false;
 }
 
 async function handlePublishReply(event) {
     const parentId = event.target.getAttribute('data-parent-id');
-    const bannerId = event.target.getAttribute('data-banner-id');
+    const bannerId = event.target.getAttribute('data-banner-id'); // Importante para asociarlo a la noticia
     const form = event.target.closest('.reply-form');
     const name = form.querySelector('.reply-name').value.trim();
     const text = form.querySelector('.reply-text').value.trim();
@@ -162,15 +236,29 @@ async function handlePublishReply(event) {
         form.style.display = 'none';
         form.querySelector('.reply-name').value = '';
         form.querySelector('.reply-text').value = '';
-        await loadCommentsForBanner(bannerId); // Recarga solo los comentarios de esta pancarta
+        await loadCommentsForBanner(bannerId);
     } else { alert("❌ Error al responder."); }
     event.target.disabled = false;
+}
+
+function toggleReplyForm(event) {
+    const id = event.target.getAttribute('data-id');
+    // Buscar dentro del contenedor de la noticia específica para evitar conflictos
+    const bannerItem = event.target.closest('.banner-item');
+    const form = bannerItem.querySelector(`.reply-form[data-reply-to="${id}"]`);
+    
+    if (form) {
+        bannerItem.querySelectorAll('.reply-form').forEach(f => { if(f !== form) f.style.display = 'none'; });
+        const isVisible = form.style.display === 'block';
+        form.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) form.querySelector('.reply-name').focus();
+    }
 }
 
 async function handleLikeToggle(event) {
     const btn = event.currentTarget;
     const id = btn.getAttribute('data-id');
-    const counter = document.querySelector(`.like-count[data-counter-id="${id}"]`);
+    const counter = btn.querySelector('.like-count') || document.querySelector(`.like-count[data-counter-id="${id}"]`);
     const isLiked = btn.classList.contains('liked');
     
     btn.disabled = true;
@@ -192,115 +280,49 @@ async function handleLikeToggle(event) {
     btn.disabled = false;
 }
 
-function attachCommentListeners(containerElement) {
-    containerElement.querySelectorAll('.reply-form-toggle').forEach(btn => {
-        btn.onclick = (e) => toggleReplyForm(e);
-    });
-    containerElement.querySelectorAll('.publish-reply-btn').forEach(btn => {
-        btn.onclick = (e) => handlePublishReply(e);
-    });
-    containerElement.querySelectorAll('.like-button').forEach(btn => {
-        btn.onclick = (e) => handleLikeToggle(e);
-    });
-}
-
-async function handlePublishComment(bannerId, formElement) {
-    const name = formElement.querySelector('.comment-name').value.trim();
-    const text = formElement.querySelector('.comment-text').value.trim();
-    const publishBtn = formElement.querySelector('.pub-btn');
-
-    if (name.length < 2 || text.length < 2) return alert("Escribe un nombre y mensaje válidos.");
-
-    publishBtn.disabled = true;
-    const { error } = await supabase.from('comentarios').insert([{ name, text, banner_id: bannerId, likes_count: 0 }]);
-    
-    if (!error) {
-        formElement.querySelector('.comment-name').value = '';
-        formElement.querySelector('.comment-text').value = '';
-        await loadCommentsForBanner(bannerId);
-    } else { alert("❌ Error al publicar."); }
-    publishBtn.disabled = false;
-}
-
-async function loadCommentsForBanner(bannerId) {
-    const bannerContainer = document.querySelector(`.banner-item[data-id="${bannerId}"]`);
-    const commentsListContainer = bannerContainer.querySelector(`.comments-list[data-banner-id="${bannerId}"]`);
-    
-    if (!commentsListContainer) return;
-
-    const [commentsResponse, likesResponse] = await Promise.all([
-        supabase.from('comentarios').select('*').eq('banner_id', bannerId).order('timestamp', { ascending: false }),
-        supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
-    ]);
-
-    if (commentsResponse.error) return commentsListContainer.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error al cargar comentarios.</p>`;
-    
-    const allComments = commentsResponse.data;
-    const userLikesMap = new Map();
-    if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
-    
-    const principalComments = allComments.filter(c => c.parent_id === null);
-    const repliesMap = allComments.reduce((map, comment) => {
-        if (comment.parent_id !== null) {
-            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []);
-            map.get(comment.parent_id).push(comment);
-        }
-        return map;
-    }, new Map());
-    
-    if (principalComments.length === 0) {
-        commentsListContainer.innerHTML = `<p style="text-align: center; color: #999; font-size: 0.9rem; padding: 10px;">Sé el primero en comentar esta noticia.</p>`;
-    } else {
-        commentsListContainer.innerHTML = principalComments.map(c => createCommentHTML(c, userLikesMap.get(c.id))).join('');
-        
-        principalComments.forEach(comment => {
-            const replies = repliesMap.get(comment.id);
-            if (replies) {
-                const container = document.querySelector(`.replies-container[data-parent-of="${comment.id}"]`);
-                if (container) drawReplies(container, replies, userLikesMap);
-            }
-        });
-    }
-
-    // Volver a adjuntar listeners después de renderizar
-    attachCommentListeners(commentsListContainer.closest('.banner-item'));
-}
-
 // ----------------------------------------------------------------
-// 📢 LÓGICA DE BANNERS (Noticias)
+// 📰 LÓGICA DE PANCARTAS (BANNERS)
 // ----------------------------------------------------------------
 
 function createBannerHTML(banner) {
     const neonColor = getBannerColor(banner.id);
     const linkedContent = linkify(banner.content);
-    const commentsCount = banner.comments_count || 0;
-    const isNew = (Date.now() - new Date(banner.timestamp).getTime()) < (7 * 24 * 60 * 60 * 1000); // Es nueva si tiene menos de 7 días
+    // Calculamos si es nuevo (menos de 7 días)
+    const isNew = (Date.now() - new Date(banner.timestamp).getTime()) < (7 * 24 * 60 * 60 * 1000);
+    
+    // Botón borrar solo visible si admin es true (controlado por CSS/JS global toggle)
+    const deleteBtnStyle = isAdmin ? 'display: flex;' : 'display: none;';
 
     return `
         <div class="banner-item" data-id="${banner.id}">
-            <h2 style="--card-neon: ${neonColor}">${banner.title} ${isNew ? '<span class="new-tag">¡NUEVO!</span>' : ''}</h2>
+            <button class="delete-banner-btn btn-danger" data-id="${banner.id}" style="${deleteBtnStyle}">×</button>
+            
+            <h2 style="--card-neon: ${neonColor}">
+                ${banner.title} 
+                ${isNew ? '<span class="new-tag">¡NUEVO!</span>' : ''}
+            </h2>
+            
             <div class="banner-meta">
-                <span>📅 ${timeAgo(banner.timestamp).text}</span>
-                ${isAdmin ? `<button class="delete-banner-btn btn-danger btn-sm" data-id="${banner.id}" style="display: flex;">❌ Borrar</button>` : ''}
+                <span>📅 Publicado: ${timeAgo(banner.timestamp).text}</span>
             </div>
             
             <div class="banner-content">${linkedContent}</div>
             
             <div class="banner-actions">
                 <button class="toggle-comments-btn btn btn-secondary btn-sm" data-id="${banner.id}">
-                    🗣️ Ver Comentarios (${commentsCount})
+                    🗣️ Cargar Comentarios
                 </button>
             </div>
 
-            <div class="comments-container-wrap" data-id="${banner.id}" style="display: none;">
-                <div class="comments-list" data-banner-id="${banner.id}">
-                    <p style="text-align: center; color: #eee; margin: 15px;">Cargando comentarios...</p>
-                </div>
-
+            <div class="comments-container-wrap" data-id="${banner.id}">
                 <div class="comment-form-container">
                     <input type="text" class="comment-name" placeholder="Tu Nombre" required maxlength="30">
                     <textarea class="comment-text" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250"></textarea>
                     <button class="pub-btn btn btn-success" data-id="${banner.id}">Publicar Comentario</button>
+                </div>
+
+                <div class="comments-list" data-banner-id="${banner.id}">
+                    <p style="text-align: center; color: #eee; margin: 15px;">Cargando...</p>
                 </div>
             </div>
         </div>
@@ -313,29 +335,30 @@ async function loadBanners() {
         DOM.container.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error al cargar noticias: ${error.message}</p>`;
         return;
     }
+    if (!data || data.length === 0) {
+        DOM.container.innerHTML = `<p style="text-align: center; color: white;">No hay noticias publicadas aún.</p>`;
+        return;
+    }
+
     DOM.container.innerHTML = data.map(createBannerHTML).join('');
 
-    // Adjuntar los listeners de comentarios iniciales
-    data.forEach(banner => {
-        loadCommentsForBanner(banner.id); // Carga los datos de comentarios (pero el contenedor está oculto)
-    });
+    // Cargar comentarios iniciales para todas las pancartas
+    data.forEach(banner => loadCommentsForBanner(banner.id));
 }
 
-function toggleComments(bannerId) {
-    const wrap = document.querySelector(`.comments-container-wrap[data-id="${bannerId}"]`);
-    if (wrap) {
-        wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
-    }
-}
+// ----------------------------------------------------------------
+// 🛡️ ADMIN & EVENTOS
+// ----------------------------------------------------------------
 
-async function handlePublish() {
+async function handlePublishBanner() {
     if (!isAdmin) return;
     const title = DOM.titleInput.value.trim();
     const content = DOM.contentInput.value.trim();
-    if (title.length < 5 || content.length < 10) return alert("Título y contenido deben ser más largos.");
+    
+    if (title.length < 5 || content.length < 10) return alert("Título (min 5) y contenido (min 10) requeridos.");
     
     DOM.publishBtn.disabled = true;
-    const { error } = await supabase.from('banners').insert([{ title, content, comments_count: 0 }]);
+    const { error } = await supabase.from('banners').insert([{ title, content }]);
     
     if (!error) {
         DOM.titleInput.value = '';
@@ -343,16 +366,23 @@ async function handlePublish() {
         DOM.formSection.style.display = 'none';
         await loadBanners();
     } else {
+        console.error(error);
         alert("Error al publicar la pancarta.");
     }
     DOM.publishBtn.disabled = false;
 }
 
-async function handleDelete(id) {
-    if (!isAdmin || !confirm("¿Confirmar borrado de la pancarta? ¡Esto también borra todos los comentarios asociados!")) return;
-    await supabase.from('comentarios').delete().eq('banner_id', id); // Borra comentarios asociados
-    await supabase.from('banners').delete().eq('id', id);
-    await loadBanners();
+async function handleDeleteBanner(id) {
+    if (!isAdmin || !confirm("¿Confirmar borrado de la pancarta?\n⚠️ ¡Esto también borra todos los comentarios asociados!")) return;
+    
+    // Primero borramos comentarios para evitar errores de Foreign Key (si no está en Cascade)
+    await supabase.from('comentarios').delete().eq('banner_id', id); 
+    
+    // Borramos pancarta
+    const { error } = await supabase.from('banners').delete().eq('id', id);
+    
+    if (!error) await loadBanners();
+    else alert("Error al borrar.");
 }
 
 function toggleAdmin(forceExit = false) {
@@ -361,9 +391,9 @@ function toggleAdmin(forceExit = false) {
         isAdmin = false;
     } else if (!isAdmin) {
         isAdmin = true;
-        alert("¡🔴 MODO EDICIÓN ACTIVO! Edita con responsabilidad.");
-    } else { // Si ya está activo y no es forzar salida
-        return;
+        alert("¡🔴 MODO EDICIÓN ACTIVO!");
+    } else {
+        return; // Ya es admin
     }
     
     if (isAdmin) {
@@ -377,46 +407,65 @@ function toggleAdmin(forceExit = false) {
         DOM.formSection.style.display = 'none';
         // Ocultar botones de borrar
         document.querySelectorAll('.delete-banner-btn').forEach(b => b.style.display = 'none');
-        loadBanners(); // Recargar para eliminar inputs de edición si los hubiese
     }
 }
 
-
 // ----------------------------------------------------------------
-// 🚀 INICIALIZACIÓN
+// 🚀 INICIALIZACIÓN & DELEGACIÓN DE EVENTOS
 // ----------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadBanners();
 
-    // Listeners de Admin
+    // Listeners Estáticos
     DOM.toggleBtn.onclick = () => toggleAdmin();
     if (DOM.exitBtn) DOM.exitBtn.onclick = () => toggleAdmin(true);
-    document.getElementById('addBannerBtn').onclick = () => DOM.formSection.style.display = 'block';
-    document.getElementById('cancelBannerBtn').onclick = () => DOM.formSection.style.display = 'none';
-    DOM.publishBtn.onclick = handlePublish;
+    DOM.addBannerBtn.onclick = () => DOM.formSection.style.display = 'block';
+    DOM.cancelBannerBtn.onclick = () => DOM.formSection.style.display = 'none';
+    DOM.publishBtn.onclick = handlePublishBanner;
 
-    // Listener Global para elementos dinámicos (Banners y Comentarios)
+    // Delegación de Eventos (para elementos dinámicos dentro de las pancartas)
     DOM.container.onclick = (e) => {
-        const t = e.target.closest('button'); 
-        if (!t) return;
+        const target = e.target;
+        const btn = target.closest('button'); // Detectar clic en botón o icono dentro
         
-        const bannerId = t.closest('.banner-item')?.dataset.id;
-        if (!bannerId) return;
+        if (!btn) return;
 
-        if (t.classList.contains('delete-banner-btn')) handleDelete(t.dataset.id);
-        
-        // Manejo de comentarios por eventos delegados (para nuevos y respuestas)
-        if (t.classList.contains('pub-btn')) {
-            const form = t.closest('.comment-form-container');
-            if(form) handlePublishComment(bannerId, form);
+        // Borrar pancarta
+        if (btn.classList.contains('delete-banner-btn')) {
+            handleDeleteBanner(btn.dataset.id);
             return;
         }
 
-        // Delegamos los likes y las respuestas al contenedor principal.
-        if (t.classList.contains('like-button')) handleLikeToggle(e);
-        if (t.classList.contains('reply-form-toggle')) toggleReplyForm(e);
-        if (t.classList.contains('publish-reply-btn')) handlePublishReply(e);
+        // Toggle ver comentarios
+        if (btn.classList.contains('toggle-comments-btn')) {
+            toggleComments(btn.dataset.id);
+            return;
+        }
 
-        if (t.classList.contains('toggle-comments-btn')) toggleComments(bannerId);
+        // Publicar comentario principal
+        if (btn.classList.contains('pub-btn')) {
+            const form = btn.closest('.comment-form-container');
+            const bannerId = btn.dataset.id;
+            if(form && bannerId) handlePublishComment(bannerId, form);
+            return;
+        }
+
+        // Like
+        if (btn.classList.contains('like-button')) {
+            handleLikeToggle(e); // Pasamos evento paracurrentTarget
+            return;
+        }
+
+        // Toggle form respuesta
+        if (btn.classList.contains('reply-form-toggle')) {
+            toggleReplyForm(e);
+            return;
+        }
+
+        // Publicar respuesta
+        if (btn.classList.contains('publish-reply-btn')) {
+            handlePublishReply(e);
+            return;
+        }
     };
 });
