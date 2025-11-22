@@ -1,121 +1,104 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Glassmorphism Premium UI | Full Production</title>
-    <meta name="description" content="Interfaz de tarjetas premium con efectos de cristal, neón y animaciones avanzadas.">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
-    
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css"> 
+
+<style id="dynamicTickerStyles"></style>
+
 </head>
 <body>
 
-    <main class="main-wrapper">
+<header>
+  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
+  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
+  
+  <div class="header-action-container">
+    <a href="news.html" class="btn btn-news" role="button">
+        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
+    </a>
+  </div>
+  
+  <div id="viewCounter" class="view-counter" aria-live="polite">
+    Cargando...
+  </div>
+
+</header>
+
+<div id="statusPanel" class="status-panel-container">
+    <div class="status-panel-header">
+        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
         
-        <div class="grid-container">
-            
-            <article class="card">
-                <div class="card-bg-elements">
-                    <div class="card-blob"></div>
-                    <div class="card-noise"></div>
-                </div>
-                
-                <div class="card-shine"></div>
-
-                <div class="card-content">
-                    <div class="card-top">
-                        <span class="chip">V.1.0</span>
-                        <div class="icon-box">
-                            <i class="ri-cpu-line"></i>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <h2 class="glass-title">CYBER</h2>
-                        <h3 class="sub-title">SECURITY</h3>
-                        <p class="description">Protección de datos con encriptación de grado militar y estética cristalina.</p>
-                    </div>
-
-                    <div class="card-footer">
-                        <button class="action-btn">
-                            <span>Ver Detalles</span>
-                            <i class="ri-arrow-right-line"></i>
-                        </button>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card">
-                <div class="card-bg-elements">
-                    <div class="card-blob"></div>
-                    <div class="card-noise"></div>
-                </div>
-                <div class="card-shine"></div>
-
-                <div class="card-content">
-                    <div class="card-top">
-                        <span class="chip">PRO</span>
-                        <div class="icon-box">
-                            <i class="ri-global-line"></i>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <h2 class="glass-title">NEXUS</h2>
-                        <h3 class="sub-title">NETWORK</h3>
-                        <p class="description">Conectividad global ultrarrápida con visualización de datos en tiempo real.</p>
-                    </div>
-
-                    <div class="card-footer">
-                        <button class="action-btn">
-                            <span>Ver Detalles</span>
-                            <i class="ri-arrow-right-line"></i>
-                        </button>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card">
-                <div class="card-bg-elements">
-                    <div class="card-blob"></div>
-                    <div class="card-noise"></div>
-                </div>
-                <div class="card-shine"></div>
-
-                <div class="card-content">
-                    <div class="card-top">
-                        <span class="chip">MAX</span>
-                        <div class="icon-box">
-                            <i class="ri-artboard-line"></i>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <h2 class="glass-title">FLUX</h2>
-                        <h3 class="sub-title">DESIGN</h3>
-                        <p class="description">Sistemas de diseño fluido que se adaptan a cualquier entorno digital.</p>
-                    </div>
-
-                    <div class="card-footer">
-                        <button class="action-btn">
-                            <span>Ver Detalles</span>
-                            <i class="ri-arrow-right-line"></i>
-                        </button>
-                    </div>
-                </div>
-            </article>
-
+        <div class="live-container">
+            <span class="live-dot"></span>
+            EN VIVO
         </div>
-    </main>
+        
+        <span id="lastEditedTime" style="display: none;"></span>
+    </div>
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
+    </div>
+</div>
 
-    <script src="script.js"></script>
+<div id="newsTicker" class="news-ticker-container" style="display:none;">
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+    <div class="news-ticker-wrap">
+        <div id="newsTickerContent" class="news-ticker-content">
+            </div>
+    </div>
+</div>
+
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
+            Accede a modo edición para actualizar la información
+  </div>
+  
+  <button id="toggleAdminBtn" class="btn btn-primary">
+      🛡️ ACTIVAR EL MODO EDICIÓN
+  </button>
+
+  <div id="adminControlsPanel">
+    <div class="admin-group">
+        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
+    </div>
+    <div class="admin-group">
+        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
+    </div>
+  </div>
+</div>
+
+<div class="container" id="contenedor">
+  </div>
+
+<section class="comments-section">
+    <h2>🗣️ Comentarios de la Comunidad</h2>
+    
+    <div class="comments-display-wrap">
+        <div id="commentsContainer" class="comments-list-container">
+            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
+        </div>
+    </div>
+
+    <div class="comment-form-container">
+        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
+        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
+        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
+    </div>
+</section>
+
+<footer>
+  <div>© 2025 – Información actualizada periódicamente.</div>
+</footer>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
