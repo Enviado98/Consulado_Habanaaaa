@@ -66,7 +66,7 @@ const DOMElements = {
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
-    lastEditedTime: document.getElementById('lastEditedTime')
+    lastEditedTime: document.getElementById('lastEditedTime') // Aún lo referenciamos para evitar errores, aunque esté oculto
 };
 
 function timeAgo(timestamp) {
@@ -595,15 +595,8 @@ async function getAndDisplayViewCount() {
 // ----------------------------------------------------
 
 function renderStatusPanel(status, isAdminMode) {
-    // Usamos deficit_edited_at para el tiempo de edición manual
-    const timeInfo = timeAgo(new Date(status.deficit_edited_at || Date.now()).getTime()).text;
-    DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${timeInfo}`;
-    
-    // Mostramos la hora de la divisa si existe y estamos en modo no-admin
-    if (!isAdminMode && status.divisa_edited_at) {
-        const { text: divisaTimeText } = timeAgo(status.divisa_edited_at);
-        DOMElements.lastEditedTime.innerHTML += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${divisaTimeText}</small>`;
-    }
+    // 🔴 MODIFICACIÓN: Ya no actualizamos "DOMElements.lastEditedTime" porque ahora es ESTÁTICO (EN VIVO)
+    // Se eliminó la lógica de timeAgo para el panel superior.
 
     if (isAdminMode) {
         // MODO ADMIN: Inputs para editar déficit, divisas deshabilitadas (INCLUYE MLC)
