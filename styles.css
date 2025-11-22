@@ -150,7 +150,6 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
     border-radius: 12px; background: rgba(255, 255, 255, 0.9); color: #333;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 5; display: none;
 }
-/* Mantener funcionalidad visual de Recent/Old */
 .card-recent .card-label { display: block; color: var(--acento-rojo); }
 .card-old .card-label { display: block; color: var(--acento-cian); }
 
@@ -179,7 +178,7 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
 .btn-secondary { background: rgba(255,255,255,0.3); color: #fff; border: 1px solid white; }
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
 
-/* --- PANELES (Login, Status, Comments) --- */
+/* --- PANELES --- */
 .login-controls, .comments-section, .status-panel-container {
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -191,7 +190,7 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
 .login-controls { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 10; margin-top: 20px; }
 #adminControlsPanel { display: none; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
 
-/* --- STATUS PANEL (CORREGIDO A FUNCIONALIDAD ORIGINAL) --- */
+/* --- STATUS PANEL --- */
 .status-panel-container { 
     background: rgba(255, 215, 0, 0.8); 
     border: 1px solid rgba(255,255,255,0.5); 
@@ -206,7 +205,6 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
 .live-dot { width: 8px; height: 8px; background: var(--acento-rojo); border-radius: 50%; animation: blink 1.5s infinite; }
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-/* ESTRUCTURA DE DATOS NORMAL */
 .status-panel-data { 
     display: flex; justify-content: space-between; align-items: center;
     flex-wrap: nowrap; gap: 4px; text-align: center; overflow-x: auto;
@@ -220,7 +218,6 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
 .status-item.deficit .value { color: #d90429; }
 .status-item.divisa .value { color: #008000; }
 
-/* ESTRUCTURA DE DATOS MODO ADMIN */
 .status-panel-container.admin-mode { padding: 8px; border: 2px dashed var(--acento-rojo); }
 .status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 4px; }
 .status-panel-container.admin-mode .status-item {
@@ -232,7 +229,7 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
     font-size: 0.9rem; font-weight: 700; text-align: center; width: 100%; margin-top: 4px;
 }
 
-/* --- NEWS TICKER (RESTAURADO ORIGINAL) --- */
+/* --- NEWS TICKER --- */
 .news-ticker-container {
     width: 100%;
     background: rgba(220, 20, 60, 0.9); backdrop-filter: blur(5px);
@@ -242,19 +239,12 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
     padding: 5px 0; margin-bottom: 15px; display: flex; align-items: center;
     position: sticky; top: 0; z-index: 998;
 }
-
 .news-ticker-fixed-label {
     font-weight: 900; margin-right: 8px; padding: 0 7px; font-size: 0.75rem; 
     background-color: rgba(0, 0, 0, 0.35); border-radius: 4px; flex-shrink: 0; line-height: 1.2; z-index: 2; margin-left: 5px;
 }
-
-.news-ticker-wrap { 
-    overflow: hidden; flex-grow: 1; position: relative; height: 100%; 
-}
-.news-ticker-content { 
-    white-space: nowrap; font-size: 0.8rem; display: inline-block; 
-}
-
+.news-ticker-wrap { overflow: hidden; flex-grow: 1; position: relative; height: 100%; }
+.news-ticker-content { white-space: nowrap; font-size: 0.8rem; display: inline-block; }
 @keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 .news-item { padding: 0 20px; display: inline-block; font-weight: 700; text-shadow: 0 0 2px rgba(0, 0, 0, 0.4); }
@@ -263,7 +253,7 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
 
 
 /* ----------------------------------------------------------------
-   --- COMENTARIOS (MODERNO & INTUITIVO) ---
+   --- COMENTARIOS (CORREGIDO: HILOS DEBAJO) ---
    ---------------------------------------------------------------- */
 .comments-section { 
     padding: 10px 5px;
@@ -272,238 +262,155 @@ header p { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; opacity: 0.9
 }
 
 .comments-section h2 { 
-    font-size: 1.4rem; 
-    margin-bottom: 20px; 
-    text-align: center; 
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-size: 1.4rem; margin-bottom: 20px; text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .comments-display-wrap {
-    max-height: 500px; 
-    overflow-y: auto; 
-    padding: 15px; 
-    margin-bottom: 20px;
-    /* Contenedor estilo cristal suave */
-    background: rgba(255, 255, 255, 0.15); 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 24px; 
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    max-height: 500px; overflow-y: auto; padding: 15px; margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); border-radius: 24px; 
+    border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
 }
-
-/* SCROLLBAR PERSONALIZADO PARA COMENTARIOS */
 .comments-display-wrap::-webkit-scrollbar { width: 6px; }
 .comments-display-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 10px; }
 .comments-display-wrap::-webkit-scrollbar-track { background: transparent; }
 
-/* --- ITEM DE COMENTARIO (TARJETA) --- */
+/* --- ITEM DE COMENTARIO (WRAPPER PRINCIPAL) --- */
 .comment-item {
-    display: flex; /* Layout horizontal: Avatar | Contenido */
-    gap: 15px;
+    display: block; /* CRÍTICO: Bloque para que los hijos caigan debajo */
     margin-bottom: 20px;
     animation: fadeInComment 0.4s ease-out;
+    width: 100%;
 }
-
 @keyframes fadeInComment { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Fila horizontal solo para Avatar + Texto */
+.comment-main-row {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    align-items: flex-start;
+}
 
 /* Avatar Circular */
 .comment-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: var(--comment-color, #667eea); /* Color dinámico desde JS */
-    color: #fff;
-    font-weight: 800;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Evita que se aplaste */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    border: 2px solid rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    user-select: none;
+    width: 45px; height: 45px; border-radius: 50%;
+    background: var(--comment-color, #667eea); color: #fff;
+    font-weight: 800; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; /* No aplastar */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid rgba(255,255,255,0.4);
+    text-transform: uppercase; user-select: none;
 }
 
-/* Contenedor del Texto (La "Burbuja") */
+/* Burbuja */
 .comment-bubble {
     flex-grow: 1;
-    background: rgba(255, 255, 255, 0.85); /* Blanco casi sólido para leer bien */
+    background: rgba(255, 255, 255, 0.85);
     padding: 15px 18px;
-    border-radius: 0 18px 18px 18px; /* Esquina superior izquierda recta */
+    border-radius: 0 18px 18px 18px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     position: relative;
+    max-width: 100%; /* Prevenir desbordamiento */
 }
 
-.comment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
+.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.comment-name { color: #1a202c; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.3px; }
+.comment-date { font-size: 0.7rem; color: #718096; font-weight: 600; }
+.comment-content { color: #4a5568; font-size: 0.95rem; line-height: 1.5; font-weight: 500; word-wrap: break-word; }
 
-.comment-name {
-    color: #1a202c; /* Color oscuro fuerte */
-    font-weight: 800;
-    font-size: 0.95rem;
-    letter-spacing: 0.3px;
-}
-
-.comment-date {
-    font-size: 0.7rem;
-    color: #718096; /* Gris suave */
-    font-weight: 600;
-}
-
-.comment-content {
-    color: #4a5568; /* Gris medio para el texto */
-    font-size: 0.95rem;
-    line-height: 1.5;
-    font-weight: 500;
-    word-wrap: break-word;
-}
-
-/* --- ACCIONES (Likes, Responder) --- */
+/* Acciones */
 .comment-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 8px;
-    border-top: 1px dashed rgba(0,0,0,0.1);
-    padding-top: 8px;
+    display: flex; align-items: center; justify-content: flex-end; gap: 15px;
+    margin-top: 8px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 8px;
 }
-
 .like-button {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    color: #a0aec0;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0;
+    background: transparent; border: none; cursor: pointer; font-size: 1.1rem;
+    color: #a0aec0; transition: all 0.2s; display: flex; align-items: center; gap: 4px; padding: 0;
 }
 .like-button:hover { transform: scale(1.15); color: #e53e3e; }
 .like-button.liked { color: #ef233c; animation: popHeart 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes popHeart { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
-
 .like-count { font-size: 0.85rem; font-weight: 700; color: #4a5568; }
-
 .reply-form-toggle {
-    font-size: 0.75rem;
-    color: var(--acento-morado);
-    font-weight: 800;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: background 0.2s;
+    font-size: 0.75rem; color: var(--acento-morado); font-weight: 800; cursor: pointer;
+    text-transform: uppercase; padding: 4px 8px; border-radius: 6px; transition: background 0.2s;
 }
 .reply-form-toggle:hover { background: rgba(79, 70, 229, 0.1); }
 
-/* --- RESPUESTAS (HILOS) --- */
+/* --- RESPUESTAS (HILOS DEBAJO) --- */
 .replies-container {
     margin-top: 10px;
-    padding-left: 10px;
+    /* Indentación visual para indicar jerarquía */
+    padding-left: 20px; 
+    margin-left: 22px; /* Alinear con el centro del avatar aprox */
     border-left: 3px solid rgba(255,255,255,0.3);
+    display: block; /* Asegura que ocupe su propia línea */
+    width: calc(100% - 22px);
 }
 
 .comment-item.reply-style {
-    margin-bottom: 10px;
-    transform: scale(0.98);
+    margin-bottom: 12px;
+    transform: scale(0.99);
     transform-origin: left top;
 }
+.comment-item.reply-style .comment-avatar { width: 35px; height: 35px; font-size: 1rem; }
+.comment-item.reply-style .comment-bubble { background: rgba(255, 255, 255, 0.7); border-radius: 0 16px 16px 16px; }
 
-.comment-item.reply-style .comment-avatar {
-    width: 35px; height: 35px; font-size: 1rem; /* Avatar más pequeño en respuestas */
-}
-
-.comment-item.reply-style .comment-bubble {
-    background: rgba(255, 255, 255, 0.7); /* Un poco más transparente */
-    border-radius: 0 16px 16px 16px;
-}
-
-/* --- FORMULARIOS (Input principal y respuestas) --- */
+/* Formularios */
 .comment-form-container, .reply-form {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+    padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     border: 1px solid rgba(255,255,255,0.6);
 }
-
 .reply-form { 
-    display: none; 
-    margin-top: 15px; 
-    background: rgba(255,255,255,0.95);
+    display: none; margin-top: 15px; background: rgba(255,255,255,0.95);
     animation: slideDown 0.3s ease;
+    /* Importante para que no rompa el layout */
+    margin-left: 60px; width: calc(100% - 60px);
 }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
 .comment-form-container input, .comment-form-container textarea, 
 .reply-form input, .reply-form textarea {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    background: #f7fafc;
-    font-family: var(--fuente-principal);
-    font-size: 0.95rem;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    color: #2d3748;
+    width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #e2e8f0;
+    border-radius: 12px; background: #f7fafc; font-family: var(--fuente-principal);
+    font-size: 0.95rem; transition: border-color 0.3s, box-shadow 0.3s; color: #2d3748;
 }
-
 .comment-form-container input:focus, .reply-form input:focus, textarea:focus {
-    outline: none;
-    border-color: var(--acento-morado);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-    background: white;
+    outline: none; border-color: var(--acento-morado); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); background: white;
 }
 
-/* --- FOOTER & VIEW COUNTER --- */
+/* Footer & Counter */
 footer {
-    width: 100%; text-align: center; padding: 20px;
-    background: rgba(0,0,0,0.2); color: white; backdrop-filter: blur(5px);
+    width: 100%; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); color: white; backdrop-filter: blur(5px);
     margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);
 }
-
 .view-counter {
     position: fixed; bottom: 15px; left: 15px; z-index: 999;
     background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5); color: white;
-    padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    display: flex; align-items: center; gap: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.5); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 5px;
 }
 .view-counter:hover { transform: scale(1.05); background: rgba(255, 255, 255, 0.3); }
 
-/* MEDIA QUERIES (CRÍTICO PARA ORDENAR EL PANEL DE ESTADO) */
 @media (max-width: 600px) {
     .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
     .card { min-height: 130px; padding: 12px 8px; }
     .card span.emoji { font-size: 2rem; }
     .card h3 { font-size: 0.85rem; }
     header h1 { font-size: 1.3rem; }
-    
-    /* Ajustes Panel Estado Móvil */
     .status-panel-container { font-size: 0.75rem; padding: 6px 8px; }
     .status-panel-data { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
     .status-item { min-width: 85px; flex-shrink: 0; }
     
-    /* Ajustes Comentarios Móvil */
-    .comment-item { gap: 10px; }
+    /* Ajustes Mobile Comentarios */
+    .comment-main-row { gap: 10px; }
     .comment-avatar { width: 38px; height: 38px; font-size: 1rem; }
     .comment-bubble { padding: 12px; }
+    .replies-container { margin-left: 15px; padding-left: 10px; width: calc(100% - 15px); }
+    .reply-form { margin-left: 0; width: 100%; }
     
-    /* Admin Panel Móvil */
     .status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 4px; }
     .status-panel-container.admin-mode .status-item { flex-direction: column; width: 48%; }
 }
