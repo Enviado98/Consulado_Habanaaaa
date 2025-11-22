@@ -11,6 +11,7 @@ const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
 // ⏱️ TIEMPO DE CACHÉ: 10 Minutos (en milisegundos)
+// Si el dato en la BD tiene menos de este tiempo, NO gastamos llamada a la API.
 const CACHE_DURATION = 10 * 60 * 1000; 
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -28,15 +29,14 @@ const TIME_PANEL_AUTOHIDE_MS = 2000;
 
 let currentData = [];
 let currentNews = []; 
-
-// Inicializamos status (AHORA INCLUYE MLC)
+// Inicializamos status
 let currentStatus = {
     deficit_mw: 'Cargando...', 
     dollar_cup: '...', 
     euro_cup: '...',
-    mlc_cup: '...', // Nuevo campo para MLC
+    mlc_cup: '...', // ✅ NUEVO: Inicializamos MLC
     deficit_edited_at: null,
-    divisa_edited_at: null 
+    divisa_edited_at: null // Importante para el caché
 }; 
 const timePanelTimeouts = new Map(); 
 
@@ -92,7 +92,7 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 LÓGICA API ELTOQUE CON CACHÉ INTELIGENTE
+// 💰 LÓGICA API ELTOQUE CON CACHÉ INTELIGENTE Y MLC
 // ----------------------------------------------------
 
 async function fetchElToqueRates() {
@@ -101,6 +101,7 @@ async function fetchElToqueRates() {
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
         const now = Date.now();
         
+        // Si el dato tiene menos de 10 minutos, NO llamamos a la API.
         if ((now - lastUpdate) < CACHE_DURATION) {
             return; 
         }
@@ -123,45 +124,47 @@ async function fetchElToqueRates() {
         
         let usdPrice = '---';
         let eurPrice = '---';
-        let mlcPrice = '---'; // Variable para MLC
+        let mlcPrice = '---'; // ✅ Variable MLC
 
         if (data.tasas) {
             usdPrice = data.tasas.USD || '---';
-            eurPrice = data.tasas.EUR || data.tasas.ECU || '---'; 
-            mlcPrice = data.tasas.MLC || '---'; // Extraemos MLC
+            eurPrice = data.tasas.EUR || data.tasas.ECU || '---';
+            mlcPrice = data.tasas.MLC || '---'; // ✅ Capturamos MLC
         } else if (data.USD) {
              usdPrice = data.USD;
              eurPrice = data.EUR || data.ECU;
-             mlcPrice = data.MLC;
+             mlcPrice = data.MLC; // ✅ Capturamos MLC
         }
 
+        // Formatear a entero
         usdPrice = parseFloat(usdPrice).toFixed(0);
         eurPrice = parseFloat(eurPrice).toFixed(0);
-        mlcPrice = parseFloat(mlcPrice).toFixed(0);
+        mlcPrice = parseFloat(mlcPrice).toFixed(0); // ✅ Formatear MLC
 
         if (isNaN(usdPrice)) usdPrice = '---';
         if (isNaN(eurPrice)) eurPrice = '---';
         if (isNaN(mlcPrice)) mlcPrice = '---';
 
-        // 3. GUARDAR EN BASE DE DATOS
+        // 3. GUARDAR EN BASE DE DATOS (Aquí ocurre la magia)
+        // Si obtuvimos datos válidos, actualizamos Supabase para todos los demás
         if (usdPrice !== '---' && eurPrice !== '---') {
             const newTime = new Date().toISOString();
             
-            // Actualizamos el objeto local
+            // Actualizamos el objeto local inmediatamente para que se vea rápido
             currentStatus.dollar_cup = usdPrice;
             currentStatus.euro_cup = eurPrice;
-            currentStatus.mlc_cup = mlcPrice; // Actualizamos estado local MLC
+            currentStatus.mlc_cup = mlcPrice; // ✅ Actualizar local
             currentStatus.divisa_edited_at = newTime;
             
             renderStatusPanel(currentStatus, admin);
 
-            // Enviamos el dato nuevo a la nube (Incluyendo MLC)
+            // Enviamos el dato nuevo a la nube (INCLUYENDO MLC)
             const { error } = await supabase
                 .from('status_data')
                 .update({ 
                     dollar_cup: usdPrice, 
                     euro_cup: eurPrice,
-                    mlc_cup: mlcPrice, // Guardamos MLC en DB
+                    mlc_cup: mlcPrice, // ✅ Guardar en DB
                     divisa_edited_at: newTime
                 })
                 .eq('id', 1);
@@ -173,7 +176,6 @@ async function fetchElToqueRates() {
         console.error("⚠️ Error silencioso API:", error.message);
     }
 }
-
 // ----------------------------------------------------
 // FUNCIONES DE UI Y LOGIN
 // ----------------------------------------------------
@@ -198,7 +200,6 @@ function updateAdminUI(isAdmin) {
         disableEditing(); 
     }
     
-    // Re-renderizar panel con el modo correcto
     if (isAdmin) {
         DOMElements.statusPanel.classList.add('admin-mode');
         renderStatusPanel(currentStatus, true); 
@@ -403,7 +404,7 @@ async function deleteNews() {
 }
 
 // ----------------------------------------------------
-// LÓGICA DE COMENTARIOS Y VISTAS
+// LÓGICA DE COMENTARIOS, HILOS Y LIKES (COMPLETA)
 // ----------------------------------------------------
 
 function generateColorByName(str) {
@@ -570,6 +571,9 @@ async function handleLikeToggle(event) {
     btn.disabled = false;
 }
 
+// ----------------------------------------------------
+// --- CONTADOR DE VISTAS ---
+// ----------------------------------------------------
 const VISIT_KEY = 'lastPageView';
 async function registerPageView() {
     const last = localStorage.getItem(VISIT_KEY);
@@ -591,23 +595,26 @@ async function getAndDisplayViewCount() {
 // ----------------------------------------------------
 
 function renderStatusPanel(status, isAdminMode) {
+    // Usamos deficit_edited_at para el tiempo de edición manual
     const timeInfo = timeAgo(new Date(status.deficit_edited_at || Date.now()).getTime()).text;
     DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${timeInfo}`;
     
+    // Mostramos la hora de la divisa si existe y estamos en modo no-admin
     if (!isAdminMode && status.divisa_edited_at) {
         const { text: divisaTimeText } = timeAgo(status.divisa_edited_at);
         DOMElements.lastEditedTime.innerHTML += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${divisaTimeText}</small>`;
     }
 
-    // AHORA INCLUYE MLC EN AMBOS MODOS
     if (isAdminMode) {
+        // MODO ADMIN: Inputs para editar déficit, divisas deshabilitadas (INCLUYE MLC)
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
-            <div class="status-item"><span class="label">Dollar (Auto):</span><input type="text" value="${status.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-            <div class="status-item"><span class="label">Euro (Auto):</span><input type="text" value="${status.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+            <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+            <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
             <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled style="background:#e9ecef; color:#666;"></div>
         `;
     } else {
+        // MODO PÚBLICO: Visualización normal (INCLUYE MLC)
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
@@ -618,10 +625,15 @@ function renderStatusPanel(status, isAdminMode) {
 }
 
 async function loadStatusData() {
+    // Aquí cargamos todos los campos, incluyendo divisa_edited_at, para el caché
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
     if (data) currentStatus = { ...currentStatus, ...data };
     
+    // 1. Renderizamos el panel con los datos que ya tenemos (Divisas del caché viejo)
     renderStatusPanel(currentStatus, admin);
+    
+    // 2. Ejecutamos la función de caché inteligente. 
+    // Esta función decidirá si debe actualizar desde la API o no.
     fetchElToqueRates(); 
 }
 
@@ -644,7 +656,6 @@ async function saveChanges() {
     });
 
     if (newDeficit !== currentStatus.deficit_mw) {
-        // Nota: Guardamos también MLC si se dispara el guardado manual, aunque es automático
         updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() }).eq('id', 1));
     }
 
@@ -669,6 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
     registerPageView();
     getAndDisplayViewCount();
     loadData(); loadNews(); loadComments(); 
+    
+    // 🚨 MODIFICACIÓN CLAVE: Quitamos el setInterval porque el caché ahora se actualiza al cargar la página.
+    // Solo actualizaremos si el usuario está en modo admin (opcional) o si se requiere un update forzado.
     loadStatusData(); 
 });
 
