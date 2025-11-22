@@ -1,5 +1,5 @@
 // ----------------------------------------------------
-// 🚨 CONFIGURACIÓN DE SUPABASE (POSTGRESQL BAAS) 🚨
+// 🚨 CONFIGURACIÓN DE SUPABASE (BAAS) 🚨
 // ----------------------------------------------------
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
@@ -15,15 +15,43 @@ const CACHE_DURATION = 10 * 60 * 1000;
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let admin = false; 
+// ----------------------------------------------------
+// 🎨 PALETA DE COLORES NEÓN (PREMIUM)
+// ----------------------------------------------------
+const NEON_PALETTE = [
+    '#00ffff', // Cian Eléctrico
+    '#ff00ff', // Magenta Neón
+    '#00ff00', // Lima Matrix
+    '#ffff00', // Amarillo Cyber
+    '#ff0099', // Rosa Fuerte
+    '#9D00FF', // Violeta Ultra
+    '#FF4D00', // Naranja Neón
+    '#00E5FF', // Azul Láser
+    '#76ff03', // Verde Alien
+    '#ff1744'  // Rojo Brillante
+];
 
-// Variables y constantes
+// Función para obtener un color fijo basado en el ID (para que no cambie al recargar)
+function getCardColor(id) {
+    // Convertimos el ID (texto o número) a un número entero
+    let hash = 0;
+    const str = String(id);
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Usamos el módulo para elegir un color de la paleta
+    const index = Math.abs(hash) % NEON_PALETTE.length;
+    return NEON_PALETTE[index];
+}
+
+// Variables y constantes globales
+let admin = false; 
 const ONE_HOUR = 3600000;
 const ONE_DAY = 24 * ONE_HOUR;
 const RECENT_THRESHOLD_MS = ONE_DAY; 
 const OLD_THRESHOLD_MS = 7 * ONE_DAY;
 const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
-const TIME_PANEL_AUTOHIDE_MS = 2000; 
+const TIME_PANEL_AUTOHIDE_MS = 3000; // Un poco más de tiempo para leer
 
 let currentData = [];
 let currentNews = []; 
@@ -35,7 +63,6 @@ let currentStatus = {
     deficit_edited_at: null,
     divisa_edited_at: null
 }; 
-const timePanelTimeouts = new Map(); 
 
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
@@ -79,7 +106,7 @@ function timeAgo(timestamp) {
     else if (DAYS >= 7) { const weeks = Math.floor(DAYS / 7); text = `hace ${weeks} sem.`; } 
     else if (DAYS >= 2) { text = `hace ${DAYS} días`; } 
     else if (DAYS === 1) { text = 'hace 1 día'; } 
-    else if (HOURS >= 2) { text = `hace ${HOURS} horas`; } 
+    else if (HOURS >= 2) { text = `hace ${HOURS} h.`; } 
     else if (HOURS === 1) { text = 'hace 1 hora'; } 
     else if (MINUTES >= 1) { text = `hace ${MINUTES} min.`; } 
     else { text = 'hace unos momentos'; }
@@ -141,11 +168,10 @@ function updateAdminUI(isAdmin) {
         DOMElements.body.classList.add('admin-mode');
         DOMElements.adminControlsPanel.style.display = "flex";
         
-        DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
-        DOMElements.statusMessage.style.color = "#0d9488"; 
+        DOMElements.statusMessage.textContent = "¡🔴 EDITA CON RESPONSABILIDAD!";
+        DOMElements.statusMessage.style.color = "#ef233c"; 
         
-        // Cambiar estilos de botón usando clases (DRY)
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR MODO EDICIÓN"; 
         DOMElements.toggleAdminBtn.classList.remove('btn-primary');
         DOMElements.toggleAdminBtn.classList.add('btn-danger');
         
@@ -154,11 +180,10 @@ function updateAdminUI(isAdmin) {
         DOMElements.body.classList.remove('admin-mode');
         DOMElements.adminControlsPanel.style.display = "none";
         
-        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
+        DOMElements.statusMessage.textContent = "Modo lectura activo"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
         
-        // Restaurar estilos de botón
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EDICIÓN"; 
         DOMElements.toggleAdminBtn.classList.remove('btn-danger');
         DOMElements.toggleAdminBtn.classList.add('btn-primary');
         
@@ -172,7 +197,7 @@ function updateAdminUI(isAdmin) {
 function toggleAdminMode() {
     if (!admin) {
         updateAdminUI(true);
-        alert("¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
+        alert("¡🔴 EDITA CON RESPONSABILIDAD!\nCualquier cambio será visible para todos.");
     } else {
         if (!confirm("✅️ ¿Terminar la edición?")) return;
         updateAdminUI(false);
@@ -184,35 +209,40 @@ function enableEditing() { toggleEditing(true); }
 function disableEditing() { toggleEditing(false); }
 
 // ----------------------------------------------------
-// CREACIÓN DE CARD
+// CREACIÓN DE CARD (CON COLORES NEÓN)
 // ----------------------------------------------------
 function createCardHTML(item, index) {
-    let cardClass = '', labelHTML = '', panelStyle = '', labelText = 'Sin fecha', timeText = 'Sin editar';
+    let cardClass = '', labelHTML = '', labelText = 'Sin fecha', timeText = 'Sin editar';
+    
     if (item.last_edited_timestamp) {
         const { text, diff } = timeAgo(item.last_edited_timestamp);
         timeText = text;
         if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
             cardClass = 'card-recent';
-            labelHTML = '<div class="card-label" style="background-color: var(--acento-rojo); color: white; display: block;">!EDITADO RECIENTEMENTE¡</div>';
-            panelStyle = `background: var(--tiempo-panel-rojo); color: var(--acento-rojo);`; 
-            labelText = ''; 
+            labelHTML = '<div class="card-label">!NUEVO!</div>';
+            labelText = 'Reciente';
         } else if (diff >= OLD_THRESHOLD_MS) {
             cardClass = 'card-old';
-            labelHTML = '<div class="card-label" style="background-color: var(--acento-cian); color: var(--color-texto-principal); display: block;">Editado hace tiempo</div>';
-            panelStyle = `background: var(--tiempo-panel-cian); color: var(--acento-cian);`;
-            labelText = '';
+            labelHTML = '<div class="card-label">Antiguo</div>';
+            labelText = 'Antiguo';
         } else {
-            panelStyle = `background: white; color: var(--color-texto-principal);`;
             labelText = 'Actualizado';
         }
     }
+
+    // Obtener color neón único
+    const neonColor = getCardColor(item.id);
+
     return `
     <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
         ${labelHTML}
         <span class="emoji">${item.emoji}</span>
-        <h3>${item.titulo}</h3>
+        
+        <h3 style="--card-neon: ${neonColor}">${item.titulo}</h3>
+        
         <div class="card-content"><p>${item.contenido}</p></div>
-        <div class="card-time-panel" data-id="${item.id}" style="${panelStyle}">
+        
+        <div class="card-time-panel" data-id="${item.id}">
             <strong>${labelText}</strong> (${timeText})
         </div>
     </div>`;
@@ -228,12 +258,8 @@ function toggleEditing(enable) {
         const titleH3 = card.querySelector('h3');
         
         if (enable) {
+            card.classList.add('editing-active');
             card.removeEventListener('click', toggleTimePanel); 
-            
-            // ⭐ APLICAR CLASE ADMIN-MODE EN LUGAR DE ESTILOS INLINE ⭐
-            card.classList.add('admin-mode'); 
-            card.classList.remove('card-recent', 'card-old');
-            
             card.querySelector('.card-time-panel').style.display = 'none';
             if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'none';
 
@@ -253,29 +279,33 @@ function toggleEditing(enable) {
                 contentDiv.appendChild(editableContent);
             }
         } else {
+            card.classList.remove('editing-active');
             const editableEmoji = card.querySelector('.editable-emoji');
             if (editableEmoji) {
                 const editableTitle = card.querySelector('.editable-title');
                 const editableContent = card.querySelector('.editable-content');
+                
                 editableEmoji.remove(); editableTitle.remove(); editableContent.remove();
                 
+                // Restaurar elementos originales
                 const newEmojiSpan = document.createElement('span');
                 newEmojiSpan.className = 'emoji'; newEmojiSpan.textContent = item.emoji; 
                 card.insertBefore(newEmojiSpan, card.firstChild);
                 
+                // Restaurar título con su color neón
+                const neonColor = getCardColor(item.id);
                 const newTitleH3 = document.createElement('h3');
                 newTitleH3.textContent = item.titulo;
+                newTitleH3.style.setProperty('--card-neon', neonColor); // IMPORTANTE: Restaurar color
                 card.insertBefore(newTitleH3, newEmojiSpan.nextSibling);
 
                 const newP = document.createElement('p');
                 newP.textContent = item.contenido;
                 contentDiv.appendChild(newP);
                 
-                // ⭐ QUITAR CLASE ADMIN-MODE EN LUGAR DE ESTILOS INLINE ⭐
-                card.classList.remove('admin-mode'); 
-
-                card.querySelector('.card-time-panel').style.display = 'block';
-                if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'block';
+                card.querySelector('.card-time-panel').style.display = '';
+                if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = '';
+                card.addEventListener('click', toggleTimePanel);
             }
         }
     });
@@ -349,7 +379,7 @@ async function deleteNews() {
 }
 
 // ----------------------------------------------------
-// LÓGICA DE COMENTARIOS (DRY & Clean)
+// LÓGICA DE COMENTARIOS
 // ----------------------------------------------------
 function generateColorByName(str) {
     let hash = 0;
@@ -371,7 +401,7 @@ function createCommentHTML(comment, isLiked) {
                 <button class="like-button ${likeClass}" data-id="${comment.id}"><span class="heart">♥</span></button>
                 <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
                 ${!comment.parent_id ? `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : ''}
-                <span class="comment-date">Publicado: ${formatCommentDate(comment.timestamp)}</span>
+                <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
             </div>
             ${!comment.parent_id ? `
                 <div class="reply-form" data-reply-to="${comment.id}">
@@ -404,7 +434,7 @@ async function loadComments() {
         supabase.from('comentarios').select('*').order('timestamp', { ascending: false }),
         supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
     ]);
-    if (commentsResponse.error) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--acento-rojo);">❌ Error al cargar comentarios.</p>`;
+    if (commentsResponse.error) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error al cargar comentarios.</p>`;
     const allComments = commentsResponse.data;
     const userLikesMap = new Map();
     if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
@@ -415,7 +445,7 @@ async function loadComments() {
         return map;
     }, new Map());
     
-    if (principalComments.length === 0) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: var(--color-texto-secundario);">Aún no hay comentarios activos. ¡Sé el primero!</p>`;
+    if (principalComments.length === 0) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #333;">Sé el primero en comentar.</p>`;
     DOMElements.commentsContainer.innerHTML = principalComments.map(c => createCommentHTML(c, userLikesMap.get(c.id))).join('');
 
     principalComments.forEach(comment => {
@@ -481,7 +511,7 @@ async function getAndDisplayViewCount() {
     const el = document.getElementById('viewCounter'); if (!el) return;
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
-    el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} VISTAS (24H)`;
+    el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} `;
 }
 function renderStatusPanel(status, isAdminMode) {
     if (isAdminMode) {
