@@ -149,9 +149,9 @@ function updateAdminUI(isAdmin) {
     } else {
         DOMElements.body.classList.remove('admin-mode');
         DOMElements.adminControlsPanel.style.display = "none";
-        DOMElements.statusMessage.textContent = "Modo lectura activo"; 
+        DOMElements.statusMessage.textContent = "Activa modo edición y actualiza la información"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EDICIÓN"; 
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
         DOMElements.toggleAdminBtn.classList.remove('btn-danger');
         DOMElements.toggleAdminBtn.classList.add('btn-primary');
         disableEditing(); 
@@ -162,7 +162,7 @@ function updateAdminUI(isAdmin) {
 
 function toggleAdminMode() {
     if (!admin) {
-        updateAdminUI(true); alert("¡🔴 EDITA CON RESPONSABILIDAD!\nCualquier cambio será visible para todos.");
+        updateAdminUI(true); alert("¡🔴 EDITA CON RESPONSABILIDAD!");
     } else {
         if (!confirm("✅️ ¿Terminar la edición?")) return;
         updateAdminUI(false); loadData(); loadStatusData(); 
@@ -178,7 +178,7 @@ function createCardHTML(item, index) {
         const { text, diff } = timeAgo(item.last_edited_timestamp);
         timeText = text;
         if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
-            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!NUEVO!</div>'; labelText = 'Reciente';
+            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!RECIENTE!</div>'; labelText = 'Reciente';
         } else if (diff >= OLD_THRESHOLD_MS) {
             cardClass = 'card-old'; labelHTML = '<div class="card-label">Antiguo</div>'; labelText = 'Antiguo';
         } else { labelText = 'Actualizado'; }
@@ -495,4 +495,4 @@ async function loadData() {
         currentData = data; DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
-}
+                                      }
