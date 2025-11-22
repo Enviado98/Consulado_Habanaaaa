@@ -90,22 +90,51 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     color: #555;
 }
 
-/* ⭐ MODIFICACIÓN SOLICITADA: Estilo para la etiqueta de Última Edición (Caja Roja y Tamaño) ⭐ */
-#lastEditedTime {
-    /* REQUISITO: Cuadro Rojo de Fondo */
-    background-color: var(--acento-rojo); 
-    color: white; 
-    border-radius: 6px; 
-    padding: 2px 4px; /* Compacto */
-    display: inline-block; /* Necesario para que el cuadro encierre el texto */
-    text-align: center;
-    line-height: 1.1; /* Compacta las líneas */
-
-    /* REQUISITO: Reducir tamaño (aprox 30% menos del 0.75rem del padre) */
-    font-size: 0.5rem; /* Ligeramente más pequeño */
-    font-weight: 700;
-    flex-shrink: 0;
+/* ----------------------------------------------------------------
+   INDICADOR EN VIVO (NUEVO) 🔴
+   ---------------------------------------------------------------- */
+.live-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: white;
+    border: 1px solid var(--acento-rojo);
+    color: var(--acento-rojo);
+    padding: 3px 8px;
+    border-radius: 20px; /* Bordes muy redondos */
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--acento-rojo); /* Color base rojo */
+    border-radius: 50%;
+    display: block;
+    /* La animación mágica */
+    animation: live-pulse 1.5s infinite ease-in-out;
+}
+
+/* Animación de "Latido" o Broadcasting */
+@keyframes live-pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 35, 60, 0.7); /* Rojo Intenso pegado al punto */
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(239, 35, 60, 0); /* Rojo Tenue expandiéndose */
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 35, 60, 0);
+    }
+}
+/* ---------------------------------------------------------------- */
 
 /* Estilo para inputs deshabilitados (Automáticos por API) */
 .status-panel-container.admin-mode input:disabled {
@@ -116,7 +145,6 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     font-style: italic;
     opacity: 0.8;
 }
-/* ---------------------------------------------------------------- */
 
 
 .status-panel-data {
