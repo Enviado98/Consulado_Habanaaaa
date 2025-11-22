@@ -5,12 +5,12 @@ const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
 
 // ----------------------------------------------------
-// 💰 CONFIGURACIÓN API ELTOQUE (Caché Inteligente)
+// 💰 CONFIGURACIÓN API ELTOQUE (Caché Inteligente) 🚨
 // ----------------------------------------------------
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos
+const CACHE_DURATION = 10 * 60 * 1000; 
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -19,10 +19,19 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // 🎨 PALETA DE COLORES NEÓN (PREMIUM)
 // ----------------------------------------------------
 const NEON_PALETTE = [
-    '#00ffff', '#ff00ff', '#00ff00', '#ffff00', '#ff0099', 
-    '#9D00FF', '#FF4D00', '#00E5FF', '#76ff03', '#ff1744'
+    '#00ffff', // Cian Eléctrico
+    '#ff00ff', // Magenta Neón
+    '#00ff00', // Lima Matrix
+    '#ffff00', // Amarillo Cyber
+    '#ff0099', // Rosa Fuerte
+    '#9D00FF', // Violeta Ultra
+    '#FF4D00', // Naranja Neón
+    '#00E5FF', // Azul Láser
+    '#76ff03', // Verde Alien
+    '#ff1744'  // Rojo Brillante
 ];
 
+// Función para obtener un color fijo basado en el ID
 function getCardColor(id) {
     let hash = 0;
     const str = String(id);
@@ -33,24 +42,26 @@ function getCardColor(id) {
     return NEON_PALETTE[index];
 }
 
-// Variables Globales
+// Variables y constantes globales
 let admin = false; 
 const ONE_HOUR = 3600000;
 const ONE_DAY = 24 * ONE_HOUR;
 const RECENT_THRESHOLD_MS = ONE_DAY; 
 const OLD_THRESHOLD_MS = 7 * ONE_DAY;
 const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
-const TIME_PANEL_AUTOHIDE_MS = 3000;
+const TIME_PANEL_AUTOHIDE_MS = 3000; 
 
 let currentData = [];
 let currentNews = []; 
 let currentStatus = {
     deficit_mw: 'Cargando...', 
-    dollar_cup: '...', euro_cup: '...', mlc_cup: '...',
-    deficit_edited_at: null, divisa_edited_at: null
+    dollar_cup: '...', 
+    euro_cup: '...',
+    mlc_cup: '...',
+    deficit_edited_at: null,
+    divisa_edited_at: null
 }; 
 
-// Identificador de usuario para likes (simple localStorage)
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
     userWebId = crypto.randomUUID(); 
@@ -79,25 +90,24 @@ const DOMElements = {
 };
 
 function timeAgo(timestamp) {
-    if (!timestamp) return { text: 'Sin fecha.', diff: -1, date: null };
+    if (!timestamp) return { text: 'Sin fecha de edición.', diff: -1, date: null };
     const then = new Date(timestamp).getTime();
     const now = Date.now();
     const diff = now - then;
     if (diff < 0) return { text: 'Ahora mismo', diff: 0, date: new Date(timestamp) }; 
-    
     const SECONDS = Math.floor(diff / 1000);
     const MINUTES = Math.floor(SECONDS / 60);
     const HOURS = Math.floor(MINUTES / 60);
     const DAYS = Math.floor(HOURS / 24);
-    
     let text;
-    if (DAYS >= 30) text = `hace ${Math.floor(DAYS / 30)} meses`;
-    else if (DAYS >= 7) text = `hace ${Math.floor(DAYS / 7)} sem.`;
-    else if (DAYS >= 1) text = `hace ${DAYS} día${DAYS > 1 ? 's' : ''}`;
-    else if (HOURS >= 1) text = `hace ${HOURS} h.`;
-    else if (MINUTES >= 1) text = `hace ${MINUTES} min.`;
-    else text = 'hace un momento';
-    
+    if (DAYS >= 30) { text = `hace ${Math.floor(DAYS / 30)} meses`; } 
+    else if (DAYS >= 7) { const weeks = Math.floor(DAYS / 7); text = `hace ${weeks} sem.`; } 
+    else if (DAYS >= 2) { text = `hace ${DAYS} días`; } 
+    else if (DAYS === 1) { text = 'hace 1 día'; } 
+    else if (HOURS >= 2) { text = `hace ${HOURS} h.`; } 
+    else if (HOURS === 1) { text = 'hace 1 hora'; } 
+    else if (MINUTES >= 1) { text = `hace ${MINUTES} min.`; } 
+    else { text = 'hace unos momentos'; }
     return { text, diff, date: new Date(timestamp) };
 }
 
@@ -120,52 +130,65 @@ async function fetchElToqueRates() {
         if (!response.ok) throw new Error(`Error API: ${response.status}`);
         const data = await response.json();
         
-        let usd = '---', eur = '---', mlc = '---';
-        // Manejo de diferentes estructuras de respuesta de la API
-        if (data.tasas) { usd = data.tasas.USD; eur = data.tasas.EUR || data.tasas.ECU; mlc = data.tasas.MLC; } 
-        else if (data.USD) { usd = data.USD; eur = data.EUR || data.ECU; mlc = data.MLC; }
+        let usdPrice = '---', eurPrice = '---', mlcPrice = '---';
+        if (data.tasas) {
+            usdPrice = data.tasas.USD || '---'; eurPrice = data.tasas.EUR || data.tasas.ECU || '---'; mlcPrice = data.tasas.MLC || '---';
+        } else if (data.USD) {
+             usdPrice = data.USD; eurPrice = data.EUR || data.ECU; mlcPrice = data.MLC;
+        }
 
-        if (usd && eur) {
+        usdPrice = parseFloat(usdPrice).toFixed(0);
+        eurPrice = parseFloat(eurPrice).toFixed(0);
+        mlcPrice = parseFloat(mlcPrice).toFixed(0);
+
+        if (usdPrice !== '---' && eurPrice !== '---') {
             const newTime = new Date().toISOString();
-            currentStatus.dollar_cup = parseFloat(usd).toFixed(0);
-            currentStatus.euro_cup = parseFloat(eur).toFixed(0);
-            currentStatus.mlc_cup = parseFloat(mlc).toFixed(0);
+            currentStatus.dollar_cup = usdPrice;
+            currentStatus.euro_cup = eurPrice;
+            currentStatus.mlc_cup = mlcPrice;
             currentStatus.divisa_edited_at = newTime;
             
             renderStatusPanel(currentStatus, admin);
+
             await supabase.from('status_data').update({ 
-                dollar_cup: currentStatus.dollar_cup, 
-                euro_cup: currentStatus.euro_cup, 
-                mlc_cup: currentStatus.mlc_cup, 
-                divisa_edited_at: newTime
+                    dollar_cup: usdPrice, euro_cup: eurPrice, mlc_cup: mlcPrice, divisa_edited_at: newTime
             }).eq('id', 1);
         }
     } catch (error) { console.error("⚠️ Error API:", error.message); }
 }
 
 // ----------------------------------------------------
-// UI ADMIN
+// FUNCIONES DE UI Y LOGIN
 // ----------------------------------------------------
 function updateAdminUI(isAdmin) {
     admin = isAdmin;
-    DOMElements.body.classList.toggle('admin-mode', isAdmin);
-    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
-    
     if (isAdmin) {
+        DOMElements.body.classList.add('admin-mode');
         DOMElements.adminControlsPanel.style.display = "flex";
-        DOMElements.statusMessage.textContent = "¡🔴 MODO EDICIÓN ACTIVO!";
+        
+        DOMElements.statusMessage.textContent = "¡🔴 EDITA CON RESPONSABILIDAD!";
         DOMElements.statusMessage.style.color = "#ef233c"; 
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR"; 
-        DOMElements.toggleAdminBtn.className = 'btn btn-danger';
+        
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.classList.remove('btn-primary');
+        DOMElements.toggleAdminBtn.classList.add('btn-danger');
+        
         enableEditing(); 
     } else {
+        DOMElements.body.classList.remove('admin-mode');
         DOMElements.adminControlsPanel.style.display = "none";
+        
         DOMElements.statusMessage.textContent = "Modo lectura activo"; 
         DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        
         DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EDICIÓN"; 
-        DOMElements.toggleAdminBtn.className = 'btn btn-primary';
+        DOMElements.toggleAdminBtn.classList.remove('btn-danger');
+        DOMElements.toggleAdminBtn.classList.add('btn-primary');
+        
         disableEditing(); 
     }
+    
+    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
     renderStatusPanel(currentStatus, isAdmin); 
 }
 
@@ -180,57 +203,105 @@ function toggleAdminMode() {
     }
 }
 
+function enableEditing() { toggleEditing(true); }
+function disableEditing() { toggleEditing(false); }
+
 // ----------------------------------------------------
-// CARDS & EDITING (TARJETAS PRINCIPALES)
+// CREACIÓN DE CARD
 // ----------------------------------------------------
 function createCardHTML(item, index) {
-    let cardClass = '', labelHTML = '', labelText = 'Actualizado', timeText = 'Sin editar';
+    let cardClass = '', labelHTML = '', labelText = 'Sin fecha', timeText = 'Sin editar';
     
     if (item.last_edited_timestamp) {
         const { text, diff } = timeAgo(item.last_edited_timestamp);
         timeText = text;
         if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
-            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!NUEVO!</div>'; labelText = 'Reciente';
+            cardClass = 'card-recent';
+            labelHTML = '<div class="card-label">!NUEVO!</div>';
+            labelText = 'Reciente';
         } else if (diff >= OLD_THRESHOLD_MS) {
-            cardClass = 'card-old'; labelHTML = '<div class="card-label">Antiguo</div>'; labelText = 'Antiguo';
+            cardClass = 'card-old';
+            labelHTML = '<div class="card-label">Antiguo</div>';
+            labelText = 'Antiguo';
+        } else {
+            labelText = 'Actualizado';
         }
     }
+
     const neonColor = getCardColor(item.id);
 
     return `
     <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
         ${labelHTML}
         <span class="emoji">${item.emoji}</span>
+        
         <h3 style="--card-neon: ${neonColor}">${item.titulo}</h3>
+        
         <div class="card-content"><p>${item.contenido}</p></div>
+        
         <div class="card-time-panel" data-id="${item.id}">
             <strong>${labelText}</strong> (${timeText})
         </div>
     </div>`;
 }
 
-function enableEditing() { toggleEditing(true); }
-function disableEditing() { toggleEditing(false); }
-
 function toggleEditing(enable) {
-    document.querySelectorAll(".card").forEach(card => {
+    const cards = document.querySelectorAll(".card");
+    cards.forEach(card => {
         const index = card.getAttribute('data-index');
         const item = currentData[index];
+        const contentDiv = card.querySelector('.card-content');
+        const emojiSpan = card.querySelector('.emoji');
+        const titleH3 = card.querySelector('h3');
         
         if (enable) {
             card.classList.add('editing-active');
             card.removeEventListener('click', toggleTimePanel); 
-            
-            // Reemplazar contenido visual por inputs de edición
-            // Mantenemos data-id en el padre, así que no hay problema
-            card.innerHTML = `
-                <input class="editable-emoji" value="${item.emoji}" maxlength="2">
-                <input class="editable-title" value="${item.titulo}">
-                <div class="card-content"><textarea class="editable-content">${item.contenido}</textarea></div>
-            `;
+            card.querySelector('.card-time-panel').style.display = 'none';
+            if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'none';
+
+            if (emojiSpan && titleH3) {
+                emojiSpan.remove(); titleH3.remove(); contentDiv.querySelector('p').remove();
+                
+                const editableEmoji = document.createElement('input');
+                editableEmoji.className = 'editable-emoji'; editableEmoji.value = item.emoji; editableEmoji.maxLength = 2;
+                card.insertBefore(editableEmoji, card.firstChild);
+                
+                const editableTitle = document.createElement('input');
+                editableTitle.className = 'editable-title'; editableTitle.value = item.titulo;
+                card.insertBefore(editableTitle, editableEmoji.nextSibling);
+
+                const editableContent = document.createElement('textarea');
+                editableContent.className = 'editable-content'; editableContent.value = item.contenido;
+                contentDiv.appendChild(editableContent);
+            }
         } else {
-            // No hace falta hacer nada aquí, porque al salir del modo admin
-            // se llama a loadData() que reconstruye el HTML desde 0.
+            card.classList.remove('editing-active');
+            const editableEmoji = card.querySelector('.editable-emoji');
+            if (editableEmoji) {
+                const editableTitle = card.querySelector('.editable-title');
+                const editableContent = card.querySelector('.editable-content');
+                
+                editableEmoji.remove(); editableTitle.remove(); editableContent.remove();
+                
+                const newEmojiSpan = document.createElement('span');
+                newEmojiSpan.className = 'emoji'; newEmojiSpan.textContent = item.emoji; 
+                card.insertBefore(newEmojiSpan, card.firstChild);
+                
+                const neonColor = getCardColor(item.id);
+                const newTitleH3 = document.createElement('h3');
+                newTitleH3.textContent = item.titulo;
+                newTitleH3.style.setProperty('--card-neon', neonColor);
+                card.insertBefore(newTitleH3, newEmojiSpan.nextSibling);
+
+                const newP = document.createElement('p');
+                newP.textContent = item.contenido;
+                contentDiv.appendChild(newP);
+                
+                card.querySelector('.card-time-panel').style.display = '';
+                if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = '';
+                card.addEventListener('click', toggleTimePanel);
+            }
         }
     });
 }
@@ -238,12 +309,16 @@ function toggleEditing(enable) {
 function toggleTimePanel(event) {
     if (admin) return;
     const clickedCard = event.currentTarget;
+    const cardId = clickedCard.getAttribute('data-id'); 
+    document.querySelectorAll('.card').forEach(card => {
+        if (card.getAttribute('data-id') !== cardId) card.classList.remove('show-time-panel');
+    });
     const isShowing = clickedCard.classList.toggle('show-time-panel');
     if (isShowing) setTimeout(() => clickedCard.classList.remove('show-time-panel'), TIME_PANEL_AUTOHIDE_MS);
 }
 
 // ----------------------------------------------------
-// NEWS TICKER (CINTA DE NOTICIAS RÁPIDAS)
+// LÓGICA DE NOTICIAS 
 // ----------------------------------------------------
 function linkify(text) {
     return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
@@ -253,32 +328,27 @@ function linkify(text) {
 }
 
 async function loadNews() {
-    // Carga noticias de la tabla 'noticias' (distinta de 'banners')
     const { data: newsData, error } = await supabase.from('noticias').select('id, text, timestamp').order('timestamp', { ascending: false });
     if (error) return;
-    
     const validNews = [];
-    const cutoff = Date.now() - RECENT_THRESHOLD_MS; // Filtra noticias muy viejas automáticamente
-    
-    // Borrado automático de noticias viejas de la cinta
+    const cutoff = Date.now() - RECENT_THRESHOLD_MS;
     newsData.forEach(n => {
         if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n);
-        else supabase.from('noticias').delete().eq('id', n.id); // Limpieza automática
+        else supabase.from('noticias').delete().eq('id', n.id);
     });
     currentNews = validNews;
-    
     if (validNews.length > 0) {
         const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
-        // Duplicamos el contenido para efecto infinito sin saltos
         DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`;
         DOMElements.newsTicker.style.display = 'flex';
         
-        // Calculamos la velocidad de animación basada en la longitud del texto
+        DOMElements.newsTickerContent.style.animation = 'none'; DOMElements.newsTickerContent.offsetHeight; 
         const width = DOMElements.newsTickerContent.scrollWidth / 2;
         const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
         DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker-move-dynamic { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
         DOMElements.newsTickerContent.style.animation = `ticker-move-dynamic ${duration}s linear infinite`;
     } else {
+        DOMElements.newsTicker.style.display = 'flex';
         DOMElements.newsTickerContent.innerHTML = `<span class="news-item">Sin Noticias recientes... || 🛡 Activa el modo edición para publicar</span>`.repeat(2);
         DOMElements.newsTickerContent.style.animation = `ticker-move-static 15s linear infinite`;
     }
@@ -286,88 +356,118 @@ async function loadNews() {
 
 async function addQuickNews() {
     if (!admin) return;
-    const text = prompt("✍️ Escribe tu noticia (ej: 'Citas de visado abiertas'):");
-    if (text && confirm("¿Publicar en la cinta roja?")) {
+    const text = prompt("✍️ Escribe tu noticia:");
+    if (text && confirm("¿Publicar?")) {
         await supabase.from('noticias').insert([{ text: text.trim() }]);
         loadNews();
     }
 }
 
 async function deleteNews() {
-    if (!admin || currentNews.length === 0) return alert("No hay noticias activas.");
+    if (!admin || currentNews.length === 0) return alert("No hay noticias.");
     const list = currentNews.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
-    const idx = parseInt(prompt(`Escribe el número de la noticia a eliminar:\n${list}`)) - 1;
-    if (currentNews[idx] && confirm("¿Eliminar esta noticia?")) {
+    const idx = parseInt(prompt(`Eliminar número:\n${list}`)) - 1;
+    if (currentNews[idx] && confirm("¿Eliminar?")) {
         await supabase.from('noticias').delete().eq('id', currentNews[idx].id);
         loadNews();
     }
 }
 
 // ----------------------------------------------------
-// 🗣️ SISTEMA DE COMENTARIOS (PÁGINA PRINCIPAL)
+// LÓGICA DE COMENTARIOS (MODERNA - ESTILO CHAT)
 // ----------------------------------------------------
+
+// Generador de colores pastel/vivos para los avatares
 function generateColorByName(str) {
     let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${hash % 360}, 70%, 50%)`; 
+    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    // Saturation 75%, Lightness 55% para colores legibles con texto blanco
+    return `hsl(${Math.abs(hash) % 360}, 75%, 55%)`; 
 }
 
-function getInitials(name) {
-    return name ? name.charAt(0).toUpperCase() : '?';
+function formatCommentDate(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    // Si es hoy, mostrar solo hora
+    if (date.toDateString() === now.toDateString()) {
+        return 'Hoy, ' + date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+    }
+    // Si es ayer
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+        return 'Ayer, ' + date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+    }
+    
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) + ' ' + date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
 }
 
+// NUEVA FUNCIÓN DE RENDERIZADO TIPO CHAT/BURBUJA
 function createCommentHTML(comment, isLiked) {
-    const color = generateColorByName(comment.name);
-    const initial = getInitials(comment.name);
+    const color = generateColorByName(comment.name.toLowerCase());
     const likeClass = isLiked ? 'liked' : '';
-    const dateText = timeAgo(comment.timestamp).text;
+    const itemClass = comment.parent_id ? 'comment-item reply-style' : 'comment-item';
+    
+    // Extraer inicial para el avatar
+    const initial = comment.name ? comment.name.charAt(0).toUpperCase() : '?';
 
     return `
-        <div class="comment-item" data-comment-id="${comment.id}">
-            <div class="comment-avatar" style="--comment-color: ${color};">${initial}</div>
-            
-            <div class="comment-body">
+        <div class="${itemClass}" data-comment-id="${comment.id}">
+            <div class="comment-avatar" style="background-color: ${color};" title="${comment.name}">
+                ${initial}
+            </div>
+
+            <div class="comment-bubble">
                 <div class="comment-header">
-                    <span class="comment-author">${comment.name}</span>
-                    <span class="comment-date">${dateText}</span>
+                    <span class="comment-name">${comment.name}</span>
+                    <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
                 </div>
                 
-                <div class="comment-text">${comment.text}</div>
+                <div class="comment-content">${comment.text}</div>
                 
                 <div class="comment-actions">
-                    <button class="action-btn like-button ${likeClass}" data-id="${comment.id}">
-                        <span class="icon">♥</span> <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
+                    <button class="like-button ${likeClass}" data-id="${comment.id}" title="Me gusta">
+                        <span class="heart">♥</span>
+                        <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
                     </button>
-                    ${!comment.parent_id ? `<button class="action-btn reply-form-toggle" data-id="${comment.id}">Responder</button>` : ''}
+                    
+                    ${!comment.parent_id ? `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : ''}
                 </div>
-
-                ${!comment.parent_id ? `
-                    <div class="reply-form" data-reply-to="${comment.id}">
-                        <input type="text" class="reply-name" placeholder="Tu Nombre" maxlength="30">
-                        <textarea class="reply-text" placeholder="Escribe tu respuesta..." maxlength="250"></textarea>
-                        <button class="btn btn-sm btn-success publish-reply-btn" data-parent-id="${comment.id}">Publicar Respuesta</button>
-                    </div>
-                    <div class="replies-container" data-parent-of="${comment.id}"></div>
-                ` : ''}
             </div>
+
+            ${!comment.parent_id ? `
+                <div class="reply-form" data-reply-to="${comment.id}">
+                    <input type="text" class="reply-name" placeholder="Tu Nombre" required maxlength="30">
+                    <textarea class="reply-text" placeholder="Escribe tu respuesta..." required maxlength="250"></textarea>
+                    <div style="text-align: right;">
+                        <button class="btn btn-sm btn-success publish-reply-btn" data-parent-id="${comment.id}">Enviar Respuesta</button>
+                    </div>
+                </div>
+                <div class="replies-container" data-parent-of="${comment.id}"></div>
+            ` : ''}
         </div>`;
 }
 
 function drawReplies(container, replies, userLikesMap) {
     container.innerHTML = ''; 
-    // Ordenar respuestas: cronológico (antiguas primero)
     replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
-    
     replies.forEach((reply) => {
         const isLiked = userLikesMap.get(reply.id) || false;
+        // No necesitamos wrapper extra, createCommentHTML ya devuelve el div completo
         container.insertAdjacentHTML('beforeend', createCommentHTML(reply, isLiked));
     });
+    
+    // Si hay muchas respuestas, podríamos ocultarlas, pero en chat moderno se suelen ver
+    if (replies.length > 3) {
+        // Opcional: Lógica de "Ver más respuestas" si lo deseas en el futuro
+    }
 }
 
 async function loadComments() {
     const [commentsResponse, likesResponse] = await Promise.all([
-        // Cargar comentarios donde banner_id sea NULL (comentarios generales de la home)
-        supabase.from('comentarios').select('*').is('banner_id', null).order('timestamp', { ascending: false }),
+        supabase.from('comentarios').select('*').order('timestamp', { ascending: false }),
         supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
     ]);
 
@@ -377,110 +477,111 @@ async function loadComments() {
     const userLikesMap = new Map();
     if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
     
-    // Separar principales y respuestas
     const principalComments = allComments.filter(c => c.parent_id === null);
     const repliesMap = allComments.reduce((map, comment) => {
-        if (comment.parent_id !== null) {
-            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []);
-            map.get(comment.parent_id).push(comment);
+        if (comment.parent_id !== null) { 
+            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []); 
+            map.get(comment.parent_id).push(comment); 
         }
         return map;
     }, new Map());
     
-    if (principalComments.length === 0) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #eee;">Sé el primero en comentar.</p>`;
+    if (principalComments.length === 0) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #fff; opacity: 0.8;">Sé el primero en comentar 👇</p>`;
     
-    // Renderizar principales
     DOMElements.commentsContainer.innerHTML = principalComments.map(c => createCommentHTML(c, userLikesMap.get(c.id))).join('');
 
-    // Renderizar respuestas dentro de los principales
+    // Renderizar respuestas dentro de sus padres
     principalComments.forEach(comment => {
         const replies = repliesMap.get(comment.id);
-        if (replies) {
-            const container = document.querySelector(`.replies-container[data-parent-of="${comment.id}"]`);
-            if (container) drawReplies(container, replies, userLikesMap);
+        if (replies) { 
+            // Seleccionar el div exacto dentro de la tarjeta renderizada
+            const cardElement = document.querySelector(`.comment-item[data-comment-id="${comment.id}"]`);
+            if (cardElement) {
+                const container = cardElement.querySelector(`.replies-container`);
+                if (container) drawReplies(container, replies, userLikesMap); 
+            }
         }
     });
 
-    // Event Listeners (Delegación o re-attach)
-    attachCommentListeners();
-}
-
-function attachCommentListeners() {
-    // Quitamos listeners previos para evitar duplicados si se llama varias veces
-    document.querySelectorAll('.reply-form-toggle').forEach(btn => btn.onclick = toggleReplyForm);
-    document.querySelectorAll('.publish-reply-btn').forEach(btn => btn.onclick = handlePublishReply);
-    document.querySelectorAll('.like-button').forEach(btn => btn.onclick = handleLikeToggle);
+    // Reasignar listeners
+    document.querySelectorAll('.reply-form-toggle').forEach(btn => btn.addEventListener('click', toggleReplyForm));
+    document.querySelectorAll('.publish-reply-btn').forEach(btn => btn.addEventListener('click', handlePublishReply));
+    document.querySelectorAll('.like-button').forEach(btn => btn.addEventListener('click', handleLikeToggle));
 }
 
 function toggleReplyForm(event) {
-    const id = event.currentTarget.getAttribute('data-id');
-    const form = document.querySelector(`.reply-form[data-reply-to="${id}"]`);
+    const commentId = event.target.getAttribute('data-id');
+    // Buscar el formulario específico dentro del item
+    const item = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+    const form = item.querySelector(`.reply-form`);
+    
     if (form) {
-        // Cerrar otros
-        document.querySelectorAll('.reply-form').forEach(f => { if(f !== form) f.style.display = 'none'; });
+        // Cerrar otros formularios abiertos para limpieza visual
+        document.querySelectorAll('.reply-form').forEach(f => { if (f !== form) f.style.display = 'none'; });
         
-        const isVisible = form.style.display === 'block';
-        form.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible) form.querySelector('.reply-name').focus();
+        form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        if (form.style.display === 'block') form.querySelector('.reply-name').focus();
     }
 }
 
 async function publishComment() {
-    const name = DOMElements.commenterName.value.trim();
+    const name = DOMElements.commenterName.value.trim(); 
     const text = DOMElements.commentText.value.trim();
-    if (name.length < 2 || text.length < 2) return alert("Escribe un nombre y mensaje válidos.");
+    
+    if (name.length < 2 || text.length < 2) return alert("Por favor, escribe un nombre y un mensaje válidos.");
     
     DOMElements.publishCommentBtn.disabled = true;
-    // banner_id es NULL para comentarios de la página principal
-    const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0, banner_id: null }]);
+    const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0 }]);
     
-    if (!error) {
-        DOMElements.commenterName.value = '';
-        DOMElements.commentText.value = '';
-        await loadComments();
-    } else { alert("❌ Error al publicar."); }
+    if (!error) { 
+        DOMElements.commenterName.value = ''; 
+        DOMElements.commentText.value = ''; 
+        await loadComments(); 
+    } else { 
+        alert("❌ Error al publicar."); 
+    }
     DOMElements.publishCommentBtn.disabled = false;
 }
 
 async function handlePublishReply(event) {
-    const btn = event.currentTarget;
-    const parentId = btn.getAttribute('data-parent-id');
-    const form = btn.closest('.reply-form');
-    const name = form.querySelector('.reply-name').value.trim();
+    const parentId = event.target.getAttribute('data-parent-id'); 
+    const form = event.target.closest('.reply-form');
+    const name = form.querySelector('.reply-name').value.trim(); 
     const text = form.querySelector('.reply-text').value.trim();
     
-    if (name.length < 2 || text.length < 2) return alert("Escribe un nombre y mensaje válidos.");
+    if (name.length < 2 || text.length < 2) return alert("Datos insuficientes.");
     
-    btn.disabled = true;
-    // Las respuestas heredan el contexto (banner_id null) implícitamente o explícitamente
-    const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0, banner_id: null }]);
+    event.target.disabled = true;
+    const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0 }]);
     
-    if (!error) {
-        form.style.display = 'none';
-        await loadComments();
-    } else { alert("❌ Error al responder."); }
-    btn.disabled = false;
+    if (!error) { 
+        form.style.display = 'none'; 
+        await loadComments(); 
+    } else { 
+        alert("❌ Error al responder."); 
+    }
+    event.target.disabled = false;
 }
 
 async function handleLikeToggle(event) {
-    const btn = event.currentTarget;
-    const id = btn.getAttribute('data-id');
-    const counter = document.querySelector(`.like-count[data-counter-id="${id}"]`);
-    const isLiked = btn.classList.contains('liked');
+    const btn = event.currentTarget; 
+    const id = btn.getAttribute('data-id'); 
+    const isLiked = btn.classList.contains('liked'); 
+    const counter = btn.querySelector('.like-count');
     
     btn.disabled = true;
     try {
         if (isLiked) {
-            await supabase.from('likes').delete().eq('comment_id', id).eq('user_web_id', userWebId);
+            await supabase.from('likes').delete().eq('comment_id', id).eq('user_web_id', userWebId); 
             await supabase.rpc('decrement_likes', { row_id: id });
-            btn.classList.remove('liked');
+            btn.classList.remove('liked'); 
             counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
         } else {
             const { error } = await supabase.from('likes').insert([{ comment_id: id, user_web_id: userWebId }]);
-            if (!error || error.code === '23505') { // 23505 = duplicado, ya le dio like
-                if (!error) await supabase.rpc('increment_likes', { row_id: id });
-                btn.classList.add('liked');
-                counter.textContent = parseInt(counter.textContent) + 1;
+            if (!error || error.code === '23505') { 
+                if (!error) await supabase.rpc('increment_likes', { row_id: id }); 
+                btn.classList.add('liked'); 
+                counter.textContent = parseInt(counter.textContent) + 1; 
             }
         }
     } catch (e) { console.error(e); }
@@ -493,7 +594,6 @@ async function handleLikeToggle(event) {
 const VISIT_KEY = 'lastPageView';
 async function registerPageView() {
     const last = localStorage.getItem(VISIT_KEY);
-    // Registrar visita solo si ha pasado más de 24h
     if (last && (Date.now() - parseInt(last)) < 24 * 60 * 60 * 1000) return;
     const { error } = await supabase.from('page_views').insert({});
     if (!error) localStorage.setItem(VISIT_KEY, Date.now());
@@ -504,79 +604,58 @@ async function getAndDisplayViewCount() {
     const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
     el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} `;
 }
-
 function renderStatusPanel(status, isAdminMode) {
-    const html = isAdminMode ? `
-        <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
-        <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
-        <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
-        <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>
-    ` : `
-        <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
-        <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
-        <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
-        <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>
-    `;
-    DOMElements.statusDataContainer.innerHTML = html;
+    if (isAdminMode) {
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
+            <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
+            <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
+            <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>`;
+    } else {
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>`;
+    }
 }
-
 async function loadStatusData() {
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
     if (data) currentStatus = { ...currentStatus, ...data };
     renderStatusPanel(currentStatus, admin); fetchElToqueRates(); 
 }
-
 async function saveChanges() {
     if (!admin) return;
     const editDeficit = document.getElementById('editDeficit');
     const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
     const updates = [];
-    
     document.querySelectorAll(".card").forEach(card => {
-        if (!card.classList.contains('editing-active')) return;
-        
         const emoji = card.querySelector('.editable-emoji').value;
         const titulo = card.querySelector('.editable-title').value;
         const contenido = card.querySelector('.editable-content').value;
-        const id = card.dataset.id;
-        
-        // Actualización de tarjeta
-        updates.push(supabase.from('items').update({ 
-            emoji, titulo, contenido, 
-            last_edited_timestamp: new Date().toISOString() 
-        }).eq('id', id));
+        const id = card.dataset.id; const idx = card.dataset.index;
+        if (contenido !== currentData[idx].contenido || titulo !== currentData[idx].titulo || emoji !== currentData[idx].emoji) {
+             updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: new Date().toISOString() }).eq('id', id));
+        }
     });
-
     if (newDeficit !== currentStatus.deficit_mw) {
-        // Actualización de déficit
-        updates.push(supabase.from('status_data').update({ 
-            deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() 
-        }).eq('id', 1));
+        updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() }).eq('id', 1));
     }
-    
-    if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); }
-    else { alert("No hay cambios."); }
+    if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else { alert("No hay cambios."); }
 }
-
-async function loadData() {
-    const { data } = await supabase.from('items').select('*').order('id');
-    if (data) {
-        currentData = data; 
-        DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
-        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
-    }
-}
-
-// Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     DOMElements.saveBtn.addEventListener('click', saveChanges);
     DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
     DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
     DOMElements.publishCommentBtn.addEventListener('click', publishComment);
-    
-    const fechaSpan = document.getElementById('fecha-actualizacion');
-    if(fechaSpan) fechaSpan.textContent = new Date().toLocaleDateString();
-    
+    document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
     registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData(); 
 });
+async function loadData() {
+    const { data } = await supabase.from('items').select('*').order('id');
+    if (data) {
+        currentData = data; DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
+        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
+    }
+}
