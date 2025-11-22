@@ -10,7 +10,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
-const CACHE_DURATION = 10 * 60 * 1000; 
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -50,6 +50,7 @@ let currentStatus = {
     deficit_edited_at: null, divisa_edited_at: null
 }; 
 
+// Identificador de usuario para likes (simple localStorage)
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
     userWebId = crypto.randomUUID(); 
@@ -120,6 +121,7 @@ async function fetchElToqueRates() {
         const data = await response.json();
         
         let usd = '---', eur = '---', mlc = '---';
+        // Manejo de diferentes estructuras de respuesta de la API
         if (data.tasas) { usd = data.tasas.USD; eur = data.tasas.EUR || data.tasas.ECU; mlc = data.tasas.MLC; } 
         else if (data.USD) { usd = data.USD; eur = data.EUR || data.ECU; mlc = data.MLC; }
 
@@ -179,7 +181,7 @@ function toggleAdminMode() {
 }
 
 // ----------------------------------------------------
-// CARDS & EDITING
+// CARDS & EDITING (TARJETAS PRINCIPALES)
 // ----------------------------------------------------
 function createCardHTML(item, index) {
     let cardClass = '', labelHTML = '', labelText = 'Actualizado', timeText = 'Sin editar';
@@ -214,23 +216,21 @@ function toggleEditing(enable) {
     document.querySelectorAll(".card").forEach(card => {
         const index = card.getAttribute('data-index');
         const item = currentData[index];
-        const contentDiv = card.querySelector('.card-content');
         
         if (enable) {
             card.classList.add('editing-active');
             card.removeEventListener('click', toggleTimePanel); 
-            card.querySelector('.emoji').remove();
-            card.querySelector('h3').remove();
-            contentDiv.querySelector('p').remove();
             
-            // Inputs de edición
+            // Reemplazar contenido visual por inputs de edición
+            // Mantenemos data-id en el padre, así que no hay problema
             card.innerHTML = `
                 <input class="editable-emoji" value="${item.emoji}" maxlength="2">
                 <input class="editable-title" value="${item.titulo}">
                 <div class="card-content"><textarea class="editable-content">${item.contenido}</textarea></div>
-            ` + card.innerHTML; // Mantiene data attrs si los hubiera en hijos ocultos, aunque aquí reemplazamos visuales
+            `;
         } else {
-            // Se restaura al cargar datos de nuevo (loadData) al salir del modo admin
+            // No hace falta hacer nada aquí, porque al salir del modo admin
+            // se llama a loadData() que reconstruye el HTML desde 0.
         }
     });
 }
@@ -243,7 +243,7 @@ function toggleTimePanel(event) {
 }
 
 // ----------------------------------------------------
-// NEWS TICKER
+// NEWS TICKER (CINTA DE NOTICIAS RÁPIDAS)
 // ----------------------------------------------------
 function linkify(text) {
     return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
@@ -253,22 +253,27 @@ function linkify(text) {
 }
 
 async function loadNews() {
+    // Carga noticias de la tabla 'noticias' (distinta de 'banners')
     const { data: newsData, error } = await supabase.from('noticias').select('id, text, timestamp').order('timestamp', { ascending: false });
     if (error) return;
     
     const validNews = [];
-    const cutoff = Date.now() - RECENT_THRESHOLD_MS;
+    const cutoff = Date.now() - RECENT_THRESHOLD_MS; // Filtra noticias muy viejas automáticamente
+    
+    // Borrado automático de noticias viejas de la cinta
     newsData.forEach(n => {
         if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n);
-        else supabase.from('noticias').delete().eq('id', n.id);
+        else supabase.from('noticias').delete().eq('id', n.id); // Limpieza automática
     });
     currentNews = validNews;
     
     if (validNews.length > 0) {
         const newsHtml = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
+        // Duplicamos el contenido para efecto infinito sin saltos
         DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`;
         DOMElements.newsTicker.style.display = 'flex';
         
+        // Calculamos la velocidad de animación basada en la longitud del texto
         const width = DOMElements.newsTickerContent.scrollWidth / 2;
         const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
         DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker-move-dynamic { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
@@ -281,25 +286,25 @@ async function loadNews() {
 
 async function addQuickNews() {
     if (!admin) return;
-    const text = prompt("✍️ Escribe tu noticia:");
-    if (text && confirm("¿Publicar?")) {
+    const text = prompt("✍️ Escribe tu noticia (ej: 'Citas de visado abiertas'):");
+    if (text && confirm("¿Publicar en la cinta roja?")) {
         await supabase.from('noticias').insert([{ text: text.trim() }]);
         loadNews();
     }
 }
 
 async function deleteNews() {
-    if (!admin || currentNews.length === 0) return alert("No hay noticias.");
+    if (!admin || currentNews.length === 0) return alert("No hay noticias activas.");
     const list = currentNews.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
-    const idx = parseInt(prompt(`Eliminar número:\n${list}`)) - 1;
-    if (currentNews[idx] && confirm("¿Eliminar?")) {
+    const idx = parseInt(prompt(`Escribe el número de la noticia a eliminar:\n${list}`)) - 1;
+    if (currentNews[idx] && confirm("¿Eliminar esta noticia?")) {
         await supabase.from('noticias').delete().eq('id', currentNews[idx].id);
         loadNews();
     }
 }
 
 // ----------------------------------------------------
-// 🗣️ COMENTARIOS (NUEVO DISEÑO PROFESIONAL)
+// 🗣️ SISTEMA DE COMENTARIOS (PÁGINA PRINCIPAL)
 // ----------------------------------------------------
 function generateColorByName(str) {
     let hash = 0;
@@ -350,23 +355,19 @@ function createCommentHTML(comment, isLiked) {
 
 function drawReplies(container, replies, userLikesMap) {
     container.innerHTML = ''; 
-    // Ordenar respuestas: las más antiguas primero (orden cronológico de conversación)
+    // Ordenar respuestas: cronológico (antiguas primero)
     replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
     
     replies.forEach((reply) => {
         const isLiked = userLikesMap.get(reply.id) || false;
         container.insertAdjacentHTML('beforeend', createCommentHTML(reply, isLiked));
     });
-
-    if (replies.length > 2) {
-        // Opcional: Ocultar si hay muchas respuestas
-        // Por ahora las mostramos todas para simplicidad en el diseño limpio
-    }
 }
 
 async function loadComments() {
     const [commentsResponse, likesResponse] = await Promise.all([
-        supabase.from('comentarios').select('*').order('timestamp', { ascending: false }),
+        // Cargar comentarios donde banner_id sea NULL (comentarios generales de la home)
+        supabase.from('comentarios').select('*').is('banner_id', null).order('timestamp', { ascending: false }),
         supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
     ]);
 
@@ -400,27 +401,22 @@ async function loadComments() {
         }
     });
 
-    // Event Listeners
+    // Event Listeners (Delegación o re-attach)
     attachCommentListeners();
 }
 
 function attachCommentListeners() {
-    document.querySelectorAll('.reply-form-toggle').forEach(btn => {
-        btn.onclick = (e) => toggleReplyForm(e);
-    });
-    document.querySelectorAll('.publish-reply-btn').forEach(btn => {
-        btn.onclick = (e) => handlePublishReply(e);
-    });
-    document.querySelectorAll('.like-button').forEach(btn => {
-        btn.onclick = (e) => handleLikeToggle(e);
-    });
+    // Quitamos listeners previos para evitar duplicados si se llama varias veces
+    document.querySelectorAll('.reply-form-toggle').forEach(btn => btn.onclick = toggleReplyForm);
+    document.querySelectorAll('.publish-reply-btn').forEach(btn => btn.onclick = handlePublishReply);
+    document.querySelectorAll('.like-button').forEach(btn => btn.onclick = handleLikeToggle);
 }
 
 function toggleReplyForm(event) {
-    const id = event.target.getAttribute('data-id');
+    const id = event.currentTarget.getAttribute('data-id');
     const form = document.querySelector(`.reply-form[data-reply-to="${id}"]`);
     if (form) {
-        // Cerrar otros formularios abiertos
+        // Cerrar otros
         document.querySelectorAll('.reply-form').forEach(f => { if(f !== form) f.style.display = 'none'; });
         
         const isVisible = form.style.display === 'block';
@@ -435,7 +431,8 @@ async function publishComment() {
     if (name.length < 2 || text.length < 2) return alert("Escribe un nombre y mensaje válidos.");
     
     DOMElements.publishCommentBtn.disabled = true;
-    const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0 }]);
+    // banner_id es NULL para comentarios de la página principal
+    const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0, banner_id: null }]);
     
     if (!error) {
         DOMElements.commenterName.value = '';
@@ -446,21 +443,23 @@ async function publishComment() {
 }
 
 async function handlePublishReply(event) {
-    const parentId = event.target.getAttribute('data-parent-id');
-    const form = event.target.closest('.reply-form');
+    const btn = event.currentTarget;
+    const parentId = btn.getAttribute('data-parent-id');
+    const form = btn.closest('.reply-form');
     const name = form.querySelector('.reply-name').value.trim();
     const text = form.querySelector('.reply-text').value.trim();
     
     if (name.length < 2 || text.length < 2) return alert("Escribe un nombre y mensaje válidos.");
     
-    event.target.disabled = true;
-    const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0 }]);
+    btn.disabled = true;
+    // Las respuestas heredan el contexto (banner_id null) implícitamente o explícitamente
+    const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0, banner_id: null }]);
     
     if (!error) {
         form.style.display = 'none';
         await loadComments();
     } else { alert("❌ Error al responder."); }
-    event.target.disabled = false;
+    btn.disabled = false;
 }
 
 async function handleLikeToggle(event) {
@@ -478,7 +477,7 @@ async function handleLikeToggle(event) {
             counter.textContent = Math.max(0, parseInt(counter.textContent) - 1);
         } else {
             const { error } = await supabase.from('likes').insert([{ comment_id: id, user_web_id: userWebId }]);
-            if (!error || error.code === '23505') { // 23505 = duplicado, ignorar
+            if (!error || error.code === '23505') { // 23505 = duplicado, ya le dio like
                 if (!error) await supabase.rpc('increment_likes', { row_id: id });
                 btn.classList.add('liked');
                 counter.textContent = parseInt(counter.textContent) + 1;
@@ -494,6 +493,7 @@ async function handleLikeToggle(event) {
 const VISIT_KEY = 'lastPageView';
 async function registerPageView() {
     const last = localStorage.getItem(VISIT_KEY);
+    // Registrar visita solo si ha pasado más de 24h
     if (last && (Date.now() - parseInt(last)) < 24 * 60 * 60 * 1000) return;
     const { error } = await supabase.from('page_views').insert({});
     if (!error) localStorage.setItem(VISIT_KEY, Date.now());
@@ -507,10 +507,10 @@ async function getAndDisplayViewCount() {
 
 function renderStatusPanel(status, isAdminMode) {
     const html = isAdminMode ? `
-        <div class="status-item"><span class="label">Deficit:</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
-        <div class="status-item"><span class="label">USD:</span><input type="text" value="${status.dollar_cup}" disabled></div>
-        <div class="status-item"><span class="label">EUR:</span><input type="text" value="${status.euro_cup}" disabled></div>
-        <div class="status-item"><span class="label">MLC:</span><input type="text" value="${status.mlc_cup}" disabled></div>
+        <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
+        <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
+        <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
+        <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>
     ` : `
         <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
         <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
@@ -540,6 +540,7 @@ async function saveChanges() {
         const contenido = card.querySelector('.editable-content').value;
         const id = card.dataset.id;
         
+        // Actualización de tarjeta
         updates.push(supabase.from('items').update({ 
             emoji, titulo, contenido, 
             last_edited_timestamp: new Date().toISOString() 
@@ -547,6 +548,7 @@ async function saveChanges() {
     });
 
     if (newDeficit !== currentStatus.deficit_mw) {
+        // Actualización de déficit
         updates.push(supabase.from('status_data').update({ 
             deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() 
         }).eq('id', 1));
