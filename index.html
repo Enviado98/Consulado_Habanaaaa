@@ -19,7 +19,9 @@
   <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
   
   <div class="header-action-container">
-    <a href="news.html" class="news-btn-v2" role="button">🔴 Noticias aquí 👈🏻</a>
+    <a href="news.html" class="btn btn-news" role="button">
+        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
+    </a>
   </div>
   
   <div id="viewCounter" class="view-counter" aria-live="polite">
@@ -57,15 +59,17 @@
             Accede a modo edición para actualizar la información
   </div>
   
-  <button id="toggleAdminBtn" class="primary-admin-btn">🛡️ ACTIVAR EL MODO EDICIÓN </button>
+  <button id="toggleAdminBtn" class="btn btn-primary">
+      🛡️ ACTIVAR EL MODO EDICIÓN
+  </button>
 
   <div id="adminControlsPanel">
     <div class="admin-group">
-        <button id="saveBtn" class="admin-btn">💾 Guardar los Cambios</button>
+        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
     </div>
     <div class="admin-group">
-        <button id="addNewsBtn" class="admin-btn">✅️ Añadir Noticia al Rodillo</button> 
-        <button id="deleteNewsBtn" class="admin-btn">⛔️ Eliminar una Noticia del Rodillo</button> 
+        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
     </div>
   </div>
 </div>
@@ -85,7 +89,7 @@
     <div class="comment-form-container">
         <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
         <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
-        <button id="publishCommentBtn">Publicar Comentario</button>
+        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
     </div>
 </section>
 
