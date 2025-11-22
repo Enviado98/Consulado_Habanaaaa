@@ -1,83 +1,90 @@
-// ----------------------------------------------------
-// 🚨 CONFIGURACIÓN DE SUPABASE (POSTGRESQL BAAS) 🚨
-// ----------------------------------------------------
+// ----------------------------------------------------------------
+// 1. IMPORTACIONES Y CONFIGURACIÓN
+// ----------------------------------------------------------------
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+// 🚨 CONFIGURACIÓN DE SUPABASE
 const SUPABASE_URL = "https://ekkaagqovdmcdexrjosh.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVra2FhZ3FvdmRtY2RleHJqb3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NjU2NTEsImV4cCI6MjA3NTQ0MTY1MX0.mmVl7C0Hkzrjoks7snvHWMYk-ksSXkUWzVexhtkozRA"; 
 
-// ----------------------------------------------------
-// 💰 CONFIGURACIÓN API ELTOQUE (Caché Inteligente) 🚨
-// ----------------------------------------------------
+// 💰 CONFIGURACIÓN API ELTOQUE (Caché Inteligente)
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
-// ⏱️ TIEMPO DE CACHÉ: 10 Minutos (en milisegundos)
-// Si el dato en la BD tiene menos de este tiempo, NO gastamos llamada a la API.
-const CACHE_DURATION = 10 * 60 * 1000; 
-
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let admin = false; 
-
-// Variables y constantes de tiempo
+// ----------------------------------------------------------------
+// 2. CONSTANTES Y ESTADO GLOBAL
+// ----------------------------------------------------------------
 const ONE_HOUR = 3600000;
 const ONE_DAY = 24 * ONE_HOUR;
 const RECENT_THRESHOLD_MS = ONE_DAY; 
 const OLD_THRESHOLD_MS = 7 * ONE_DAY;
 const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
 const TIME_PANEL_AUTOHIDE_MS = 2000; 
+const CACHE_DURATION = 10 * 60 * 1000; // 10 Minutos
 
+// Estado de la aplicación
+let admin = false; 
 let currentData = [];
 let currentNews = []; 
-// Inicializamos status
 let currentStatus = {
     deficit_mw: 'Cargando...', 
     dollar_cup: '...', 
     euro_cup: '...',
     deficit_edited_at: null,
-    divisa_edited_at: null // Importante para el caché
+    divisa_edited_at: null
 }; 
-const timePanelTimeouts = new Map(); 
 
+// Identificador de usuario (simple fingerprint en localStorage)
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
     userWebId = crypto.randomUUID(); 
     localStorage.setItem('userWebId', userWebId);
 }
 
-// Elementos del DOM
+// ----------------------------------------------------------------
+// 3. ELEMENTOS DEL DOM
+// ----------------------------------------------------------------
 const DOMElements = {
     body: document.body,
     contenedor: document.getElementById('contenedor'),
+    // Noticias
     newsTicker: document.getElementById('newsTicker'),
     newsTickerContent: document.getElementById('newsTickerContent'),
-    fixedLabel: document.querySelector('.news-ticker-fixed-label'),
+    dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
+    addNewsBtn: document.getElementById('addNewsBtn'),
+    deleteNewsBtn: document.getElementById('deleteNewsBtn'),
+    // Comentarios
     commentsContainer: document.getElementById('commentsContainer'),
     commenterName: document.getElementById('commenterName'),
     commentText: document.getElementById('commentText'),
     publishCommentBtn: document.getElementById('publishCommentBtn'),
+    // Admin / Estado
     adminControlsPanel: document.getElementById('adminControlsPanel'),
     statusMessage: document.getElementById('statusMessage'),
     toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
     saveBtn: document.getElementById('saveBtn'),
-    addNewsBtn: document.getElementById('addNewsBtn'),
-    deleteNewsBtn: document.getElementById('deleteNewsBtn'),
-    dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
     statusPanel: document.getElementById('statusPanel'),
     statusDataContainer: document.getElementById('statusDataContainer'),
     lastEditedTime: document.getElementById('lastEditedTime')
 };
 
+// ----------------------------------------------------------------
+// 4. FUNCIONES DE UTILIDAD (HELPERS)
+// ----------------------------------------------------------------
 function timeAgo(timestamp) {
     if (!timestamp) return { text: 'Sin fecha de edición.', diff: -1, date: null };
     const then = new Date(timestamp).getTime();
     const now = Date.now();
     const diff = now - then;
     if (diff < 0) return { text: 'Ahora mismo', diff: 0, date: new Date(timestamp) }; 
+    
     const SECONDS = Math.floor(diff / 1000);
     const MINUTES = Math.floor(SECONDS / 60);
     const HOURS = Math.floor(MINUTES / 60);
     const DAYS = Math.floor(HOURS / 24);
+    
     let text;
     if (DAYS >= 30) { text = `hace ${Math.floor(DAYS / 30)} meses`; } 
     else if (DAYS >= 7) { const weeks = Math.floor(DAYS / 7); text = `hace ${weeks} sem.`; } 
@@ -87,46 +94,60 @@ function timeAgo(timestamp) {
     else if (HOURS === 1) { text = 'hace 1 hora'; } 
     else if (MINUTES >= 1) { text = `hace ${MINUTES} min.`; } 
     else { text = 'hace unos momentos'; }
+    
     return { text, diff, date: new Date(timestamp) };
 }
 
-// ----------------------------------------------------
-// 💰 LÓGICA API ELTOQUE CON CACHÉ INTELIGENTE
-// ----------------------------------------------------
+function linkify(text) {
+    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
+        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
+        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
+    });
+}
 
+function generateColorByName(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    return `hsl(${hash % 360}, 70%, 50%)`; 
+}
+
+function formatCommentDate(timestamp) {
+    return new Intl.DateTimeFormat('es-ES', { 
+        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false 
+    }).format(new Date(timestamp)) + ' h';
+}
+
+// ----------------------------------------------------------------
+// 5. LÓGICA DE API Y DATOS (CORE)
+// ----------------------------------------------------------------
+
+// API El Toque con Caché Inteligente en BD
 async function fetchElToqueRates() {
     try {
-        // 1. Verificar la edad del dato en la BD
+        // 1. Verificar caché local (BD)
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
         const now = Date.now();
         
-        // Si el dato tiene menos de 10 minutos, NO llamamos a la API.
         if ((now - lastUpdate) < CACHE_DURATION) {
-            // console.log("☕ Dato fresco de BD. Ahorrando llamada a API.");
+            // Cache válido (< 10 min), no llamamos a la API externa.
             return; 
         }
 
-        // console.log("🔄 Dato viejo (>10min). Llamando a elTOQUE...");
-
-        // 2. Si es viejo, llamamos a la API
+        // 2. Cache expirado, llamar API
         const proxyUrl = "https://corsproxy.io/?"; 
         const targetUrl = encodeURIComponent(ELTOQUE_API_URL);
 
         const response = await fetch(proxyUrl + targetUrl, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${ELTOQUE_TOKEN}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': `Bearer ${ELTOQUE_TOKEN}`, 'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Error API: ${response.status}`);
-
         const data = await response.json();
         
-        let usdPrice = '---';
-        let eurPrice = '---';
+        let usdPrice = '---', eurPrice = '---';
 
+        // Normalización de respuesta API
         if (data.tasas) {
             usdPrice = data.tasas.USD || '---';
             eurPrice = data.tasas.EUR || data.tasas.ECU || '---'; 
@@ -141,90 +162,99 @@ async function fetchElToqueRates() {
         if (isNaN(usdPrice)) usdPrice = '---';
         if (isNaN(eurPrice)) eurPrice = '---';
 
-        // 3. GUARDAR EN BASE DE DATOS (Aquí ocurre la magia)
-        // Si obtuvimos datos válidos, actualizamos Supabase para todos los demás
+        // 3. Guardar en BD (Supabase) si hay datos válidos
         if (usdPrice !== '---' && eurPrice !== '---') {
             const newTime = new Date().toISOString();
             
-            // Actualizamos el objeto local inmediatamente para que se vea rápido
+            // Actualizar estado local
             currentStatus.dollar_cup = usdPrice;
             currentStatus.euro_cup = eurPrice;
             currentStatus.divisa_edited_at = newTime;
             
             renderStatusPanel(currentStatus, admin);
 
-            // Enviamos el dato nuevo a la nube
-            const { error } = await supabase
-                .from('status_data')
-                .update({ 
-                    dollar_cup: usdPrice, 
-                    euro_cup: eurPrice,
-                    divisa_edited_at: newTime
-                })
-                .eq('id', 1);
+            // Actualizar BD
+            const { error } = await supabase.from('status_data').update({ 
+                dollar_cup: usdPrice, 
+                euro_cup: eurPrice,
+                divisa_edited_at: newTime
+            }).eq('id', 1);
 
             if (error) console.error("⚠️ Error al guardar caché en DB:", error.message);
-            // else console.log("✅ Precio actualizado en la Nube para todos.");
         }
 
     } catch (error) {
         console.error("⚠️ Error silencioso API:", error.message);
     }
 }
-// ----------------------------------------------------
-// FUNCIONES DE UI Y LOGIN
-// ----------------------------------------------------
 
-function updateAdminUI(isAdmin) {
-    admin = isAdmin;
-    if (isAdmin) {
-        DOMElements.body.classList.add('admin-mode');
-        DOMElements.adminControlsPanel.style.display = "flex";
-        DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
-        DOMElements.statusMessage.style.color = "#0d9488"; 
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
-        enableEditing(); 
-    } else {
-        DOMElements.body.classList.remove('admin-mode');
-        DOMElements.adminControlsPanel.style.display = "none";
-        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
-        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
-        disableEditing(); 
+// Carga de tarjetas principales
+async function loadData() {
+    const { data } = await supabase.from('items').select('*').order('id');
+    if (data) {
+        currentData = data;
+        DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
+        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
+}
+
+// Carga de datos de estado (Economía/Energía)
+async function loadStatusData() {
+    const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
+    if (data) currentStatus = { ...currentStatus, ...data };
     
-    if (isAdmin) {
-        DOMElements.statusPanel.classList.add('admin-mode');
-        renderStatusPanel(currentStatus, true); 
+    // Renderizar primero con datos de BD, luego intentar actualizar tasas
+    renderStatusPanel(currentStatus, admin);
+    fetchElToqueRates(); 
+}
+
+// Guardar cambios generales (Admin)
+async function saveChanges() {
+    if (!admin) return;
+    
+    const editDeficit = document.getElementById('editDeficit');
+    const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
+    const updates = [];
+
+    // Recopilar cambios en tarjetas
+    document.querySelectorAll(".card").forEach(card => {
+        const emoji = card.querySelector('.editable-emoji').value;
+        const titulo = card.querySelector('.editable-title').value;
+        const contenido = card.querySelector('.editable-content').value;
+        const id = card.dataset.id;
+        const idx = card.dataset.index;
+        
+        if (contenido !== currentData[idx].contenido || titulo !== currentData[idx].titulo || emoji !== currentData[idx].emoji) {
+             updates.push(supabase.from('items').update({ 
+                 emoji, titulo, contenido, last_edited_timestamp: new Date().toISOString() 
+             }).eq('id', id));
+        }
+    });
+
+    // Recopilar cambios en panel de estado (Déficit)
+    if (newDeficit !== currentStatus.deficit_mw) {
+        updates.push(supabase.from('status_data').update({ 
+            deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() 
+        }).eq('id', 1));
+    }
+
+    if (updates.length > 0) {
+        await Promise.all(updates);
+        alert("✅ Guardado.");
+        location.reload(); 
     } else {
-        DOMElements.statusPanel.classList.remove('admin-mode');
-        renderStatusPanel(currentStatus, false); 
+        alert("No hay cambios.");
     }
 }
 
-function toggleAdminMode() {
-    if (!admin) {
-        updateAdminUI(true);
-        alert("¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
-    } else {
-        if (!confirm("✅️ ¿Terminar la edición?")) return;
-        updateAdminUI(false);
-        loadData(); 
-        loadStatusData(); 
-    }
-}
+// ----------------------------------------------------------------
+// 6. FUNCIONES DE UI (RENDERIZADO Y EDICIÓN)
+// ----------------------------------------------------------------
 
-function enableEditing() { toggleEditing(true); }
-function disableEditing() { toggleEditing(false); }
-
-// ----------------------------------------------------
-// CREACIÓN DE CARD
-// ----------------------------------------------------
-
+// Renderizado de tarjeta individual
 function createCardHTML(item, index) {
     let cardClass = '', labelHTML = '', panelStyle = '', labelText = 'Sin fecha', timeText = 'Sin editar';
+    
     if (item.last_edited_timestamp) {
         const { text, diff } = timeAgo(item.last_edited_timestamp);
         timeText = text;
@@ -243,6 +273,7 @@ function createCardHTML(item, index) {
             labelText = 'Actualizado';
         }
     }
+
     return `
     <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
         ${labelHTML}
@@ -253,6 +284,69 @@ function createCardHTML(item, index) {
             <strong>${labelText}</strong> (${timeText})
         </div>
     </div>`;
+}
+
+// Renderizado del Panel de Estado
+function renderStatusPanel(status, isAdminMode) {
+    const timeInfo = timeAgo(new Date(status.deficit_edited_at || Date.now()).getTime()).text;
+    DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${timeInfo}`;
+    
+    if (!isAdminMode && status.divisa_edited_at) {
+        const { text: divisaTimeText } = timeAgo(status.divisa_edited_at);
+        DOMElements.lastEditedTime.innerHTML += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${divisaTimeText}</small>`;
+    }
+
+    if (isAdminMode) {
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
+            <div class="status-item"><span class="label">Dollar (Auto):</span><input type="text" value="${status.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+            <div class="status-item"><span class="label">Euro (Auto):</span><input type="text" value="${status.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
+        `;
+    } else {
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
+        `;
+    }
+}
+
+// Modo Admin
+function updateAdminUI(isAdmin) {
+    admin = isAdmin;
+    if (isAdmin) {
+        DOMElements.body.classList.add('admin-mode');
+        DOMElements.adminControlsPanel.style.display = "flex";
+        DOMElements.statusMessage.textContent = "¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!";
+        DOMElements.statusMessage.style.color = "#0d9488"; 
+        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR DEL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "var(--acento-rojo)"; 
+        toggleEditing(true); 
+    } else {
+        DOMElements.body.classList.remove('admin-mode');
+        DOMElements.adminControlsPanel.style.display = "none";
+        DOMElements.statusMessage.textContent = "Accede a modo edición para actualizar la información"; 
+        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
+        DOMElements.toggleAdminBtn.style.backgroundColor = "#4f46e5"; 
+        toggleEditing(false); 
+    }
+    
+    // Re-renderizar panel estado en el modo correcto
+    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
+    renderStatusPanel(currentStatus, isAdmin);
+}
+
+function toggleAdminMode() {
+    if (!admin) {
+        updateAdminUI(true);
+        alert("¡🔴 POR FAVOR EDITA CON RESPONSABILIDAD!");
+    } else {
+        if (!confirm("✅️ ¿Terminar la edición?")) return;
+        updateAdminUI(false);
+        loadData(); 
+        loadStatusData(); 
+    }
 }
 
 function toggleEditing(enable) {
@@ -266,14 +360,14 @@ function toggleEditing(enable) {
         const contentP = contentDiv.querySelector('p');
         
         if (enable) {
+            // Activar edición: Reemplazar texto con Inputs
             card.removeEventListener('click', toggleTimePanel); 
             card.classList.remove('card-recent', 'card-old');
             card.style.background = 'white'; 
             card.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; 
             card.style.border = '1px solid #4f46e5'; 
             card.querySelector('.card-time-panel').style.display = 'none';
-            const label = card.querySelector('.card-label');
-            if (label) label.style.display = 'none';
+            if(card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'none';
 
             if (emojiSpan && titleH3 && contentP) {
                 emojiSpan.remove(); titleH3.remove(); contentP.remove();
@@ -295,6 +389,7 @@ function toggleEditing(enable) {
                 contentDiv.appendChild(editableContent);
             }
         } else {
+            // Desactivar edición: Restaurar elementos visuales
             const editableEmoji = card.querySelector('.editable-emoji');
             const editableTitle = card.querySelector('.editable-title');
             const editableContent = card.querySelector('.editable-content');
@@ -317,8 +412,7 @@ function toggleEditing(enable) {
                 
                 card.style.background = ''; card.style.boxShadow = ''; card.style.border = '';
                 card.querySelector('.card-time-panel').style.display = 'block';
-                const label = card.querySelector('.card-label');
-                if (label) label.style.display = 'block';
+                if(card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'block';
             }
         }
     });
@@ -337,17 +431,11 @@ function toggleTimePanel(event) {
     }
 }
 
-// ----------------------------------------------------
-// LÓGICA DE NOTICIAS 
-// ----------------------------------------------------
+// ----------------------------------------------------------------
+// 7. LÓGICA DE NOTICIAS Y COMENTARIOS
+// ----------------------------------------------------------------
 
-function linkify(text) {
-    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
-        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
-        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
-    });
-}
-
+// --- Noticias ---
 async function loadNews() {
     const { data: newsData, error } = await supabase.from('noticias').select('id, text, timestamp').order('timestamp', { ascending: false });
     if (error) return;
@@ -355,6 +443,7 @@ async function loadNews() {
     const validNews = [];
     const cutoff = Date.now() - RECENT_THRESHOLD_MS;
     
+    // Limpieza automática de noticias viejas
     newsData.forEach(n => {
         if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n);
         else supabase.from('noticias').delete().eq('id', n.id);
@@ -366,8 +455,9 @@ async function loadNews() {
         DOMElements.newsTickerContent.innerHTML = `${newsHtml}<span class="news-item"> | </span>${newsHtml}`;
         DOMElements.newsTicker.style.display = 'flex';
         
+        // Animación dinámica según longitud
         DOMElements.newsTickerContent.style.animation = 'none';
-        DOMElements.newsTickerContent.offsetHeight; 
+        DOMElements.newsTickerContent.offsetHeight; // Trigger reflow
         const width = DOMElements.newsTickerContent.scrollWidth / 2;
         const duration = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
         DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker-move-dynamic { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
@@ -398,20 +488,7 @@ async function deleteNews() {
     }
 }
 
-// ----------------------------------------------------
-// LÓGICA DE COMENTARIOS, HILOS Y LIKES (COMPLETA)
-// ----------------------------------------------------
-
-function generateColorByName(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-    return `hsl(${hash % 360}, 70%, 50%)`; 
-}
-
-function formatCommentDate(timestamp) {
-    return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(timestamp)) + ' h';
-}
-
+// --- Comentarios ---
 function createCommentHTML(comment, isLiked) {
     const color = generateColorByName(comment.name.toLowerCase());
     const likeClass = isLiked ? 'liked' : '';
@@ -566,13 +643,15 @@ async function handleLikeToggle(event) {
     btn.disabled = false;
 }
 
-// ----------------------------------------------------
-// --- CONTADOR DE VISTAS ---
-// ----------------------------------------------------
+// ----------------------------------------------------------------
+// 8. ESTADÍSTICAS Y EVENT LISTENERS (INICIO)
+// ----------------------------------------------------------------
+
+// Estadísticas de visitas
 const VISIT_KEY = 'lastPageView';
 async function registerPageView() {
     const last = localStorage.getItem(VISIT_KEY);
-    if (last && (Date.now() - parseInt(last)) < 24 * 60 * 60 * 1000) return;
+    if (last && (Date.now() - parseInt(last)) < 24 * ONE_HOUR) return;
     const { error } = await supabase.from('page_views').insert({});
     if (!error) localStorage.setItem(VISIT_KEY, Date.now());
 }
@@ -585,83 +664,9 @@ async function getAndDisplayViewCount() {
     el.textContent = `👀 - ${count ? count.toLocaleString('es-ES') : '0'} vistas en (24h)`;
 }
 
-// ----------------------------------------------------
-// RENDERIZADO ESTADO Y EVENTOS
-// ----------------------------------------------------
-
-function renderStatusPanel(status, isAdminMode) {
-    // Usamos deficit_edited_at para el tiempo de edición manual
-    const timeInfo = timeAgo(new Date(status.deficit_edited_at || Date.now()).getTime()).text;
-    DOMElements.lastEditedTime.innerHTML = `Última edición:<br> ${timeInfo}`;
-    
-    // Mostramos la hora de la divisa si existe y estamos en modo no-admin
-    if (!isAdminMode && status.divisa_edited_at) {
-        const { text: divisaTimeText } = timeAgo(status.divisa_edited_at);
-        DOMElements.lastEditedTime.innerHTML += `<br><small style="color:var(--color-texto-secundario)">Divisas: ${divisaTimeText}</small>`;
-    }
-
-    if (isAdminMode) {
-        // MODO ADMIN: Inputs para editar déficit, divisas deshabilitadas
-        DOMElements.statusDataContainer.innerHTML = `
-            <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
-            <div class="status-item"><span class="label">Dollar (Auto):</span><input type="text" value="${status.dollar_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-            <div class="status-item"><span class="label">Euro (Auto):</span><input type="text" value="${status.euro_cup}" disabled style="background:#e9ecef; color:#666;"></div>
-        `;
-    } else {
-        // MODO PÚBLICO
-        DOMElements.statusDataContainer.innerHTML = `
-            <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
-        `;
-    }
-}
-
-async function loadStatusData() {
-    // Aquí cargamos todos los campos, incluyendo divisa_edited_at, para el caché
-    const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
-    if (data) currentStatus = { ...currentStatus, ...data };
-    
-    // 1. Renderizamos el panel con los datos que ya tenemos (Divisas del caché viejo)
-    renderStatusPanel(currentStatus, admin);
-    
-    // 2. Ejecutamos la función de caché inteligente. 
-    // Esta función decidirá si debe actualizar desde la API o no.
-    fetchElToqueRates(); 
-}
-
-async function saveChanges() {
-    if (!admin) return;
-    const editDeficit = document.getElementById('editDeficit');
-    const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
-    
-    const updates = [];
-    document.querySelectorAll(".card").forEach(card => {
-        const emoji = card.querySelector('.editable-emoji').value;
-        const titulo = card.querySelector('.editable-title').value;
-        const contenido = card.querySelector('.editable-content').value;
-        const id = card.dataset.id;
-        const idx = card.dataset.index;
-        
-        if (contenido !== currentData[idx].contenido || titulo !== currentData[idx].titulo || emoji !== currentData[idx].emoji) {
-             updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: new Date().toISOString() }).eq('id', id));
-        }
-    });
-
-    if (newDeficit !== currentStatus.deficit_mw) {
-        updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() }).eq('id', 1));
-    }
-
-    if (updates.length > 0) {
-        await Promise.all(updates);
-        alert("✅ Guardado.");
-        location.reload(); 
-    } else {
-        alert("No hay cambios.");
-    }
-}
-
+// Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+    // Eventos
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     DOMElements.saveBtn.addEventListener('click', saveChanges);
     DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
@@ -670,20 +675,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
     
+    // Cargas iniciales
     registerPageView();
     getAndDisplayViewCount();
-    loadData(); loadNews(); loadComments(); 
-    
-    // 🚨 MODIFICACIÓN CLAVE: Quitamos el setInterval porque el caché ahora se actualiza al cargar la página.
-    // Solo actualizaremos si el usuario está en modo admin (opcional) o si se requiere un update forzado.
-    loadStatusData(); 
+    loadData(); 
+    loadNews(); 
+    loadComments(); 
+    loadStatusData(); // Carga estado y dispara caché API
 });
-
-async function loadData() {
-    const { data } = await supabase.from('items').select('*').order('id');
-    if (data) {
-        currentData = data;
-        DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
-        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
-    }
-            }
