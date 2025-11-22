@@ -8,8 +8,8 @@
 :root {
   --color-texto-principal: #2b2d42;
   --color-texto-secundario: #8d99ae;
-  --acento-rojo: #ef233c;
-  --acento-verde: #10b981; /* Verde más vibrante */
+  --acento-rojo: #ef233c; 
+  --acento-verde: #10b981; 
   --acento-morado: #4f46e5;
   
   --fondo-principal: #e6ffe6; 
@@ -18,8 +18,10 @@
   --sombra-fuerte: rgba(0, 0, 0, 0.25);
   --sombra-suave: rgba(0, 0, 0, 0.1);
   
-  --glass-bg: rgba(255, 255, 255, 0.4); 
+  /* ⭐ GLASSMORHPISM AVANZADO ⭐ */
+  --glass-bg: rgba(255, 255, 255, 0.3); /* Menos opaco para ver más el fondo */
   --glass-border: rgba(255, 255, 255, 0.6); 
+  
   --acento-cian: #00bcd4; 
   --tiempo-panel-rojo: #f7a2ab; 
   --tiempo-panel-cian: #a2d9e0; 
@@ -30,12 +32,16 @@
   
   --fondo-panel-status: #FFD700; 
   --borde-panel-status: #ff9800;
+
+  /* ⭐ FUENTES MODERNAS ⭐ */
+  --font-principal: 'Nunito', sans-serif;
+  --font-titulo: 'Poppins', sans-serif;
 }
 
 body {
   margin: 0;
   padding: 0; 
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-principal);
   background: var(--fondo-gradiente);
   color: var(--color-texto-principal);
   display: flex;
@@ -55,7 +61,12 @@ header {
   box-shadow: 0 4px 10px var(--sombra-fuerte);
   position: relative;
 }
-header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
+header h1 { 
+    margin: 0; 
+    font-size: 1.3rem; 
+    font-weight: 900; /* Más peso */
+    font-family: var(--font-titulo); /* Poppins para el título principal */
+}
 header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 #fecha-actualizacion { font-weight: 900; color: #ffd700; }
 
@@ -69,14 +80,14 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
     justify-content: center;
     padding: 10px 20px;
     border: none;
-    border-radius: 12px; /* Bordes modernos */
-    font-family: 'Nunito', sans-serif;
+    border-radius: 12px; 
+    font-family: var(--font-principal);
     font-weight: 800;
     font-size: 0.9rem;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    gap: 8px; /* Espacio entre icono y texto */
+    gap: 8px; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     position: relative;
     overflow: hidden;
@@ -102,11 +113,11 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .btn-news {
     background: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
     color: white;
-    font-size: 1rem; /* Un poco más grande */
+    font-size: 1rem; 
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border: 1px solid rgba(255,255,255,0.2);
-    margin: 10px auto 20px; /* Centrado en header */
+    margin: 10px auto 20px; 
     width: auto;
 }
 
@@ -254,62 +265,118 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .admin-group button { flex-grow: 1; }
 
 /* ----------------------------------------------------------------
-   TARJETAS (CARDS)
+   TARJETAS (CARDS) - GLASSMORPHISM AVANZADO
    ---------------------------------------------------------------- */
 .container {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
-  gap: 10px; width: 95%; max-width: 800px; padding: 15px; 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Más ancho */
+  gap: 15px; /* Más espacio entre ellas */
+  width: 95%; max-width: 800px; padding: 15px; 
 }
+
 .card {
-  background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
-  border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 6px 15px var(--sombra-suave);
-  padding: 8px; padding-top: 15px; text-align: center; color: var(--color-texto-principal);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, background 0.3s; 
-  min-height: 110px; display: flex; flex-direction: column; position: relative; cursor: pointer; overflow: hidden; 
+  /* GLASSMORHPISM BASE */
+  background: var(--glass-bg); 
+  backdrop-filter: blur(15px); /* Más blur para efecto de cristal */
+  -webkit-backdrop-filter: blur(15px); 
+  border: 1px solid var(--glass-border); 
+  border-radius: 20px; /* Bordes más suaves y modernos */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra más sutil */
+  padding: 10px; 
+  text-align: center; 
+  color: var(--color-texto-principal);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición global más suave */
+  min-height: 120px; 
+  display: flex; flex-direction: column; 
+  position: relative; 
+  cursor: pointer; 
+  overflow: hidden; 
 }
-.card-recent:not(.admin-mode) {
-    background: rgba(239, 35, 60, 0.1); box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
-    border: 1px solid rgba(239, 35, 60, 0.4); 
-}
-.card-old:not(.admin-mode) {
-    background: rgba(0, 188, 212, 0.1); box-shadow: 0 0 8px rgba(0, 188, 212, 0.4), 0 6px 15px var(--sombra-suave);
-    border: 1px solid rgba(0, 188, 212, 0.3); 
-}
+
+/* EFECTO HOVER */
 .card:hover:not(.admin-mode) {
-  transform: translateY(-6px); background: rgba(255, 255, 255, 0.5); box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  transform: translateY(-8px) scale(1.02); /* Efecto 3D de levitación */
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.5); /* Se aclara al pasar el ratón */
 }
-.card.show-time-panel {
-    transform: translateY(-6px); background: rgba(255, 255, 255, 0.5); box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+
+/* ESTILOS INTERNOS */
+.card span.emoji { 
+    font-size: 2rem; /* Emojis más grandes */
+    display: block; 
+    margin-bottom: 5px; 
 }
+.card h3 { 
+    font-family: var(--font-titulo); /* Títulos con Poppins (más prominente) */
+    margin: 0; 
+    font-size: 1rem; /* Títulos más prominentes */
+    font-weight: 800; 
+    color: #1a1a1a; 
+    margin-top: 5px; 
+}
+.card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+.card-content p { 
+    margin: 6px 0 0; 
+    font-size: 0.85rem; 
+    color: #333; 
+    white-space: pre-wrap; 
+    text-align: center; 
+    font-weight: 600; /* Texto más legible */
+}
+
+/* VARIANTES DE ESTADO (OPTIMIZADAS) */
 .card-label {
     position: absolute; top: -1px; right: -1px; font-weight: 900; padding: 2px 6px;
-    border-radius: 0 15px 0 15px; z-index: 10; font-size: 0.55rem; line-height: 1; display: none; 
+    border-radius: 0 19px 0 15px; z-index: 10; font-size: 0.55rem; line-height: 1; display: none; 
 }
-.card-label[style*="acento-cian"] { color: var(--color-texto-principal); font-weight: 700; }
-.card span.emoji { font-size: 1.5rem; display: block; margin-bottom: 3px; }
-.card h3 { margin: 0; font-size: 0.9rem; font-weight: 800; color: #1a1a1a; margin-top: 5px; }
-.card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-.card-content p { margin: 4px 0 0; font-size: 0.8rem; color: #333; white-space: pre-wrap; text-align: center; }
 
-/* Edición en Cards */
-.card .editable-content {
-    width: 100%; border: 2px dashed var(--acento-rojo); border-radius: 8px; padding: 10px; 
-    font-size: 0.95rem; resize: vertical; min-height: 115px; margin-top: 5px;
-    font-family: 'Nunito', sans-serif; box-sizing: border-box; background-color: #fff; line-height: 1.3;
+/* Tarjeta Reciente (ROJO) */
+.card-recent:not(.admin-mode) {
+    border: 2px solid var(--acento-rojo); /* Borde acentuado */
+    box-shadow: 0 0 12px rgba(239, 35, 60, 0.7);
 }
-.card .editable-title, .card .editable-emoji {
-    border: 2px dashed var(--acento-rojo); padding: 5px; border-radius: 4px; text-align: center; 
-    font-weight: 700; margin-bottom: 8px; background-color: #fff;
+
+/* Tarjeta Antigua (CIAN) */
+.card-old:not(.admin-mode) {
+    border: 2px solid var(--acento-cian); 
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.6);
 }
-.card .editable-emoji { width: 50%; height: 3rem; font-size: 2rem; margin: 0 auto 5px; display: block; }
-.card .editable-title { font-size: 0.8rem; width: 100%; padding: 8px; }
+
+/* Panel de Tiempo */
 .card-time-panel {
     position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px 8px; 
-    font-size: 0.7rem; font-weight: 700; color: #1a1a1a; font-family: 'Nunito', sans-serif; 
+    font-size: 0.7rem; font-weight: 700; color: #1a1a1a; font-family: var(--font-principal); 
     background: white; transition: transform 0.3s ease-out; transform: translateY(100%); 
-    border-radius: 0 0 16px 16px; text-align: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    border-radius: 0 0 20px 20px; /* Ajuste al nuevo radio */
+    text-align: center; box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+.card.show-time-panel {
+    transform: translateY(-4px); /* Movimiento reducido al mostrar panel */
 }
 .card.show-time-panel .card-time-panel { transform: translateY(0); }
+
+/* Edición en Cards */
+.card.admin-mode { 
+    border: 2px dashed var(--acento-morado) !important; 
+    box-shadow: 0 0 15px rgba(79, 70, 229, 0.5) !important;
+    background: #fff9f9; /* Fondo más claro para indicar modo edición */
+    cursor: default;
+}
+.card .editable-content {
+    width: 100%; border: 2px dashed var(--acento-morado); border-radius: 8px; padding: 10px; 
+    font-size: 0.95rem; resize: vertical; min-height: 115px; margin-top: 5px;
+    font-family: var(--font-principal); box-sizing: border-box; background-color: #fff; line-height: 1.3;
+}
+.card .editable-title {
+    border: 2px dashed var(--acento-morado); padding: 5px; border-radius: 4px; text-align: center; 
+    font-weight: 700; margin-bottom: 8px; background-color: #fff;
+    font-size: 0.9rem; width: 100%; padding: 8px; font-family: var(--font-titulo);
+}
+.card .editable-emoji {
+    border: 2px dashed var(--acento-morado); padding: 5px; border-radius: 4px; text-align: center; 
+    font-weight: 700; margin-bottom: 8px; background-color: #fff;
+    width: 50%; height: 3rem; font-size: 2rem; margin: 0 auto 5px; display: block;
+}
 
 /* ----------------------------------------------------------------
    COMENTARIOS Y HILOS
@@ -332,7 +399,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .comment-content { font-size: 0.85rem; color: #333; margin-left: 0; margin-top: 5px; }
 .comment-date { font-size: 0.65rem; color: var(--color-texto-secundario); display: block; text-align: right; }
-.comment-form-container input, .comment-form-container textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+.comment-form-container input, .comment-form-container textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--font-principal); box-sizing: border-box; }
 
 /* Botón de publicar comentario: Usar clase btn btn-success, pero mantenemos selectores legacy por si acaso */
 #publishCommentBtn { 
@@ -348,7 +415,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .like-count { font-weight: 700; color: var(--color-texto-principal); }
 .reply-form-toggle { display: inline-block; margin-left: 10px; font-size: 0.75rem; color: var(--acento-verde); cursor: pointer; font-weight: 700; }
 .reply-form { display: none; margin-top: 10px; padding: 10px; background: rgba(240, 240, 240, 0.8); border-radius: 8px; }
-.reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.75rem; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+.reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.75rem; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: var(--font-principal); box-sizing: border-box; }
 
 .replies-container { padding-left: 15px; margin-top: 10px; border-left: 3px solid var(--color-borde-hilo); }
 .reply-item { 
@@ -370,11 +437,11 @@ footer {
 /* MEDIA QUERIES */
 @media (max-width: 600px) {
     header h1 { font-size: 1.2rem; }
-    .container { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
-    .card { min-height: 95px; padding: 6px; }
-    .card span.emoji { font-size: 1.3rem; }
-    .card h3 { font-size: 0.85rem; }
-    .card-content p { font-size: 0.75rem; }
+    .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+    .card { min-height: 110px; padding: 8px; border-radius: 16px; }
+    .card span.emoji { font-size: 1.5rem; }
+    .card h3 { font-size: 0.9rem; }
+    .card-content p { font-size: 0.8rem; }
     
     /* Ajuste de botones en móvil */
     .btn { padding: 8px 16px; font-size: 0.8rem; }
