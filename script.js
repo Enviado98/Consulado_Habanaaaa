@@ -572,7 +572,7 @@ async function handleLikeToggle(event) {
 }
 
 // ----------------------------------------------------
-// --- CONTADOR DE VISTAS ---
+// --- CONTADOR DE VISTAS (MODIFICADO: ESTILO PREMIUM) ---
 // ----------------------------------------------------
 const VISIT_KEY = 'lastPageView';
 async function registerPageView() {
@@ -587,7 +587,8 @@ async function getAndDisplayViewCount() {
     if (!el) return;
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
-    el.textContent = `👀 - ${count ? count.toLocaleString('es-ES') : '0'} vistas en (24h)`;
+    // ⭐ MODIFICADO: Texto limpio para diseño tipo cápsula (Sin guiones, todo mayúscula visualmente por CSS)
+    el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} VISTAS (24H)`;
 }
 
 // ----------------------------------------------------
