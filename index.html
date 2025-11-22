@@ -17,18 +17,17 @@
 
 <header>
   <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
-  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
+  <p>Web NO OFICIAL - Actualizada por la comunidad <span id="fecha-actualizacion">...</span></p>
   
   <div class="header-action-container">
     <a href="news.html" class="btn btn-news" role="button">
-        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
+        <span>🔴</span> VER NOTICIAS Y COMENTARIOS <span>👈🏻</span>
     </a>
   </div>
   
   <div id="viewCounter" class="view-counter" aria-live="polite">
     Cargando...
   </div>
-
 </header>
 
 <div id="statusPanel" class="status-panel-container">
@@ -39,11 +38,9 @@
             <span class="live-dot"></span>
             EN VIVO
         </div>
-        
-        <span id="lastEditedTime" style="display: none;"></span>
     </div>
     <div id="statusDataContainer" class="status-panel-data">
-        Cargando datos de estado...
+        Cargando datos...
     </div>
 </div>
 
@@ -51,51 +48,36 @@
     <strong class="news-ticker-fixed-label">NOTICIAS</strong>
     <div class="news-ticker-wrap">
         <div id="newsTickerContent" class="news-ticker-content">
-            </div>
+        </div>
     </div>
 </div>
 
 <div class="login-controls">
   <div id="statusMessage" class="login-message">
-            Accede a modo edición para actualizar la información
+      Modo lectura activo
   </div>
   
   <button id="toggleAdminBtn" class="btn btn-primary">
-      🛡️ ACTIVAR EL MODO EDICIÓN
+      🛡️ ACTIVAR MODO EDICIÓN
   </button>
 
   <div id="adminControlsPanel">
     <div class="admin-group">
-        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
+        <button id="saveBtn" class="btn btn-success">💾 Guardar Cambios (Tarjetas)</button>
     </div>
     <div class="admin-group">
-        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
-        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
+        <button id="addNewsBtn" class="btn btn-secondary btn-sm">➕ Noticia Cinta</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger btn-sm">⛔️ Borrar Cinta</button> 
     </div>
   </div>
 </div>
 
 <div class="container" id="contenedor">
-  </div>
-
-<section class="comments-section">
-    <h2>🗣️ Comentarios de la Comunidad</h2>
-    
-    <div class="comments-display-wrap">
-        <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
-        </div>
-    </div>
-
-    <div class="comment-form-container">
-        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
-        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
-        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
-    </div>
-</section>
+    <p style="text-align: center; color: white; width: 100%;">Cargando información...</p>
+</div>
 
 <footer>
-  <div>© 2025 – Información actualizada periódicamente.</div>
+  <div>© 2025 – Información actualizada periódicamente por la comunidad.</div>
 </footer>
 
 <script type="module" src="script.js"></script>
