@@ -6,32 +6,28 @@
 }
 
 :root {
-  --color-texto-principal: #2b2d42; /* Azul Oscuro */
-  --color-texto-secundario: #8d99ae; /* Gris Suave */
-  --acento-rojo: #ef233c; /* Rojo Consular */
-  --acento-verde: #0d9488; /* Verde Guardar */
+  --color-texto-principal: #2b2d42;
+  --color-texto-secundario: #8d99ae;
+  --acento-rojo: #ef233c;
+  --acento-verde: #10b981; /* Verde más vibrante */
+  --acento-morado: #4f46e5;
   
-  /* ⭐ MODIFICADO: FONDO VERDE CLARO PARA LA WEB ⭐ */
   --fondo-principal: #e6ffe6; 
   --fondo-gradiente: var(--fondo-principal); 
   
   --sombra-fuerte: rgba(0, 0, 0, 0.25);
   --sombra-suave: rgba(0, 0, 0, 0.1);
-  /* Glassmorphism settings - CLAVE PARA LA 'BELLEZA' */
+  
   --glass-bg: rgba(255, 255, 255, 0.4); 
   --glass-border: rgba(255, 255, 255, 0.6); 
-  /* Nuevo color de acento cian */
   --acento-cian: #00bcd4; 
-  /* Colores para el panel de tiempo */
   --tiempo-panel-rojo: #f7a2ab; 
   --tiempo-panel-cian: #a2d9e0; 
 
-  /* NUEVOS COLORES PARA COMENTARIOS */
-  --color-comentario-fondo: #f8f9fa; /* Fondo Comentario Principal */
-  --color-respuesta-fondo: #f0f3f5; /* Fondo Respuesta */
-  --color-borde-hilo: #b3cdd1; /* Cian Suave para la línea del hilo */
+  --color-comentario-fondo: #f8f9fa;
+  --color-respuesta-fondo: #f0f3f5;
+  --color-borde-hilo: #b3cdd1;
   
-  /* ⭐ MODIFICADO: Fondo Amarillo Intenso para el panel de estado ⭐ */
   --fondo-panel-status: #FFD700; 
   --borde-panel-status: #ff9800;
 }
@@ -40,7 +36,7 @@ body {
   margin: 0;
   padding: 0; 
   font-family: 'Nunito', sans-serif;
-  background: var(--fondo-gradiente); /* Usa el nuevo color verde claro */
+  background: var(--fondo-gradiente);
   color: var(--color-texto-principal);
   display: flex;
   flex-direction: column;
@@ -57,204 +53,174 @@ header {
   background: linear-gradient(135deg, #4f46e5, #9333ea);
   color: white;
   box-shadow: 0 4px 10px var(--sombra-fuerte);
-  position: relative; /* Necesario para el contador absoluto */
+  position: relative;
 }
 header h1 { margin: 0; font-size: 1.3rem; font-weight: 800; }
 header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 #fecha-actualizacion { font-weight: 900; color: #ffd700; }
 
 /* ----------------------------------------------------------------
-   PANEL DE ESTADO DINÁMICO UNIFICADO ⭐ CSS AJUSTADO A COMPACTO ⭐
+   ⚡ SISTEMA DE BOTONES PREMIUM (OPTIMIZADO) ⚡
    ---------------------------------------------------------------- */
-.status-panel-container {
-    width: 95%;
-    max-width: 800px;
-    margin: 6px auto; /* Margen reducido */
-    background-color: var(--fondo-panel-status); /* Usa el AMARILLO INTENSO */
-    border: 1px solid var(--borde-panel-status); 
-    border-radius: 10px; 
-    font-size: 0.8rem; /* Reducido de 0.85rem */
-    color: var(--color-texto-principal); 
-    font-weight: 700;
-    box-shadow: 0 2px 4px var(--sombra-suave);
-    padding: 6px 8px; /* Padding reducido */
+/* Clase Base (Estructura) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px; /* Bordes modernos */
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    gap: 8px; /* Espacio entre icono y texto */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    line-height: 1.2;
 }
 
-.status-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 3px; /* Más compacto */
-    margin-bottom: 4px; /* Margen reducido */
-    border-bottom: 1px dashed rgba(0,0,0,0.1);
-    font-size: 0.7rem; /* Reducido de 0.75rem */
-    color: #555;
+/* Efecto de Click (Hundimiento) */
+.btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* Efecto Hover Genérico */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    filter: brightness(1.1);
+}
+
+/* --- VARIANTES DE COLOR --- */
+
+/* 1. Botón de Noticias (Especial) */
+.btn-news {
+    background: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
+    color: white;
+    font-size: 1rem; /* Un poco más grande */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255,255,255,0.2);
+    margin: 10px auto 20px; /* Centrado en header */
+    width: auto;
+}
+
+/* 2. Botón Principal (Admin Toggle / Login) */
+.btn-primary {
+    background-color: var(--acento-morado);
+    color: white;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* 3. Botón de Éxito (Guardar / Publicar) */
+.btn-success {
+    background-color: var(--acento-verde);
+    color: white;
+}
+
+/* 4. Botón de Peligro/Salida (Salir Admin / Borrar) */
+.btn-danger {
+    background-color: var(--acento-rojo);
+    color: white;
+}
+
+/* 5. Botón Secundario (Controles Admin menores) */
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--color-texto-principal);
+    border: 1px solid rgba(0,0,0,0.1);
+    font-size: 0.8rem;
+}
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Tamaño Pequeño (para paneles densos) */
+.btn-sm {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    border-radius: 8px;
 }
 
 /* ----------------------------------------------------------------
-   INDICADOR EN VIVO (NUEVO) 🔴
+   PANEL DE ESTADO DINÁMICO
    ---------------------------------------------------------------- */
+.status-panel-container {
+    width: 95%; max-width: 800px; margin: 6px auto;
+    background-color: var(--fondo-panel-status);
+    border: 1px solid var(--borde-panel-status); 
+    border-radius: 10px; font-size: 0.8rem; color: var(--color-texto-principal); 
+    font-weight: 700; box-shadow: 0 2px 4px var(--sombra-suave); padding: 6px 8px;
+}
+.status-panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 3px; margin-bottom: 4px; border-bottom: 1px dashed rgba(0,0,0,0.1);
+    font-size: 0.7rem; color: #555;
+}
 .live-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background-color: white;
-    border: 1px solid var(--acento-rojo);
-    color: var(--acento-rojo);
-    padding: 3px 8px;
-    border-radius: 20px; /* Bordes muy redondos */
-    font-size: 0.6rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex; align-items: center; gap: 6px; background-color: white;
+    border: 1px solid var(--acento-rojo); color: var(--acento-rojo);
+    padding: 3px 8px; border-radius: 20px; font-size: 0.6rem; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-
 .live-dot {
-    width: 8px;
-    height: 8px;
-    background-color: var(--acento-rojo); /* Color base rojo */
-    border-radius: 50%;
-    display: block;
-    /* La animación mágica */
-    animation: live-pulse 1.5s infinite ease-in-out;
+    width: 8px; height: 8px; background-color: var(--acento-rojo); border-radius: 50%;
+    display: block; animation: live-pulse 1.5s infinite ease-in-out;
 }
-
-/* Animación de "Latido" o Broadcasting */
 @keyframes live-pulse {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(239, 35, 60, 0.7); /* Rojo Intenso pegado al punto */
-    }
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(239, 35, 60, 0); /* Rojo Tenue expandiéndose */
-    }
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(239, 35, 60, 0);
-    }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 35, 60, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 35, 60, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 35, 60, 0); }
 }
-/* ---------------------------------------------------------------- */
-
-/* Estilo para inputs deshabilitados (Automáticos por API) */
 .status-panel-container.admin-mode input:disabled {
-    background-color: #e9ecef; /* Fondo gris */
-    color: #6c757d; /* Texto gris oscuro */
-    border-color: #ced4da;
-    cursor: not-allowed; /* Icono de prohibido */
-    font-style: italic;
-    opacity: 0.8;
+    background-color: #e9ecef; color: #6c757d; border-color: #ced4da;
+    cursor: not-allowed; font-style: italic; opacity: 0.8;
 }
-
-
 .status-panel-data {
-    display: flex;
-    justify-content: space-between; /* Distribución uniforme y compacta */
-    align-items: center;
-    flex-wrap: nowrap; /* Asegura que se mantenga en fila */
-    gap: 4px; /* Gap reducido */
-    font-size: 0.85rem; /* Reducido de 0.9rem */
-    font-weight: 800;
-    text-align: center;
-    overflow-x: auto; /* Por si acaso en móvil extremo */
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: nowrap; gap: 4px; font-size: 0.85rem; font-weight: 800;
+    text-align: center; overflow-x: auto;
 }
-
 .status-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2px 4px; /* Padding reducido */
-    border-radius: 6px;
-    min-width: 85px; /* Ancho mínimo reducido de 95px */
-    flex-shrink: 0; /* No se encoge fácilmente */
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2px 4px; border-radius: 6px; min-width: 85px; flex-shrink: 0;
 }
+.status-item .value { display: block; font-size: 0.95rem; font-weight: 900; margin-top: 1px; }
+.status-item.deficit .value { color: var(--acento-rojo); }
+.status-item.divisa .value { color: #008000; }
+.status-item .label { font-size: 0.65rem; font-weight: 600; color: #555; margin-bottom: 1px; }
 
-/* Estilos de valores específicos */
-.status-item .value {
-    display: block;
-    font-size: 0.95rem; /* Reducido de 1rem */
-    font-weight: 900;
-    margin-top: 1px;
-}
-
-.status-item.deficit .value {
-    color: var(--acento-rojo); 
-}
-.status-item.divisa .value {
-    color: #008000; /* Verde para divisas */
-}
-
-.status-item .label {
-    font-size: 0.65rem; /* Reducido de 0.7rem */
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 1px;
-}
-
-/* Modo Admin: Campos de edición para el panel */
-.status-panel-container.admin-mode {
-    padding: 8px;
-    border: 2px dashed var(--acento-rojo); 
-}
-.status-panel-container.admin-mode .status-panel-data {
-    flex-direction: row; /* ⭐ MANTIENE FILA EN ADMIN MODE ⭐ */
-    flex-wrap: wrap; 
-    gap: 4px;
-}
+/* Modo Admin Panel Estado */
+.status-panel-container.admin-mode { padding: 8px; border: 2px dashed var(--acento-rojo); }
+.status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 4px; }
 .status-panel-container.admin-mode .status-item {
-    width: 23%; /* ⭐ ACTUALIZADO: Divide el espacio en 4 columnas para MLC */
-    flex-direction: column; /* Cambiado a columna para que el input sea 100% del item */
-    justify-content: center;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 4px;
-    border: 1px solid #ccc;
+    width: 23%; flex-direction: column; justify-content: center;
+    background-color: rgba(255, 255, 255, 0.7); padding: 4px; border: 1px solid #ccc;
 }
 .status-panel-container.admin-mode input {
-    border: 1px solid var(--acento-rojo);
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-align: center; /* Centrado en columna */
-    width: 100%; /* Ocupa todo el item */
-    margin-top: 4px;
+    border: 1px solid var(--acento-rojo); padding: 2px 5px; border-radius: 4px;
+    font-size: 0.75rem; font-weight: 700; text-align: center; width: 100%; margin-top: 4px;
 }
-.status-panel-container.admin-mode .status-item .label {
-    color: var(--color-texto-principal);
-    font-size: 0.75rem;
-}
-
 
 /* ----------------------------------------------------------------
    PANCARTA DE NOTICIAS (NEWS TICKER) 
    ---------------------------------------------------------------- */
 .news-ticker-container {
-    width: 100%;
-    background: linear-gradient(90deg, #d90429 0%, var(--acento-rojo) 100%); 
-    color: white;
-    box-shadow: 0 2px 5px var(--sombra-fuerte);
-    overflow: hidden; 
-    padding: 5px 0;
-    margin-bottom: 15px; 
-    display: flex; 
-    align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.5); 
-    border-bottom: 1px solid rgba(0, 0, 0, 0.3); 
-    position: sticky;
-    top: 0;
-    z-index: 998; 
+    width: 100%; background: linear-gradient(90deg, #d90429 0%, var(--acento-rojo) 100%); 
+    color: white; box-shadow: 0 2px 5px var(--sombra-fuerte); overflow: hidden; 
+    padding: 5px 0; margin-bottom: 15px; display: flex; align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.5); border-bottom: 1px solid rgba(0, 0, 0, 0.3); 
+    position: sticky; top: 0; z-index: 998; 
 }
 .news-ticker-fixed-label {
-    font-weight: 900; 
-    margin-right: 8px; 
-    padding: 0 7px; 
-    font-size: 0.75rem; 
-    background-color: rgba(0, 0, 0, 0.35); 
-    border-radius: 4px;
-    flex-shrink: 0;
-    line-height: 1.2;
-    z-index: 2; 
+    font-weight: 900; margin-right: 8px; padding: 0 7px; font-size: 0.75rem; 
+    background-color: rgba(0, 0, 0, 0.35); border-radius: 4px; flex-shrink: 0; line-height: 1.2; z-index: 2; 
 }
 .news-ticker-wrap { overflow: hidden; flex-grow: 1; position: relative; height: 100%; }
 .news-ticker-content { white-space: nowrap; font-size: 0.8rem; display: inline-block; }
@@ -263,189 +229,80 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .news-item a { color: #ffcc00; text-decoration: underline; font-weight: 800; }
 @keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-
 /* ----------------------------------------------------------------
-   LOGIN Y ADMIN CONTROLES (MODIFICADO PARA ACCESO DIRECTO Y DISEÑO MEJORADO)
+   LOGIN Y ADMIN CONTROLES
    ---------------------------------------------------------------- */
 .login-controls {
   display: flex; flex-direction: column; align-items: center; gap: 10px; width: 95%; max-width: 550px; 
   background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
-  padding: 0.8rem; border-radius: 12px; border: 1px solid var(--glass-border); 
+  padding: 1.2rem; border-radius: 16px; border: 1px solid var(--glass-border); 
   box-shadow: 0 4px 12px var(--sombra-fuerte); margin-bottom: 20px; z-index: 10; 
 }
-.login-message { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
+.login-message { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; text-align: center; }
 
-/* ELIMINADO: #loginForm */
-/* ELIMINADO: .login-controls input */
-
-.login-controls button {
-  background: #4f46e5; color: white; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer;
-  font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; flex-shrink: 0; 
-}
-
-/* NUEVO: Botón principal de acceso */
-#toggleAdminBtn { 
-    font-size: 0.9rem; 
-    padding: 8px 15px; 
-    width: 100%;
-    max-width: 350px; /* Ancho máximo para el botón de acceso */
-    margin-bottom: 5px;
-}
-#toggleAdminBtn:hover {
-    background-color: #3b30ad;
-}
-
-
-/* Panel de Administracion */
+/* Panel de Administracion (Botones internos) */
 #adminControlsPanel { 
-    display: none; justify-content: center; align-items: center; gap: 8px; padding: 8px; width: 100%; flex-wrap: wrap; background-color: rgba(0, 0, 0, 0.05); border-radius: 8px; overflow-x: hidden; 
+    display: none; justify-content: center; align-items: center; gap: 8px; 
+    padding: 10px; width: 100%; flex-wrap: wrap; 
+    background-color: rgba(255, 255, 255, 0.3); border-radius: 12px; overflow-x: hidden; margin-top: 10px;
 }
-#adminControlsPanel button { font-size: 0.8rem; padding: 7px 10px; flex-grow: 1; min-width: 120px; }
-#saveBtn { 
-    background-color: var(--acento-verde); 
-    font-weight: 800;
-    min-width: 90%; 
-    padding: 10px 15px;
-    font-size: 0.9rem; 
-} 
-#saveBtn:hover { background-color: #0c8075; } 
 
-/* NUEVO: Agrupación de botones para diseño */
+/* Agrupación de botones */
 .admin-group {
-    display: flex;
-    gap: 8px;
-    width: 100%; 
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
+    display: flex; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap;
 }
-.admin-group button {
-    flex-grow: 0;
-    flex-basis: auto; 
-    width: 48%; /* Para que dos quepan en una línea */
-    min-width: 150px;
-}
-.admin-group:first-child { margin-bottom: 10px; } /* Espacio extra sobre el grupo de noticias */
-
+.admin-group button { flex-grow: 1; }
 
 /* ----------------------------------------------------------------
    TARJETAS (CARDS)
    ---------------------------------------------------------------- */
 .container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
-  gap: 10px; 
-  width: 95%;
-  max-width: 800px; 
-  padding: 15px; 
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+  gap: 10px; width: 95%; max-width: 800px; padding: 15px; 
 }
-
 .card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); 
-  border: 1px solid var(--glass-border);
-  border-radius: 16px; 
-  box-shadow: 0 6px 15px var(--sombra-suave);
-  padding: 8px; 
-  padding-top: 15px; 
-  text-align: center;
-  color: var(--color-texto-principal);
+  background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); 
+  border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 6px 15px var(--sombra-suave);
+  padding: 8px; padding-top: 15px; text-align: center; color: var(--color-texto-principal);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, background 0.3s; 
-  min-height: 110px; 
-  display: flex;
-  flex-direction: column;
-  position: relative; 
-  cursor: pointer; 
-  overflow: hidden; 
+  min-height: 110px; display: flex; flex-direction: column; position: relative; cursor: pointer; overflow: hidden; 
 }
-
-/* --- ESTILOS DE ESTADO (Web 1) --- */
 .card-recent:not(.admin-mode) {
-    background: rgba(239, 35, 60, 0.1); 
-    box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
+    background: rgba(239, 35, 60, 0.1); box-shadow: 0 0 10px rgba(239, 35, 60, 0.5), 0 6px 15px var(--sombra-suave);
     border: 1px solid rgba(239, 35, 60, 0.4); 
 }
 .card-old:not(.admin-mode) {
-    background: rgba(0, 188, 212, 0.1); 
-    box-shadow: 0 0 8px rgba(0, 188, 212, 0.4), 0 6px 15px var(--sombra-suave);
+    background: rgba(0, 188, 212, 0.1); box-shadow: 0 0 8px rgba(0, 188, 212, 0.4), 0 6px 15px var(--sombra-suave);
     border: 1px solid rgba(0, 188, 212, 0.3); 
 }
 .card:hover:not(.admin-mode) {
-  transform: translateY(-6px);
-  background: rgba(255, 255, 255, 0.5); 
-  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  transform: translateY(-6px); background: rgba(255, 255, 255, 0.5); box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 .card.show-time-panel {
-    transform: translateY(-6px); 
-    background: rgba(255, 255, 255, 0.5); 
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    transform: translateY(-6px); background: rgba(255, 255, 255, 0.5); box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
-
-/* *** LABEL DE RECIENTE COMPACTO (Web 1 REINTRODUCIDO) *** */
 .card-label {
-    position: absolute; 
-    top: -1px; 
-    right: -1px; 
-    font-weight: 900;
-    padding: 2px 6px;
-    border-radius: 0 15px 0 15px; 
-    z-index: 10;
-    font-size: 0.55rem; 
-    line-height: 1;
-    display: none; /* Se muestra con JS solo si es reciente */
+    position: absolute; top: -1px; right: -1px; font-weight: 900; padding: 2px 6px;
+    border-radius: 0 15px 0 15px; z-index: 10; font-size: 0.55rem; line-height: 1; display: none; 
 }
-.card-label[style*="acento-cian"] {
-    color: var(--color-texto-principal); 
-    font-weight: 700; 
-}
-
+.card-label[style*="acento-cian"] { color: var(--color-texto-principal); font-weight: 700; }
 .card span.emoji { font-size: 1.5rem; display: block; margin-bottom: 3px; }
 .card h3 { margin: 0; font-size: 0.9rem; font-weight: 800; color: #1a1a1a; margin-top: 5px; }
 .card-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
 .card-content p { margin: 4px 0 0; font-size: 0.8rem; color: #333; white-space: pre-wrap; text-align: center; }
 
-/* --- CAMPOS DE EDICIÓN EN MODO ADMIN (MODIFICADO: BORDES ROJOS Y DISCONTINUOS) --- */
+/* Edición en Cards */
 .card .editable-content {
-    width: 100%; 
-    border: 2px dashed var(--acento-rojo); /* Borde rojo discontinuo y grueso */
-    border-radius: 8px; 
-    padding: 10px; 
-    font-size: 0.95rem; 
-    resize: vertical; 
-    min-height: 115px; 
-    margin-top: 5px;
-    font-family: 'Nunito', sans-serif; 
-    box-sizing: border-box;
-    background-color: #fff;
-    line-height: 1.3;
+    width: 100%; border: 2px dashed var(--acento-rojo); border-radius: 8px; padding: 10px; 
+    font-size: 0.95rem; resize: vertical; min-height: 115px; margin-top: 5px;
+    font-family: 'Nunito', sans-serif; box-sizing: border-box; background-color: #fff; line-height: 1.3;
 }
-
 .card .editable-title, .card .editable-emoji {
-    border: 2px dashed var(--acento-rojo); /* Borde rojo discontinuo y grueso */
-    padding: 5px; 
-    border-radius: 4px; 
-    text-align: center; 
-    font-weight: 700; 
-    margin-bottom: 8px;
-    background-color: #fff;
+    border: 2px dashed var(--acento-rojo); padding: 5px; border-radius: 4px; text-align: center; 
+    font-weight: 700; margin-bottom: 8px; background-color: #fff;
 }
-
-.card .editable-emoji { 
-    width: 50%; /* Mucho más ancha para facilitar el clic */
-    height: 3rem; 
-    font-size: 2rem; 
-    margin: 0 auto 5px; 
-    display: block; 
-}
-
-.card .editable-title { 
-    font-size: 0.8rem; /* Fuente más pequeña para que quepa más texto */
-    width: 100%; 
-    padding: 8px; 
-}
-
-/* PANEL DESLIZABLE DE TIEMPO */
+.card .editable-emoji { width: 50%; height: 3rem; font-size: 2rem; margin: 0 auto 5px; display: block; }
+.card .editable-title { font-size: 0.8rem; width: 100%; padding: 8px; }
 .card-time-panel {
     position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px 8px; 
     font-size: 0.7rem; font-weight: 700; color: #1a1a1a; font-family: 'Nunito', sans-serif; 
@@ -454,9 +311,8 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .card.show-time-panel .card-time-panel { transform: translateY(0); }
 
-
 /* ----------------------------------------------------------------
-   COMENTARIOS Y HILOS (Web 2) - ESTILOS MEJORADOS
+   COMENTARIOS Y HILOS
    ---------------------------------------------------------------- */
 .comments-section {
     width: 95%; max-width: 800px; padding: 20px; margin: 20px 0;
@@ -465,34 +321,25 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 }
 .comments-section h2 { font-size: 1.3rem; margin-bottom: 15px; }
 .comments-display-wrap { max-height: 400px; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.85); overflow-y: auto; border-radius: 8px; border: 1px solid var(--color-borde-hilo); }
-
-/* Contenedor del Comentario Principal */
 .comment-item { 
     border-bottom: 1px dashed #ccc; padding: 12px; margin-bottom: 10px; 
-    background-color: var(--color-comentario-fondo);
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    background-color: var(--color-comentario-fondo); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .comment-item:last-child { border-bottom: none; }
-
-/* Nombre del Comentario Principal */
 .comment-item > strong.comment-name { 
-    font-size: 1rem; 
-    font-weight: 900; 
-    border-bottom: 2px solid #ddd; 
-    padding-bottom: 4px;
-    margin-bottom: 5px;
-    color: var(--comment-color, #333); 
-    display: block; 
+    font-size: 1rem; font-weight: 900; border-bottom: 2px solid #ddd; padding-bottom: 4px;
+    margin-bottom: 5px; color: var(--comment-color, #333); display: block; 
 }
-
 .comment-content { font-size: 0.85rem; color: #333; margin-left: 0; margin-top: 5px; }
 .comment-date { font-size: 0.65rem; color: var(--color-texto-secundario); display: block; text-align: right; }
 .comment-form-container input, .comment-form-container textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
-#publishCommentBtn { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.3s; width: 100%; }
-#publishCommentBtn:hover { background: #059669; }
 
-/* Likes y Respuestas */
+/* Botón de publicar comentario: Usar clase btn btn-success, pero mantenemos selectores legacy por si acaso */
+#publishCommentBtn { 
+    width: 100%; /* Sobrescribir ancho específico */
+}
+
+/* Actions */
 .comment-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 5px; font-size: 0.8rem; }
 .like-button { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px 5px; line-height: 1; transition: transform 0.1s ease; }
 .like-button:hover { transform: scale(1.1); }
@@ -502,41 +349,16 @@ header p { margin: 0.3rem 0 0; font-size: 0.8rem; opacity: 0.9; }
 .reply-form-toggle { display: inline-block; margin-left: 10px; font-size: 0.75rem; color: var(--acento-verde); cursor: pointer; font-weight: 700; }
 .reply-form { display: none; margin-top: 10px; padding: 10px; background: rgba(240, 240, 240, 0.8); border-radius: 8px; }
 .reply-form input, .reply-form textarea { width: 100%; margin-bottom: 8px; font-size: 0.75rem; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Nunito', sans-serif; box-sizing: border-box; }
-.reply-form button { background: var(--acento-verde); color: white; border: none; padding: 6px 10px; font-size: 0.75rem; width: 100%; border-radius: 6px; cursor: pointer; }
 
-/* REGLAS PARA RESPUESTAS (HILOS) - MEJORA ESTÉTICA */
-.replies-container { 
-    padding-left: 15px; 
-    margin-top: 10px; 
-    border-left: 3px solid var(--color-borde-hilo); 
-}
+.replies-container { padding-left: 15px; margin-top: 10px; border-left: 3px solid var(--color-borde-hilo); }
 .reply-item { 
-    margin-top: 10px; 
-    padding: 8px; 
-    background-color: var(--color-respuesta-fondo); /* Fondo diferente para respuestas */
-    border-radius: 6px;
-    border-top: none; /* Elimina la línea punteada */
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    margin-top: 10px; padding: 8px; background-color: var(--color-respuesta-fondo);
+    border-radius: 6px; border-top: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.reply-item > span.comment-name { /* Estilo del nombre de la respuesta */
-    font-weight: 800;
-    font-size: 0.9rem;
-    color: var(--comment-color, #444);
-    display: inline;
-}
+.reply-item > span.comment-name { font-weight: 800; font-size: 0.9rem; color: var(--comment-color, #444); display: inline; }
 .replies-container .reply-item:not(:first-child) { display: none; }
 .replies-container.expanded .reply-item { display: block; }
-
-.reply-toggle { 
-    display: block; 
-    margin: 8px 0; 
-    font-size: 0.75rem; 
-    color: var(--acento-cian); 
-    cursor: pointer; 
-    font-weight: 800; 
-    text-decoration: underline;
-}
-
+.reply-toggle { display: block; margin: 8px 0; font-size: 0.75rem; color: var(--acento-cian); cursor: pointer; font-weight: 800; text-decoration: underline; }
 
 /* FOOTER */
 footer {
@@ -545,7 +367,7 @@ footer {
     width: 100%; max-width: 800px; text-align: center; font-size: 0.8rem; color: var(--color-texto-principal);
 }
 
-/* MEDIA QUERIES (Ajustes para móviles) */
+/* MEDIA QUERIES */
 @media (max-width: 600px) {
     header h1 { font-size: 1.2rem; }
     .container { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
@@ -553,142 +375,29 @@ footer {
     .card span.emoji { font-size: 1.3rem; }
     .card h3 { font-size: 0.85rem; }
     .card-content p { font-size: 0.75rem; }
-    .login-controls input, .login-controls button, #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
     
-    /* AJUSTE BOTONES ADMIN EN MÓVIL */
-    #toggleAdminBtn { font-size: 0.85rem; padding: 6px 10px; }
-    #adminControlsPanel button { font-size: 0.75rem; padding: 6px 8px; }
-    #saveBtn { min-width: 100%; font-size: 0.85rem; padding: 8px 10px; }
-    .admin-group button { width: 100%; min-width: auto; }
+    /* Ajuste de botones en móvil */
+    .btn { padding: 8px 16px; font-size: 0.8rem; }
+    .btn-news { width: 90%; font-size: 0.9rem; }
 
     .comments-section h2 { font-size: 1.1rem; }
     .comment-actions { font-size: 0.7rem; gap: 5px; }
     .replies-container { padding-left: 10px; }
-    .comment-item { padding: 8px; }
-    .reply-item { padding: 6px; }
-
-    /* ⭐ AJUSTES ESPECÍFICOS PARA MANTENER EL PANEL COMPACTO Y HORIZONTAL EN MÓVIL ⭐ */
-    .status-panel-container {
-        font-size: 0.75rem; /* Reducido de 0.8rem */
-        padding: 6px 8px; /* Padding reducido */
-    }
-    .status-panel-data {
-        flex-direction: row; /* MANTIENE EN FILA */
-        flex-wrap: nowrap;
-        overflow-x: auto; /* Permite desplazamiento si los 3 no caben */
-    }
-    .status-item {
-        min-width: 85px; /* Ancho mínimo reducido de 90px */
-        flex-shrink: 0;
-    }
-    .status-panel-container.admin-mode .status-panel-data {
-        flex-direction: row; 
-        flex-wrap: wrap; 
-        gap: 4px;
-    }
-    .status-panel-container.admin-mode .status-item {
-        flex-direction: column; 
-        width: 48%; /* ⭐ ACTUALIZADO: Cuadrícula de 2x2 en móvil para MLC */
-    }
-    .status-panel-container.admin-mode input {
-        width: 100%;
-        text-align: center;
-    }
-}
-/* ----------------------------------------------------------------
-   ESTILO DEL BOTÓN DE NOTICIAS MEJORADO (index.html)
-   ---------------------------------------------------------------- */
-
-.news-btn-v2 {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     
-    /* Colores solicitados: Fondo verde y texto blanco */
-    background-color: var(--acento-verde, #0d9488); 
-    color: white;
-    
-    padding: 10px 20px;
-    margin: 10px auto 20px; 
-    border-radius: 8px; /* Borde cuadrado suave (minimalista) */
-    
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 1.1em;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Sombra más fuerte para resaltar */
-    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    
-    /* Asegura que el contenedor del botón esté centrado */
-    width: auto; 
-    cursor: pointer;
+    /* Panel estado móvil */
+    .status-panel-container { font-size: 0.75rem; padding: 6px 8px; }
+    .status-panel-data { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
+    .status-item { min-width: 85px; flex-shrink: 0; }
+    .status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+    .status-panel-container.admin-mode .status-item { flex-direction: column; width: 48%; }
 }
 
-.news-btn-v2:hover {
-    background-color: #0c8276; /* Tono más oscuro al pasar el ratón */
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px); /* Pequeño levantamiento */
-}
-
-.news-btn-v2:active {
-    /* Efecto de pulsación */
-    transform: translateY(1px); 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    background-color: #0b7060;
-}
-
-/* El contenedor del botón debe estar en index.html para asegurar el centrado */
-.header-action-container {
-    text-align: center;
-    padding: 10px 0;
-    /* Color de fondo igual que el header, si aplica, para minimalismo */
-    background-color: transparent; 
-}
-
-/* Si quieres que el texto sea aún más 'minimalista' */
-.news-btn-v2 .emoji {
-    margin-right: 8px;
-}
-/* --- NUEVOS ESTILOS PARA EL CONTADOR DE VISTAS (PREMIUM / EN VIVO STYLE) --- */
-
+/* CONTADOR DE VISTAS (PREMIUM CAPSULE) */
 .view-counter {
-    position: absolute;
-    bottom: 8px; /* Un poco más arriba para respirar */
-    left: 10px;
-    
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px; /* Espacio entre texto y elementos */
-    
-    /* Glassmorphism con borde blanco sutil */
-    background: rgba(255, 255, 255, 0.15); 
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px); /* Soporte Safari */
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    
-    padding: 4px 12px;
-    border-radius: 20px; /* Bordes totalmente redondos (Pill shape) */
-    
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    z-index: 20;
-    transition: all 0.3s ease;
-    cursor: default;
+    position: absolute; bottom: 8px; left: 10px; display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.4); color: #ffffff; font-size: 0.75rem; font-weight: 800;
+    letter-spacing: 0.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); z-index: 20; transition: all 0.3s ease; cursor: default;
 }
-
-.view-counter:hover {
-    background: rgba(255, 255, 255, 0.3); /* Más brillante al pasar el ratón */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* Opcional: si quieres forzar un icono antes del texto vía CSS */
-/* .view-counter::before { content: '👀'; margin-right: 2px; } */
+.view-counter:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
