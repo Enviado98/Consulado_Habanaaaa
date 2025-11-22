@@ -1,306 +1,312 @@
-/* =========================================
-   1. CONFIGURACIÓN Y VARIABLES GLOBALES
-   ========================================= */
+/* ----------------------------------------------------------------
+   ESTILOS PREMIUM - GLASSMORPHISM & CRYSTAL UI
+   ---------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 :root {
-    /* Colores Base (Fondo oscuro profundo) */
-    --bg-dark: #050509;
-    --bg-panel: #0f0f16;
-    
-    /* Valores por defecto (serán sobrescritos por JS por tarjeta) */
-    --hue: 220;
-    --sat: 100%;
-    --lig: 50%;
-    --primary: hsl(var(--hue), var(--sat), var(--lig));
-    --primary-dim: hsla(var(--hue), var(--sat), var(--lig), 0.1);
-    --primary-glow: hsla(var(--hue), var(--sat), var(--lig), 0.6);
-    
-    /* Animaciones */
-    --transition-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --color-texto-principal: #1a202c;
+  --color-texto-secundario: #4a5568;
+  
+  /* Colores Base para gradientes y efectos */
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  
+  /* Fuente base */
+  --fuente-principal: 'Nunito', sans-serif;
 }
 
-/* Reset Básico */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+/* Fondo animado estilo "Aurora" para que el cristal resalte */
 body {
-    background-color: var(--bg-dark);
-    font-family: 'Outfit', sans-serif;
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
-    /* Fondo sutil ambiental */
-    background-image: radial-gradient(circle at 50% 0%, #1a1a24 0%, #000 80%);
+  margin: 0;
+  padding: 0;
+  font-family: var(--fuente-principal);
+  /* Gradiente de fondo profundo y moderno */
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  color: var(--color-texto-principal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-.main-wrapper {
-    padding: 40px;
-    width: 100%;
-    max-width: 1400px;
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.grid-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 40px;
-    perspective: 1000px; /* Habilita 3D */
+/* --- HEADER --- */
+header {
+  width: 100%;
+  text-align: center;
+  padding: 1.5rem;
+  /* Header Glassmorphism */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: white;
+  position: relative;
+  z-index: 100;
+}
+header h1 { 
+    margin: 0; 
+    font-size: 1.6rem; 
+    font-weight: 900; 
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    letter-spacing: 1px;
+}
+header p { margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.95; font-weight: 600; }
+#fecha-actualizacion { 
+    color: #fff; 
+    background: rgba(0,0,0,0.2); 
+    padding: 2px 8px; 
+    border-radius: 10px; 
 }
 
-/* =========================================
-   2. TARJETA MAESTRA (STRUCTURE)
-   ========================================= */
+/* ----------------------------------------------------------------
+   TARJETAS DE CRISTAL (GLASS CARDS) - EL CAMBIO PRINCIPAL
+   ---------------------------------------------------------------- */
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Un poco más anchas */
+  gap: 20px;
+  width: 95%;
+  max-width: 1000px;
+  padding: 30px 15px;
+}
+
 .card {
-    /* Variables locales para esta tarjeta (JS las llenará) */
-    --card-hue: var(--hue); 
-    --card-primary: hsl(var(--card-hue), 90%, 60%);
-    
-    position: relative;
-    width: 340px;
-    height: 500px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    
-    /* El corazón del Glassmorphism */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transition: transform 0.4s var(--transition-smooth), 
-                box-shadow 0.4s var(--transition-smooth),
-                border-color 0.4s ease;
-                
-    /* Sombra inicial */
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    isolation: isolate; /* Crea un nuevo contexto de apilamiento */
+  /* EFECTO CRISTAL SUPREMO */
+  background: rgba(255, 255, 255, 0.15); /* Transparencia base */
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); /* Sombra difusa */
+  backdrop-filter: blur(18px) saturate(180%); /* Desenfoque potente y saturación */
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4); /* Borde fino y brillante */
+  border-top: 1px solid rgba(255, 255, 255, 0.7); /* Borde superior más luz */
+  border-left: 1px solid rgba(255, 255, 255, 0.7); /* Borde izquierdo más luz */
+  
+  padding: 20px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
 }
 
-/* Efecto Hover en la Tarjeta */
-.card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.7),
-                0 0 0 1px var(--card-primary) inset; /* Borde interior brillante */
-    border-color: rgba(255, 255, 255, 0.3);
-    z-index: 10;
+/* Hover Animation: Levitar y brillar */
+.card:hover:not(.admin-mode) {
+  transform: translateY(-10px) scale(1.02);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 15px 40px 0 rgba(31, 38, 135, 0.25);
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
-/* =========================================
-   3. FONDO Y AMBIENTACIÓN (LAYERS)
-   ========================================= */
-.card-bg-elements {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-/* La figura premium (Blob) */
-.card-blob {
-    position: absolute;
-    top: -100px;
-    right: -100px;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, var(--card-primary) 0%, transparent 70%);
-    opacity: 0.4;
-    filter: blur(60px);
-    border-radius: 50%;
-    transition: all 0.6s ease;
-    animation: floatBlob 10s infinite alternate ease-in-out;
-}
-
-/* Textura de Ruido (Noise) para calidad visual */
-.card-noise {
-    position: absolute;
-    inset: 0;
-    opacity: 0.07;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
-}
-
-/* Brillo superficial animado */
-.card-shine {
+/* Efecto de brillo que pasa (Shimmer) */
+.card::before {
+    content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: skewX(-20deg);
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-25deg);
+    transition: 0.5s;
     pointer-events: none;
-    transition: left 0.5s;
-    z-index: 0;
+}
+.card:hover::before {
+    left: 150%;
+    transition: 0.7s ease-in-out;
 }
 
-.card:hover .card-shine {
-    left: 150%; /* Pasa el brillo rápidamente al hacer hover */
-    transition: left 0.7s ease-in-out;
+/* EMOJI FLOTANTE */
+.card span.emoji {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+    transition: transform 0.3s;
+}
+.card:hover span.emoji {
+    transform: scale(1.2) rotate(5deg);
 }
 
-.card:hover .card-blob {
-    opacity: 0.6;
-    transform: scale(1.2) translate(-20px, 20px);
-}
-
-/* =========================================
-   4. CONTENIDO INTERNO
-   ========================================= */
-.card-content {
-    padding: 30px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 1;
-}
-
-/* Header de la tarjeta */
-.card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-}
-
-.chip {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* --- TIPOGRAFÍA CRISTALINA (TÍTULO) --- */
+/* Usaremos una variable --card-neon que definiremos luego en JS */
+.card h3 {
+    margin: 5px 0 10px 0;
+    font-size: 1.1rem;
+    font-weight: 800; /* Grueso para que se lea bien el efecto */
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-}
-
-.icon-box {
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--card-primary);
-    font-size: 1.4rem;
-    transition: all 0.3s ease;
-}
-
-.card:hover .icon-box {
-    background: var(--card-primary);
-    color: #000;
-    box-shadow: 0 0 20px var(--card-primary);
-}
-
-/* =========================================
-   5. FUENTE GLASSMORPHISM (REQUERIMIENTO CLAVE)
-   ========================================= */
-.card-body {
-    margin-top: auto;
-    margin-bottom: 20px;
-}
-
-.glass-title {
-    font-family: 'Syncopate', sans-serif; /* Tech font */
-    font-size: 2.8rem;
-    line-height: 1;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: -1px;
     
-    /* 1. Transparencia interna */
-    color: rgba(255, 255, 255, 0.02);
+    /* El truco del texto de cristal degradado */
+    background: linear-gradient(to bottom, #ffffff 0%, var(--card-neon, #fff) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     
-    /* 2. Borde fino (Stroke) */
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.8);
-    
-    /* 3. Resplandor difuso */
-    text-shadow: 0 0 30px var(--card-primary);
+    /* Resplandor alrededor del texto */
+    filter: drop-shadow(0 0 8px var(--card-neon, rgba(255,255,255,0.5)));
     
     position: relative;
-    transition: all 0.3s ease;
+    z-index: 2;
 }
 
-.sub-title {
-    font-size: 1rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--card-primary);
-    margin-bottom: 15px;
-    font-weight: 700;
-    text-shadow: 0 0 10px var(--card-primary);
-}
-
-.description {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 300;
-}
-
-/* Efecto hover en texto */
-.card:hover .glass-title {
-    -webkit-text-stroke: 1px var(--card-primary); /* Borde toma color */
-    color: rgba(255, 255, 255, 0.1); /* Se llena un poco */
-    filter: drop-shadow(0 0 10px var(--card-primary));
-}
-
-/* =========================================
-   6. BOTÓN DE ACCIÓN
-   ========================================= */
-.card-footer {
-    margin-top: 20px;
-}
-
-.action-btn {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    font-family: 'Outfit', sans-serif;
+/* CONTENIDO DE LA TARJETA */
+.card-content p {
+    margin: 0;
+    font-size: 0.85rem;
     font-weight: 600;
+    color: rgba(255, 255, 255, 0.9); /* Blanco casi puro */
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Etiquetas de estado (Editado, etc) */
+.card-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 3px 8px;
     border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 5;
+    text-transform: uppercase;
+}
+
+/* Panel de Tiempo (Footer de la tarjeta) */
+.card-time-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.95); /* Casi sólido para legibilidad */
+    color: #333 !important; /* Forzamos color oscuro */
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 10px 10px 0 0; /* Redondeado arriba inv */
+    z-index: 10;
+}
+.card.show-time-panel .card-time-panel {
+    transform: translateY(0);
+}
+
+/* --- INPUTS DE EDICIÓN (MODO ADMIN) --- */
+.card .editable-content, 
+.card .editable-title, 
+.card .editable-emoji {
+    background: rgba(255,255,255,0.9);
+    border: 2px dashed #333;
+    color: #333;
+    border-radius: 8px;
+    width: 100%;
+    padding: 5px;
+    font-family: 'Nunito', sans-serif;
+}
+.card .editable-content { min-height: 100px; text-align: left; }
+
+/* ----------------------------------------------------------------
+   BOTONES (Actualizados a estilo Glass)
+   ---------------------------------------------------------------- */
+.btn {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px; /* Más redondeados */
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
     transition: all 0.3s ease;
-    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.btn:hover { transform: translateY(-3px); filter: brightness(1.2); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+.btn-news {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    margin: 15px auto;
 }
 
-.action-btn:hover {
-    background: var(--card-primary);
-    color: #000; /* Contraste oscuro sobre color neón */
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    padding-right: 25px; /* Animación de flecha */
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+.btn-danger  { background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); color: white; }
+
+/* ----------------------------------------------------------------
+   CONTROLES DE LOGIN Y OTROS PANELES
+   ---------------------------------------------------------------- */
+.login-controls, .comments-section, .status-panel-container {
+    background: rgba(255, 255, 255, 0.75); /* Más opaco para leer bien */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
-.action-btn i {
-    transition: transform 0.3s ease;
+/* News Ticker */
+.news-ticker-container {
+    background: rgba(220, 20, 60, 0.85);
+    backdrop-filter: blur(5px);
+    border-top: 1px solid rgba(255,255,255,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.4);
 }
 
-.action-btn:hover i {
-    transform: translateX(5px);
+/* Footer */
+footer {
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
 }
 
-/* =========================================
-   7. KEYFRAMES
-   ========================================= */
-@keyframes floatBlob {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(20px, -20px) scale(1.1); }
+/* STATUS PANEL ESPECIFICO */
+.status-panel-container {
+    width: 95%; max-width: 800px; margin: 10px auto;
+    background: rgba(255, 215, 0, 0.85); /* Amarillo dorado translúcido */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #333;
 }
+.status-item .value { font-size: 1.1rem; }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .card { width: 100%; height: auto; min-height: 450px; }
-    .glass-title { font-size: 2.2rem; }
+/* MEDIA QUERIES */
+@media (max-width: 600px) {
+    .container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+    .card { padding: 15px 10px; min-height: 140px; }
+    .card span.emoji { font-size: 2rem; }
+    .card h3 { font-size: 0.9rem; }
+    header h1 { font-size: 1.3rem; }
 }
