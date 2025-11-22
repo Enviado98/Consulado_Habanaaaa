@@ -138,7 +138,7 @@ header p {
 }
 
 /* ----------------------------------------------------------------
-   4. PANEL DE ESTADO (ECONOMÍA Y ENERGÍA)
+   4. PANEL DE ESTADO (ECONOMÍA Y ENERGÍA) - ACTUALIZADO PARA MLC
    ---------------------------------------------------------------- */
 .status-panel-container {
     width: 95%;
@@ -197,7 +197,8 @@ header p {
     align-items: center;
     padding: 3px 5px;
     border-radius: 6px;
-    min-width: 95px;
+    /* Ajustado a 85px para que quepan mejor 4 elementos */
+    min-width: 85px; 
     flex-shrink: 0;
 }
 
@@ -218,7 +219,7 @@ header p {
 .status-item.deficit .value { color: var(--acento-rojo); }
 .status-item.divisa .value { color: #008000; font-size: 1rem; }
 
-/* --- Estilos Modo Admin (Panel de Estado) --- */
+/* --- Estilos Modo Admin (Panel de Estado - Ajustado para 4 items) --- */
 .status-panel-container.admin-mode {
     padding: 10px;
     border: 2px dashed var(--acento-rojo);
@@ -231,7 +232,8 @@ header p {
 }
 
 .status-panel-container.admin-mode .status-item {
-    width: 31%;
+    /* Ajustado a 23% para que quepan 4 en una fila en Desktop */
+    width: 23%; 
     flex-direction: column;
     justify-content: center;
     background-color: rgba(255, 255, 255, 0.7);
@@ -854,11 +856,11 @@ footer {
     }
     
     .status-item {
-        min-width: 90px;
+        min-width: 85px; /* Reducido a 85px para MLC */
         flex-shrink: 0;
     }
 
-    /* Panel de Estado en Modo Admin (Móvil) */
+    /* Panel de Estado en Modo Admin (Móvil - Cuadrícula 2x2) */
     .status-panel-container.admin-mode .status-panel-data {
         flex-direction: row;
         flex-wrap: wrap;
@@ -867,7 +869,7 @@ footer {
     
     .status-panel-container.admin-mode .status-item {
         flex-direction: column;
-        width: 31%;
+        width: 48%; /* Configurado a 48% para cuadrícula 2x2 */
     }
     
     .status-panel-container.admin-mode input {
