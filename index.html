@@ -24,9 +24,9 @@
   <h1>⚜️ Portal de Trámites Consulares ⚜️</h1>
   <p>Comunidad de Descendientes • <span id="fecha-actualizacion">Sincronizando magia...</span></p>
   
-  <div class="header-action-container" style="margin-top: 15px;">
+  <div class="header-action-container">
     <a href="news.html" class="btn btn-news" role="button">
-        <span>🔮</span> LEER EL ORÁCULO (NOTICIAS)
+        <span>🔮</span> LEER EL ORÁCULO (NOTICIAS) <span>✨</span>
     </a>
   </div>
   
@@ -43,21 +43,24 @@
             <span class="live-dot"></span>
             EN VIVO
         </div>
+        
+        <span id="lastEditedTime" style="display: none;"></span>
     </div>
     <div id="statusDataContainer" class="status-panel-data">
-        <span style="opacity:0.7; font-size:0.8rem;">Consultando los astros...</span>
+        Cargando datos astrales...
     </div>
 </div>
 
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
-    <span class="news-ticker-fixed-label">SUSURROS</span>
+    <strong class="news-ticker-fixed-label">SUSURROS</strong>
     <div class="news-ticker-wrap">
-        <div id="newsTickerContent" class="news-ticker-content"></div>
+        <div id="newsTickerContent" class="news-ticker-content">
+        </div>
     </div>
 </div>
 
-<div class="login-controls" style="background: rgba(0,0,0,0.6); border: 1px solid var(--magic-accent-purple);">
-  <div id="statusMessage" class="login-message" style="color: #b2dfdb;">
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
       Modo Observador Activo
   </div>
   
@@ -65,11 +68,11 @@
       🛡️ INVOCAR PODERES (ADMIN)
   </button>
 
-  <div id="adminControlsPanel">
-    <div class="admin-group" style="margin-top:10px;">
+  <div id="adminControlsPanel" style="display: none;">
+    <div class="admin-group">
         <button id="saveBtn" class="btn btn-success">💾 Sellar Cambios</button>
     </div>
-    <div class="admin-group" style="margin-top:10px;">
+    <div class="admin-group">
         <button id="addNewsBtn" class="btn btn-secondary">✨ Conjurar Noticia</button> 
         <button id="deleteNewsBtn" class="btn btn-danger">🔥 Disipar Noticia</button> 
     </div>
@@ -84,19 +87,19 @@
     
     <div class="comments-display-wrap">
         <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: rgba(255,255,255,0.5); margin: 15px;">Escuchando el viento...</p>
+            <p style="text-align: center; color: rgba(255,255,255,0.6); margin: 15px;">Escuchando el viento...</p>
         </div>
     </div>
 
-    <div class="comment-form-container" style="background:transparent; padding:0;">
+    <div class="comment-form-container">
         <input type="text" id="commenterName" placeholder="Tu Nombre o Alias Mágico" required maxlength="30">
-        <textarea id="commentText" placeholder="Deja tu mensaje en el árbol..." required maxlength="250" rows="2"></textarea>
-        <button id="publishCommentBtn" class="btn btn-success" style="width:100%">🍃 Enviar Mensaje</button>
+        <textarea id="commentText" placeholder="Deja tu mensaje en el árbol (máx. 250 caracteres)" required maxlength="250"></textarea>
+        <button id="publishCommentBtn" class="btn btn-success">🍃 Enviar Mensaje</button>
     </div>
 </section>
 
 <footer>
-  <div style="opacity: 0.6;">© 2025 – Portal de la Comunidad Encantada</div>
+  <div>© 2025 – Portal de la Comunidad Encantada</div>
 </footer>
 
 <script type="module" src="script.js"></script>
