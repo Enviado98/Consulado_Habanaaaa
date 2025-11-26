@@ -3,108 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendario Consular La Habana | Portal Mágico</title>
+<title>Portal Consular La Habana 🇪🇸✨</title>
 
-<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/sparkling.png"> 
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/crystal-ball.png"> 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Quicksand:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Quicksand:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="styles.css"> 
 
 <style id="dynamicTickerStyles"></style>
 
 </head>
-<body class="fairy-theme">
+<body>
 
-<div id="magic-background"></div>
+<div id="fireflies-container"></div>
 
 <header>
-  <h1>⚜️ Calendario Consular ⚜️</h1>
-  <p class="subtitle">La Habana, Cuba</p>
-  <p class="meta-info">Portal Comunitario • Actualizado: <span id="fecha-actualizacion">Cargando...</span></p>
+  <h1>⚜️ Portal de Trámites Consulares ⚜️</h1>
+  <p>Comunidad de Descendientes • <span id="fecha-actualizacion">Sincronizando magia...</span></p>
   
-  <div class="header-action-container">
-    <a href="news.html" class="btn btn-magic-news" role="button">
-        <span class="sparkle-icon">✨</span> LEER PERGAMINOS DE NOTICIAS
+  <div class="header-action-container" style="margin-top: 15px;">
+    <a href="news.html" class="btn btn-news" role="button">
+        <span>🔮</span> LEER EL ORÁCULO (NOTICIAS)
     </a>
   </div>
   
   <div id="viewCounter" class="view-counter" aria-live="polite">
-    🔮 Visualizando...
+    👁️ Observando...
   </div>
-
 </header>
 
 <div id="statusPanel" class="status-panel-container">
     <div class="status-panel-header">
-        <span>⚡ ESTADO DEL REINO (Energía y Moneda)</span>
+        <span>⚡ ESTADO DEL REINO</span>
         
         <div class="live-container">
-            <span class="live-orb"></span>
-            VIGENTE
+            <span class="live-dot"></span>
+            EN VIVO
         </div>
-        
-        <span id="lastEditedTime" style="display: none;"></span>
     </div>
     <div id="statusDataContainer" class="status-panel-data">
-        <span class="loading-text">Invocando datos...</span>
+        <span style="opacity:0.7; font-size:0.8rem;">Consultando los astros...</span>
     </div>
 </div>
 
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
-    <strong class="news-ticker-fixed-label">📢 PREGONERO:</strong>
+    <span class="news-ticker-fixed-label">SUSURROS</span>
     <div class="news-ticker-wrap">
-        <div id="newsTickerContent" class="news-ticker-content">
-            </div>
+        <div id="newsTickerContent" class="news-ticker-content"></div>
     </div>
 </div>
 
-<div class="login-controls">
-  <div id="statusMessage" class="login-message">
-    El modo edición está dormido...
+<div class="login-controls" style="background: rgba(0,0,0,0.6); border: 1px solid var(--magic-accent-purple);">
+  <div id="statusMessage" class="login-message" style="color: #b2dfdb;">
+      Modo Observador Activo
   </div>
   
   <button id="toggleAdminBtn" class="btn btn-primary">
-      🛡️ ACTIVAR PODERES DE EDICIÓN
+      🛡️ INVOCAR PODERES (ADMIN)
   </button>
 
   <div id="adminControlsPanel">
-    <div class="admin-group">
+    <div class="admin-group" style="margin-top:10px;">
         <button id="saveBtn" class="btn btn-success">💾 Sellar Cambios</button>
     </div>
-    <div class="admin-group">
-        <button id="addNewsBtn" class="btn btn-secondary">📜 Escribir Edicto</button> 
-        <button id="deleteNewsBtn" class="btn btn-danger">🔥 Quemar Edicto</button> 
+    <div class="admin-group" style="margin-top:10px;">
+        <button id="addNewsBtn" class="btn btn-secondary">✨ Conjurar Noticia</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger">🔥 Disipar Noticia</button> 
     </div>
   </div>
 </div>
 
 <div class="container" id="contenedor">
-  </div>
+    </div>
 
 <section class="comments-section">
-    <h2>🍃 Susurros de la Comunidad 🍃</h2>
+    <h2>🗣️ Ecos del Bosque</h2>
     
     <div class="comments-display-wrap">
         <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Escuchando el viento...</p>
+            <p style="text-align: center; color: rgba(255,255,255,0.5); margin: 15px;">Escuchando el viento...</p>
         </div>
     </div>
 
-    <div class="comment-form-container">
-        <input type="text" id="commenterName" placeholder="Tu Nombre o Alias" required maxlength="30" aria-label="Tu Nombre">
-        <textarea id="commentText" placeholder="Deja tu mensaje en el árbol de los deseos..." required maxlength="250" aria-label="Tu Comentario"></textarea>
-        <button id="publishCommentBtn" class="btn btn-success">Envíar Mensaje ✨</button>
+    <div class="comment-form-container" style="background:transparent; padding:0;">
+        <input type="text" id="commenterName" placeholder="Tu Nombre o Alias Mágico" required maxlength="30">
+        <textarea id="commentText" placeholder="Deja tu mensaje en el árbol..." required maxlength="250" rows="2"></textarea>
+        <button id="publishCommentBtn" class="btn btn-success" style="width:100%">🍃 Enviar Mensaje</button>
     </div>
 </section>
 
 <footer>
-  <div class="footer-content">
-    <p>© 2025 – Comunidad de Descendientes.</p>
-    <small>Hecho con magia y esperanza.</small>
-  </div>
+  <div style="opacity: 0.6;">© 2025 – Portal de la Comunidad Encantada</div>
 </footer>
 
 <script type="module" src="script.js"></script>
