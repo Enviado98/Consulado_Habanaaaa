@@ -43,12 +43,17 @@ const TIME_PANEL_AUTOHIDE_MS = 3000;
 let currentData = [];
 let currentNews = []; 
 
-// ESTADO ECONÓMICO (Deficit + 6 Monedas Automáticas)
+// 1. AÑADIDAS LAS NUEVAS VARIABLES AL ESTADO INICIAL
 let currentStatus = {
     deficit_mw: 'Cargando...', 
-    dollar_cup: '...', euro_cup: '...', mlc_cup: '...',
-    cad_cup: '...', zelle_cup: '...', cla_cup: '...', 
-    deficit_edited_at: null, divisa_edited_at: null
+    dollar_cup: '...', 
+    euro_cup: '...', 
+    mlc_cup: '...',
+    zelle_cup: '...', 
+    cad_cup: '...', 
+    clasica_cup: '...',
+    deficit_edited_at: null, 
+    divisa_edited_at: null
 }; 
 
 let userWebId = localStorage.getItem('userWebId');
@@ -101,7 +106,7 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 LÓGICA API ELTOQUE (AUTOMÁTICA PARA TODAS)
+// 💰 LÓGICA API ELTOQUE (ACTUALIZADA PARA CAD, ZELLE, CLASICA)
 // ----------------------------------------------------
 async function fetchElToqueRates() {
     try {
@@ -118,54 +123,57 @@ async function fetchElToqueRates() {
         if (!response.ok) throw new Error(`Error API: ${response.status}`);
         const data = await response.json();
         
-        // Inicializamos valores en '---'
-        let usd = '---', eur = '---', mlc = '---';
-        let cad = '---', zelle = '---', cla = '---';
+        let usdPrice = '---', eurPrice = '---', mlcPrice = '---';
+        let cadPrice = '---', zellePrice = '---', clasicaPrice = '---';
 
-        // Lógica de extracción segura
-        if (data.tasas) {
-            usd = data.tasas.USD || '---'; 
-            eur = data.tasas.EUR || data.tasas.ECU || '---'; 
-            mlc = data.tasas.MLC || '---';
+        // Lógica de mapeo flexible
+        const tasas = data.tasas || data;
+
+        if (tasas) {
+            usdPrice = tasas.USD || '---';
+            eurPrice = tasas.EUR || tasas.ECU || '---';
+            mlcPrice = tasas.MLC || '---';
             
-            // Intenta buscar las nuevas monedas
-            cad = data.tasas.CAD || '---'; 
-            zelle = data.tasas.Zelle || data.tasas.ZELLE || '---'; 
-            cla = data.tasas.CLA || data.tasas.Cla || '---';
-        } 
-        
-        // Formateo a enteros (sin decimales) si existen
-        const formatRate = (val) => val !== '---' ? parseFloat(val).toFixed(0) : '---';
+            // Intentamos obtener las nuevas monedas si existen en la API
+            cadPrice = tasas.CAD || '---'; 
+            zellePrice = tasas.ZELLE || tasas.USDT || '---'; // A veces Zelle viene como USDT o no viene
+            clasicaPrice = tasas.CLASICA || '---'; // Nombre supuesto, probablemente requiera edición manual
+        }
 
-        usd = formatRate(usd);
-        eur = formatRate(eur);
-        mlc = formatRate(mlc);
-        cad = formatRate(cad);
-        zelle = formatRate(zelle);
-        cla = formatRate(cla);
+        // Formateo a enteros si son números
+        const formatRate = (val) => (val !== '---' && !isNaN(val)) ? parseFloat(val).toFixed(0) : val;
 
-        if (usd !== '---') {
+        usdPrice = formatRate(usdPrice);
+        eurPrice = formatRate(eurPrice);
+        mlcPrice = formatRate(mlcPrice);
+        cadPrice = formatRate(cadPrice);
+        zellePrice = formatRate(zellePrice);
+        clasicaPrice = formatRate(clasicaPrice);
+
+        // Actualizamos estado si encontramos al menos el USD (indicador de que la API funciona)
+        if (usdPrice !== '---') {
             const newTime = new Date().toISOString();
             
-            // Actualizamos objeto local
-            currentStatus.dollar_cup = usd;
-            currentStatus.euro_cup = eur;
-            currentStatus.mlc_cup = mlc;
-            currentStatus.cad_cup = cad;
-            currentStatus.zelle_cup = zelle;
-            currentStatus.cla_cup = cla;
+            // Solo sobrescribimos si la API trajo datos reales, si no, mantenemos lo que había (útil para Zelle/Clásica manual)
+            currentStatus.dollar_cup = usdPrice;
+            currentStatus.euro_cup = eurPrice;
+            currentStatus.mlc_cup = mlcPrice;
+            if(cadPrice !== '---') currentStatus.cad_cup = cadPrice;
+            
+            // Zelle y Clásica: Si la API no trae nada, NO sobrescribimos lo que pusiste manual
+            if(zellePrice !== '---') currentStatus.zelle_cup = zellePrice;
+            if(clasicaPrice !== '---') currentStatus.clasica_cup = clasicaPrice;
+
             currentStatus.divisa_edited_at = newTime;
             
             renderStatusPanel(currentStatus, admin);
             
-            // Guardamos todo en Supabase automáticamente
+            // Guardamos en Supabase las que se detectaron automáticamente
             await supabase.from('status_data').update({ 
-                dollar_cup: usd, 
-                euro_cup: eur, 
-                mlc_cup: mlc,
-                cad_cup: cad,
-                zelle_cup: zelle,
-                cla_cup: cla,
+                dollar_cup: usdPrice, 
+                euro_cup: eurPrice, 
+                mlc_cup: mlcPrice,
+                cad_cup: currentStatus.cad_cup, // Guardamos el estado actual (sea api o manual)
                 divisa_edited_at: newTime 
             }).eq('id', 1);
         }
@@ -480,33 +488,37 @@ async function getAndDisplayViewCount() {
     el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} `;
 }
 
+// ----------------------------------------------------
+// 2. RENDERIZADO DEL PANEL DE ESTADO (ESTRUCTURA NUEVA 2 FILAS)
+// ----------------------------------------------------
 function renderStatusPanel(status, isAdminMode) {
+    // Definimos el salto de línea para separar las dos filas visualmente
+    const breakRow = '<div class="break-row"></div>';
+    
     if (isAdminMode) {
-        // MODO EDICIÓN: 
-        // - El déficit sigue siendo editable.
-        // - USD, EUR, MLC, CAD, Zelle y CLA ahora son DISABLED (solo lectura automática).
+        // MODO EDITOR: Inputs para todo
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
             <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
             <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
             <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>
             
-            <div class="status-item"><span class="label">🇨🇦 CAD (Auto):</span><input type="text" value="${status.cad_cup}" disabled></div>
-            <div class="status-item"><span class="label">📱 Zelle (Auto):</span><input type="text" value="${status.zelle_cup}" disabled></div>
-            <div class="status-item"><span class="label">💳 CLA (Auto):</span><input type="text" value="${status.cla_cup}" disabled></div>
-            `;
+            ${breakRow} <div class="status-item admin-extra"><span class="label">ZELLE:</span><input type="text" id="editZelle" value="${status.zelle_cup || '---'}"></div>
+            <div class="status-item admin-extra"><span class="label">CAD:</span><input type="text" id="editCad" value="${status.cad_cup || '---'}"></div>
+            <div class="status-item admin-extra"><span class="label">CLÁSICA:</span><input type="text" id="editClasica" value="${status.clasica_cup || '---'}"></div>
+        `;
     } else {
-        // MODO PÚBLICO:
+        // MODO VISUALIZACIÓN: Filas separadas
         DOMElements.statusDataContainer.innerHTML = `
             <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
             <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>
             
-            <div class="status-item extra"><span class="label">🇨🇦 CAD:</span><span class="value">${status.cad_cup || '---'}</span></div>
-            <div class="status-item extra"><span class="label">📱 Zelle:</span><span class="value">${status.zelle_cup || '---'}</span></div>
-            <div class="status-item extra"><span class="label">💳 CLA:</span><span class="value">${status.cla_cup || '---'}</span></div>
-            `;
+            ${breakRow} <div class="status-item divisa extra-curr"><span class="label">🏦 ZELLE:</span><span class="value">${status.zelle_cup || '---'}</span></div>
+            <div class="status-item divisa extra-curr"><span class="label">🇨🇦 CAD:</span><span class="value">${status.cad_cup || '---'}</span></div>
+            <div class="status-item divisa extra-curr"><span class="label">💳 CLÁSICA:</span><span class="value">${status.clasica_cup || '---'}</span></div>
+        `;
     }
 }
 
@@ -516,16 +528,24 @@ async function loadStatusData() {
     renderStatusPanel(currentStatus, admin); fetchElToqueRates(); 
 }
 
+// ----------------------------------------------------
+// 3. GUARDADO DE CAMBIOS (INCLUYE NUEVAS MONEDAS)
+// ----------------------------------------------------
 async function saveChanges() {
     if (!admin) return;
     
-    // Solo permitimos guardar manualmente el Déficit y las Tarjetas
+    // Capturamos valores de los inputs normales y nuevos
     const editDeficit = document.getElementById('editDeficit');
+    const editZelle = document.getElementById('editZelle');
+    const editCad = document.getElementById('editCad');
+    const editClasica = document.getElementById('editClasica');
+    
     const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
-    
+    const newZelle = editZelle ? editZelle.value : currentStatus.zelle_cup;
+    const newCad = editCad ? editCad.value : currentStatus.cad_cup;
+    const newClasica = editClasica ? editClasica.value : currentStatus.clasica_cup;
+
     const updates = [];
-    
-    // Actualización de Tarjetas (Items principales)
     document.querySelectorAll(".card").forEach(card => {
         const emoji = card.querySelector('.editable-emoji').value;
         const titulo = card.querySelector('.editable-title').value;
@@ -536,12 +556,17 @@ async function saveChanges() {
         }
     });
 
-    // Solo actualizamos deficit manualmente en la DB
-    if (newDeficit !== currentStatus.deficit_mw) {
-        updates.push(supabase.from('status_data').update({ 
-            deficit_mw: newDeficit, 
-            deficit_edited_at: new Date().toISOString() 
-        }).eq('id', 1));
+    // Verificamos si hubo cambios en los datos de estado
+    let statusChanged = false;
+    let statusUpdateObj = { deficit_edited_at: new Date().toISOString() };
+
+    if (newDeficit !== currentStatus.deficit_mw) { statusUpdateObj.deficit_mw = newDeficit; statusChanged = true; }
+    if (newZelle !== currentStatus.zelle_cup) { statusUpdateObj.zelle_cup = newZelle; statusChanged = true; }
+    if (newCad !== currentStatus.cad_cup) { statusUpdateObj.cad_cup = newCad; statusChanged = true; }
+    if (newClasica !== currentStatus.clasica_cup) { statusUpdateObj.clasica_cup = newClasica; statusChanged = true; }
+
+    if (statusChanged) {
+        updates.push(supabase.from('status_data').update(statusUpdateObj).eq('id', 1));
     }
 
     if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else { alert("No hay cambios."); }
