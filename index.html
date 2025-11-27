@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Consular La Habana 🇪🇸✨</title>
+<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
 
-<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/crystal-ball.png"> 
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Quicksand:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="styles.css"> 
 
@@ -18,26 +15,25 @@
 </head>
 <body>
 
-<div id="fireflies-container"></div>
-
 <header>
-  <h1>⚜️ Portal de Trámites Consulares ⚜️</h1>
-  <p>Comunidad de Descendientes • <span id="fecha-actualizacion">Sincronizando magia...</span></p>
+  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
+  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
   
   <div class="header-action-container">
     <a href="news.html" class="btn btn-news" role="button">
-        <span>🔮</span> LEER EL ORÁCULO (NOTICIAS) <span>✨</span>
+        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
     </a>
   </div>
   
   <div id="viewCounter" class="view-counter" aria-live="polite">
-    👁️ Observando...
+    Cargando...
   </div>
+
 </header>
 
 <div id="statusPanel" class="status-panel-container">
     <div class="status-panel-header">
-        <span>⚡ ESTADO DEL REINO</span>
+        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
         
         <div class="live-container">
             <span class="live-dot"></span>
@@ -47,59 +43,59 @@
         <span id="lastEditedTime" style="display: none;"></span>
     </div>
     <div id="statusDataContainer" class="status-panel-data">
-        Cargando datos astrales...
+        Cargando datos de estado...
     </div>
 </div>
 
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
-    <strong class="news-ticker-fixed-label">SUSURROS</strong>
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
     <div class="news-ticker-wrap">
         <div id="newsTickerContent" class="news-ticker-content">
-        </div>
+            </div>
     </div>
 </div>
 
 <div class="login-controls">
   <div id="statusMessage" class="login-message">
-      Modo Observador Activo
+            Activa modo edición y actualiza la información
   </div>
   
   <button id="toggleAdminBtn" class="btn btn-primary">
-      🛡️ INVOCAR PODERES (ADMIN)
+      🛡️ ACTIVAR EL MODO EDICIÓN
   </button>
 
-  <div id="adminControlsPanel" style="display: none;">
+  <div id="adminControlsPanel">
     <div class="admin-group">
-        <button id="saveBtn" class="btn btn-success">💾 Sellar Cambios</button>
+        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
     </div>
     <div class="admin-group">
-        <button id="addNewsBtn" class="btn btn-secondary">✨ Conjurar Noticia</button> 
-        <button id="deleteNewsBtn" class="btn btn-danger">🔥 Disipar Noticia</button> 
+        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
     </div>
   </div>
 </div>
 
 <div class="container" id="contenedor">
-    </div>
+  </div>
 
 <section class="comments-section">
-    <h2>🗣️ Ecos del Bosque</h2>
+    <h2>🗣️ Comentarios de la Comunidad</h2>
     
     <div class="comments-display-wrap">
         <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: rgba(255,255,255,0.6); margin: 15px;">Escuchando el viento...</p>
+            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
         </div>
     </div>
 
     <div class="comment-form-container">
-        <input type="text" id="commenterName" placeholder="Tu Nombre o Alias Mágico" required maxlength="30">
-        <textarea id="commentText" placeholder="Deja tu mensaje en el árbol (máx. 250 caracteres)" required maxlength="250"></textarea>
-        <button id="publishCommentBtn" class="btn btn-success">🍃 Enviar Mensaje</button>
+        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
+        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
+        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
     </div>
 </section>
 
 <footer>
-  <div>© 2025 – Portal de la Comunidad Encantada</div>
+  <div>© 2025 – Información actualizada periódicamente.</div>
 </footer>
 
 <script type="module" src="script.js"></script>
