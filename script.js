@@ -158,9 +158,10 @@ async function fetchElToqueRates() {
             currentStatus.dollar_cup = usdPrice;
             currentStatus.euro_cup = eurPrice;
             currentStatus.mlc_cup = mlcPrice;
-            if(cadPrice !== '---') currentStatus.cad_cup = cadPrice;
             
-            // Zelle y Clásica: Si la API no trae nada, NO sobrescribimos lo que pusiste manual
+            // Si la API trae un valor para CAD/ZELLE/CLASICA, lo actualizamos. 
+            // Si no trae nada ('---'), mantenemos el valor actual (manual o el '---' inicial).
+            if(cadPrice !== '---') currentStatus.cad_cup = cadPrice;
             if(zellePrice !== '---') currentStatus.zelle_cup = zellePrice;
             if(clasicaPrice !== '---') currentStatus.clasica_cup = clasicaPrice;
 
@@ -168,12 +169,16 @@ async function fetchElToqueRates() {
             
             renderStatusPanel(currentStatus, admin);
             
-            // Guardamos en Supabase las que se detectaron automáticamente
+            // 🚨 CORRECCIÓN IMPORTANTE: Guardamos TODAS las divisas en Supabase, 
+            // incluyendo Zelle, CAD y Clásica, usando los valores actualizados 
+            // (que serán los de la API o los manuales si la API no los trajo).
             await supabase.from('status_data').update({ 
                 dollar_cup: usdPrice, 
                 euro_cup: eurPrice, 
                 mlc_cup: mlcPrice,
-                cad_cup: currentStatus.cad_cup, // Guardamos el estado actual (sea api o manual)
+                cad_cup: currentStatus.cad_cup,
+                zelle_cup: currentStatus.zelle_cup, // <-- GUARDADO AÑADIDO
+                clasica_cup: currentStatus.clasica_cup, // <-- GUARDADO AÑADIDO
                 divisa_edited_at: newTime 
             }).eq('id', 1);
         }
