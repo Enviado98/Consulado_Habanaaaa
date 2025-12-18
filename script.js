@@ -1,7 +1,7 @@
 async function logElToqueData() {
     // Reutilizando las credenciales de tu script.js
-    const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
-    const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
+    const ELTOQUE_API_URL = "https://ebihagvhgakvuoeoukbc.supabase.co";
+    const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViaWhhZ3ZoZ2FrdnVvZW91a2JjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMTM2MTEsImV4cCI6MjA4MDY4OTYxMX0.T3UNdA8bTSpDzLdNb19lTzifqLwfQPAp5fSyIVBECI8";
     const proxyUrl = "https://corsproxy.io/?"; 
     
     console.log("⚙️ Intentando conectar con la API de El Toque...");
