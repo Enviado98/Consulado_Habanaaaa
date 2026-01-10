@@ -1,23 +1,16 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// ----------------------------------------------------
-// ⚙️ CONFIGURACIÓN Y LLAVES
-// ----------------------------------------------------
+// ⚙️ LLAVES DE SUPABASE Y API
 const SUPABASE_URL = "https://mkvpjsvqjqeuniabjjwr.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg"; 
-
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ----------------------------------------------------
-// ⏳ CONSTANTES DE LIMPIEZA
-// ----------------------------------------------------
-const ONE_HOUR_MS = 3600 * 1000;
-const ONE_DAY_MS = 24 * ONE_HOUR_MS;
+// TIEMPOS
+const ONE_DAY_MS = 24 * 3600 * 1000;
 const ONE_WEEK_MS = 7 * ONE_DAY_MS;
-
 const RECENT_THRESHOLD_MS = ONE_DAY_MS; 
 const OLD_THRESHOLD_MS = ONE_WEEK_MS;
 
@@ -49,35 +42,25 @@ const DOM = {
     dynamicStyles: document.getElementById('dynamicTickerStyles')
 };
 
-// ----------------------------------------------------
-// 🧹 LIMPIEZA AUTOMÁTICA
-// ----------------------------------------------------
 async function runBackgroundCleanup() {
     const cutoff24h = new Date(Date.now() - ONE_DAY_MS).toISOString();
     const cutoff7d = new Date(Date.now() - ONE_WEEK_MS).toISOString();
-
-    // Borrado silencioso
     supabase.from('noticias').delete().lt('timestamp', cutoff24h).then(() => {});
     supabase.from('comentarios').delete().lt('timestamp', cutoff7d).then(() => {});
     supabase.from('page_views').delete().lt('created_at', cutoff24h).then(() => {});
 }
 
-// ----------------------------------------------------
-// 🕒 UTILIDADES
-// ----------------------------------------------------
 function timeAgo(timestamp) {
     if (!timestamp) return { text: 'Sin fecha', diff: -1 };
     const diff = Date.now() - new Date(timestamp).getTime();
     const min = Math.floor(diff / 60000);
     const hours = Math.floor(min / 60);
     const days = Math.floor(hours / 24);
-
     let text;
     if (min < 1) text = 'Ahora mismo';
     else if (min < 60) text = `hace ${min} min.`;
     else if (hours < 24) text = `hace ${hours} h.`;
     else text = `hace ${days} días`;
-
     return { text, diff };
 }
 
@@ -88,9 +71,6 @@ function linkify(text) {
     });
 }
 
-// ----------------------------------------------------
-// 💵 API ELTOQUE
-// ----------------------------------------------------
 async function fetchElToqueRates() {
     try {
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
@@ -111,9 +91,6 @@ async function fetchElToqueRates() {
     } catch (e) { console.warn("ElToque API Skip"); }
 }
 
-// ----------------------------------------------------
-// 🖥️ RENDER UI
-// ----------------------------------------------------
 function renderStatusPanel() {
     if (admin) {
         DOM.statusDataContainer.innerHTML = `
@@ -135,7 +112,6 @@ function renderStatusPanel() {
 function createCardHTML(item, index) {
     let label = '', time = timeAgo(item.last_edited_timestamp);
     let cls = '';
-    
     if (item.last_edited_timestamp) {
         if (time.diff >= 0 && time.diff < RECENT_THRESHOLD_MS) {
             cls = 'card-recent'; label = '<div class="card-label">!RECIENTE!</div>';
@@ -143,7 +119,6 @@ function createCardHTML(item, index) {
             cls = 'card-old'; label = '<div class="card-label">Antiguo</div>';
         }
     }
-
     return `
     <div class="card ${cls}" data-index="${index}" data-id="${item.id}">
         ${label}
@@ -217,9 +192,6 @@ async function saveAllChanges() {
     if (updates.length) { document.getElementById('saveBtn').textContent = 'Guardando...'; await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else alert("No hay cambios.");
 }
 
-// ----------------------------------------------------
-// 🗞️ NOTICIAS (RODILLO FIX)
-// ----------------------------------------------------
 async function loadNews() {
     const cutoffDate = new Date(Date.now() - ONE_DAY_MS).toISOString();
     const { data } = await supabase.from('noticias').select('*').gt('timestamp', cutoffDate).order('timestamp', { ascending: false });
@@ -228,23 +200,33 @@ async function loadNews() {
         DOM.newsTicker.style.display = 'none';
         return;
     }
+    
     currentNews = data;
     const newsHTML = data.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
     DOM.newsTickerContent.innerHTML = newsHTML + '<span class="news-item"> | </span>' + newsHTML;
     DOM.newsTicker.style.display = 'flex';
 
-    // Animación FIX
-    requestAnimationFrame(() => {
+    // FIX ROBUSTO: Si requestAnimationFrame falla, usamos un fallback CSS
+    setTimeout(() => {
         const fullWidth = DOM.newsTickerContent.scrollWidth;
-        const halfWidth = fullWidth / 2;
-        const duration = halfWidth / 50; 
-        DOM.dynamicStyles.innerHTML = `@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-${halfWidth}px); } } .news-ticker-content { animation: ticker ${duration}s linear infinite; padding-left: 0 !important; display: inline-block; }`;
-    });
+        // Si no se detectó ancho (0), usar animación predeterminada
+        const finalWidth = fullWidth > 0 ? (fullWidth / 2) : 1000; 
+        const duration = finalWidth / 50; 
+        
+        DOM.dynamicStyles.innerHTML = `
+            @keyframes ticker { 
+                0% { transform: translateX(0); } 
+                100% { transform: translateX(-${finalWidth}px); } 
+            } 
+            .news-ticker-content { 
+                animation: ticker ${duration}s linear infinite; 
+                padding-left: 0 !important; 
+                display: inline-block; 
+            }
+        `;
+    }, 100);
 }
 
-// ----------------------------------------------------
-// 💬 COMENTARIOS
-// ----------------------------------------------------
 function createCommentDOM(comment, userLikesMap) {
     const isLiked = userLikesMap.has(comment.id);
     const initial = comment.name.charAt(0).toUpperCase();
@@ -283,7 +265,7 @@ async function loadComments() {
         DOM.commentsContainer.innerHTML = '';
         const parents = comments.filter(c => !c.parent_id);
         const replies = comments.filter(c => c.parent_id).reverse();
-        if(parents.length === 0) DOM.commentsContainer.innerHTML = '<p style="text-align:center; opacity:0.5">Sé el primero en comentar 👇</p>';
+        if(parents.length === 0) DOM.commentsContainer.innerHTML = '<p style="text-align:center; opacity:0.5; color:#333;">Sé el primero en comentar 👇</p>';
         parents.forEach(p => {
             DOM.commentsContainer.innerHTML += createCommentDOM(p, userLikesMap);
             setTimeout(() => {
