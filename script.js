@@ -1,48 +1,42 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ----------------------------------------------------
-// ⚙️ CONFIGURACIÓN Y LLAVES (No compartir)
+// ⚙️ CONFIGURACIÓN Y LLAVES
 // ----------------------------------------------------
 const SUPABASE_URL = "https://mkvpjsvqjqeuniabjjwr.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg"; 
 
 const ELTOQUE_API_URL = "https://tasas.eltoque.com/v1/trmi";
-// Nota: Este token expira en el futuro. Si deja de funcionar, necesitarás uno nuevo.
 const ELTOQUE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MzU4NDg4MCwianRpIjoiZmVhZTc2Y2YtODc4Yy00MjdmLTg5MGUtMmQ4MzRmOGE1MzAyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjY5MWUyNWI3ZTkyYmU3N2VhM2RlMjE0ZSIsIm5iZiI6MTc2MzU4NDg4MCwiZXhwIjoxNzk1MTIwODgwfQ.qpxiSsg8ptDTYsXZPnnxC694lUoWmT1qyAvzLUfl1-8";
 
-// Inicializamos Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ----------------------------------------------------
-// 🎨 PALETA DE COLORES NEÓN (Para los títulos)
+// ⏳ CONSTANTES DE TIEMPO (Configuración de Limpieza)
 // ----------------------------------------------------
-const NEON_PALETTE = [
-    '#fb7185', // Rojo Rosado
-    '#34d399', // Verde Esmeralda
-    '#818cf8', // Indigo
-    '#22d3ee', // Cian
-    '#c084fc', // Violeta
-    '#f472b6', // Rosa
-    '#facc15'  // Amarillo
-];
+const ONE_HOUR_MS = 3600 * 1000;
+const ONE_DAY_MS = 24 * ONE_HOUR_MS;
+const ONE_WEEK_MS = 7 * ONE_DAY_MS;
+
+// Umbrales para etiquetas visuales ("Nuevo", "Antiguo")
+const RECENT_THRESHOLD_MS = ONE_DAY_MS; 
+const OLD_THRESHOLD_MS = ONE_WEEK_MS;
+
+// ----------------------------------------------------
+// 🎨 PALETA DE COLORES NEÓN
+// ----------------------------------------------------
+const NEON_PALETTE = ['#fb7185', '#34d399', '#818cf8', '#22d3ee', '#c084fc', '#f472b6', '#facc15'];
 
 function getCardColor(id) {
-    let hash = 0;
-    const str = String(id);
+    let hash = 0; const str = String(id);
     for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-    const index = Math.abs(hash) % NEON_PALETTE.length;
-    return NEON_PALETTE[index];
+    return NEON_PALETTE[Math.abs(hash) % NEON_PALETTE.length];
 }
 
 // ----------------------------------------------------
-// 📦 VARIABLES GLOBALES Y ESTADO
+// 📦 ESTADO GLOBAL
 // ----------------------------------------------------
-let admin = false; // Estado local de admin (INSEGURO - Mejoraremos esto en el paso 4)
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos
-const RECENT_THRESHOLD_MS = 24 * 3600000; // 24 horas para considerar algo "Nuevo"
-const OLD_THRESHOLD_MS = 7 * 24 * 3600000; // 7 días para "Antiguo"
-
-// Datos en memoria
+let admin = false;
 let currentData = [];
 let currentNews = []; 
 let currentStatus = {
@@ -50,14 +44,12 @@ let currentStatus = {
     deficit_edited_at: null, divisa_edited_at: null
 }; 
 
-// Identificador de usuario para Likes (LocalStorage)
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
     userWebId = crypto.randomUUID(); 
     localStorage.setItem('userWebId', userWebId);
 }
 
-// Referencias al DOM
 const DOM = {
     body: document.body,
     contenedor: document.getElementById('contenedor'),
@@ -72,89 +64,97 @@ const DOM = {
 };
 
 // ----------------------------------------------------
-// 🕒 UTILIDADES DE TIEMPO
+// 🧹 MANTENIMIENTO AUTOMÁTICO (Background Cleanup)
+// ----------------------------------------------------
+async function runBackgroundCleanup() {
+    console.log("🧹 Ejecutando limpieza de base de datos...");
+    
+    // Fechas de corte exactas
+    const cutoff24h = new Date(Date.now() - ONE_DAY_MS).toISOString();
+    const cutoff7d = new Date(Date.now() - ONE_WEEK_MS).toISOString();
+
+    // Ejecutamos borrados en paralelo sin esperar a que terminen (Fire & Forget)
+    Promise.all([
+        // 1. Borrar noticias de más de 24h
+        supabase.from('noticias').delete().lt('timestamp', cutoff24h),
+        
+        // 2. Borrar comentarios de más de 7 días
+        supabase.from('comentarios').delete().lt('timestamp', cutoff7d),
+        
+        // 3. Borrar Vistas de página de más de 24h
+        supabase.from('page_views').delete().lt('created_at', cutoff24h)
+    ]).then(() => console.log("✨ Limpieza completada."))
+      .catch(err => console.warn("⚠️ Error en limpieza (posible falta de permisos DELETE):", err));
+}
+
+// ----------------------------------------------------
+// 🕒 UTILIDADES
 // ----------------------------------------------------
 function timeAgo(timestamp) {
     if (!timestamp) return { text: 'Sin fecha', diff: -1 };
     const diff = Date.now() - new Date(timestamp).getTime();
-    
-    const SECONDS = Math.floor(diff / 1000);
-    const MINUTES = Math.floor(SECONDS / 60);
-    const HOURS = Math.floor(MINUTES / 60);
-    const DAYS = Math.floor(HOURS / 24);
+    const min = Math.floor(diff / 60000);
+    const hours = Math.floor(min / 60);
+    const days = Math.floor(hours / 24);
 
     let text;
-    if (diff < 60000) text = 'Hace un momento';
-    else if (MINUTES < 60) text = `Hace ${MINUTES} min`;
-    else if (HOURS < 24) text = `Hace ${HOURS} h`;
-    else if (DAYS === 1) text = 'Ayer';
-    else text = `Hace ${DAYS} días`;
+    if (min < 1) text = 'Ahora mismo';
+    else if (min < 60) text = `Hace ${min} min`;
+    else if (hours < 24) text = `Hace ${hours} h`;
+    else text = `Hace ${days} días`;
 
     return { text, diff };
 }
 
+function linkify(text) {
+    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
+        const fullUrl = url.startsWith('http') ? url : 'http://' + url;
+        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
+    });
+}
+
 // ----------------------------------------------------
-// 💵 API ELTOQUE (Economía)
+// 💵 API ELTOQUE
 // ----------------------------------------------------
 async function fetchElToqueRates() {
     try {
-        // Evitar llamadas excesivas (Caché simple)
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
-        if ((Date.now() - lastUpdate) < CACHE_DURATION) return; 
+        // Caché de 10 min
+        if ((Date.now() - lastUpdate) < (10 * 60000)) return; 
 
-        const proxyUrl = "https://corsproxy.io/?"; 
-        const targetUrl = encodeURIComponent(ELTOQUE_API_URL);
-
-        const response = await fetch(proxyUrl + targetUrl, {
-            method: 'GET', 
-            headers: { 'Authorization': `Bearer ${ELTOQUE_TOKEN}`, 'Content-Type': 'application/json' }
+        const response = await fetch("https://corsproxy.io/?" + encodeURIComponent(ELTOQUE_API_URL), {
+            headers: { 'Authorization': `Bearer ${ELTOQUE_TOKEN}` }
         });
-
-        if (!response.ok) throw new Error('Error API ElToque');
-        
+        if (!response.ok) throw new Error('API Error');
         const data = await response.json();
         
-        // Lógica flexible para leer la respuesta de la API
-        let usd = '---', eur = '---', mlc = '---';
-        const tas = data.tasas || data; // A veces la estructura cambia
-        
-        if (tas) {
-            usd = tas.USD || tas.usd || '---';
-            eur = tas.EUR || tas.eur || tas.ECU || '---';
-            mlc = tas.MLC || tas.mlc || '---';
-        }
-
-        // Actualizamos si hay datos válidos
-        if (usd !== '---') {
+        const tas = data.tasas || data;
+        if (tas && tas.USD) {
             const now = new Date().toISOString();
-            currentStatus.dollar_cup = parseFloat(usd).toFixed(0);
-            currentStatus.euro_cup = parseFloat(eur).toFixed(0);
-            currentStatus.mlc_cup = parseFloat(mlc).toFixed(0);
+            currentStatus.dollar_cup = parseFloat(tas.USD).toFixed(0);
+            currentStatus.euro_cup = parseFloat(tas.EUR || tas.ECU).toFixed(0);
+            currentStatus.mlc_cup = parseFloat(tas.MLC).toFixed(0);
             currentStatus.divisa_edited_at = now;
-            
             renderStatusPanel();
-            // Guardamos en Supabase para que otros usuarios vean el dato rápido sin llamar a la API
-            await supabase.from('status_data').update({ 
+            
+            // Actualizamos DB
+            supabase.from('status_data').update({ 
                 dollar_cup: currentStatus.dollar_cup, 
                 euro_cup: currentStatus.euro_cup, 
                 mlc_cup: currentStatus.mlc_cup, 
                 divisa_edited_at: now 
             }).eq('id', 1);
         }
-    } catch (error) { 
-        console.warn("⚠️ No se pudo actualizar ElToque:", error); 
-    }
+    } catch (e) { console.warn("ElToque API Skip"); }
 }
 
 // ----------------------------------------------------
-// 🖥️ RENDERIZADO (UI)
+// 🖥️ UI & RENDER
 // ----------------------------------------------------
-
-// 1. Panel de Estado (Déficit y Divisas)
 function renderStatusPanel() {
     if (admin) {
         DOM.statusDataContainer.innerHTML = `
-            <div class="status-item"><span class="label">Déficit (MW)</span><input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}" style="width:80px"></div>
+            <div class="status-item"><span class="label">Déficit MW</span><input type="text" id="editDeficit" value="${currentStatus.deficit_mw || ''}" style="width:60px; text-align:center"></div>
             <div class="status-item"><span class="label">USD</span><span class="value">${currentStatus.dollar_cup}</span></div>
             <div class="status-item"><span class="label">EUR</span><span class="value">${currentStatus.euro_cup}</span></div>
             <div class="status-item"><span class="label">MLC</span><span class="value">${currentStatus.mlc_cup}</span></div>
@@ -169,244 +169,153 @@ function renderStatusPanel() {
     }
 }
 
-// 2. Tarjetas Principales
 function createCardHTML(item, index) {
-    let labelHTML = '';
-    let timeInfo = { text: 'Sin actualizar', diff: -1 };
-    let cardClass = '';
-
+    let label = '', time = timeAgo(item.last_edited_timestamp);
+    let cls = '';
+    
     if (item.last_edited_timestamp) {
-        timeInfo = timeAgo(item.last_edited_timestamp);
-        if (timeInfo.diff >= 0 && timeInfo.diff < RECENT_THRESHOLD_MS) {
-            cardClass = 'card-recent';
-            labelHTML = '<div class="card-label">¡NUEVO!</div>';
-        } else if (timeInfo.diff >= OLD_THRESHOLD_MS) {
-            cardClass = 'card-old';
-            labelHTML = '<div class="card-label">ANTIGUO</div>';
+        if (time.diff >= 0 && time.diff < RECENT_THRESHOLD_MS) {
+            cls = 'card-recent'; label = '<div class="card-label">¡NUEVO!</div>';
+        } else if (time.diff >= OLD_THRESHOLD_MS) {
+            cls = 'card-old'; label = '<div class="card-label">ANTIGUO</div>';
         }
     }
 
-    const neonColor = getCardColor(item.id);
-
     return `
-    <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}">
-        ${labelHTML}
+    <div class="card ${cls}" data-index="${index}" data-id="${item.id}">
+        ${label}
         <span class="emoji">${item.emoji}</span>
-        <h3 style="--card-neon: ${neonColor}">${item.titulo}</h3>
-        
-        <div class="card-content">
-            <p>${item.contenido}</p>
-        </div>
-
-        <div class="card-time-panel">
-            <strong>Actualizado:</strong> ${timeInfo.text}
-        </div>
+        <h3 style="--card-neon: ${getCardColor(item.id)}">${item.titulo}</h3>
+        <div class="card-content"><p>${item.contenido}</p></div>
+        <div class="card-time-panel">Actualizado: ${time.text}</div>
     </div>`;
 }
 
-// 3. Renderizado de Tarjetas
 function renderCards() {
     DOM.contenedor.innerHTML = currentData.map((item, i) => createCardHTML(item, i)).join('');
-    
-    // Añadimos eventos a las nuevas tarjetas
-    document.querySelectorAll('.card').forEach(card => {
-        if (!admin) {
-            card.addEventListener('click', (e) => {
-                // Toggle para ver la fecha en móvil
-                const current = e.currentTarget;
-                document.querySelectorAll('.card').forEach(c => { if(c !== current) c.classList.remove('show-time-panel'); });
-                current.classList.toggle('show-time-panel');
-            });
-        }
+    document.querySelectorAll('.card').forEach(c => {
+        if (!admin) c.addEventListener('click', () => c.classList.toggle('show-time-panel'));
     });
 }
 
 // ----------------------------------------------------
-// 🛡️ ADMINISTRACIÓN (Frontend)
+// 🛡️ ADMIN
 // ----------------------------------------------------
 function toggleAdminMode() {
     if (!admin) {
-        const password = prompt("🔐 Contraseña de Admin (Temporal):");
-        // NOTA: Esto es inseguro. En el paso 4 lo cambiaremos por login real.
-        // Por ahora, cualquiera puede entrar si sabe que no hay contraseña real o si pones una simple.
-        if (password === null) return; // Cancelado
-        
+        if (!prompt("🔐 Contraseña:") === null) return;
         admin = true;
         DOM.body.classList.add('admin-mode');
         DOM.adminPanel.style.display = 'flex';
-        DOM.toggleAdminBtn.textContent = '🛑 SALIR DE EDICIÓN';
+        DOM.toggleAdminBtn.textContent = '🛑 SALIR';
         DOM.toggleAdminBtn.classList.replace('btn-primary', 'btn-danger');
-        DOM.statusMessage.textContent = '⚠️ MODO EDICIÓN ACTIVO - Ten cuidado';
+        DOM.statusMessage.textContent = '⚠️ MODO EDICIÓN';
         DOM.statusMessage.style.color = 'var(--acento-rojo)';
-        
         enableCardEditing();
         renderStatusPanel();
     } else {
-        if (!confirm("¿Salir sin guardar cambios pendientes?")) return;
-        
+        if (!confirm("¿Salir?")) return;
         admin = false;
         DOM.body.classList.remove('admin-mode');
         DOM.adminPanel.style.display = 'none';
-        DOM.toggleAdminBtn.textContent = '🛡️ ACTIVAR MODO EDICIÓN';
+        DOM.toggleAdminBtn.textContent = '🛡️ ACTIVAR EDICIÓN';
         DOM.toggleAdminBtn.classList.replace('btn-danger', 'btn-primary');
-        DOM.statusMessage.textContent = 'Activa modo edición para actualizar';
+        DOM.statusMessage.textContent = 'Activa modo edición';
         DOM.statusMessage.style.color = 'var(--color-texto-secundario)';
-        
-        renderCards(); // Re-render para quitar inputs
+        renderCards();
         renderStatusPanel();
     }
 }
 
 function enableCardEditing() {
     document.querySelectorAll(".card").forEach(card => {
-        const idx = card.getAttribute('data-index');
-        const item = currentData[idx];
+        const item = currentData[card.dataset.index];
         const contentDiv = card.querySelector('.card-content');
-
-        // Limpiamos visualización normal
         card.querySelector('.card-time-panel').style.display = 'none';
-        card.querySelector('h3').remove();
-        card.querySelector('.emoji').remove();
-        contentDiv.innerHTML = '';
+        card.querySelector('h3').remove(); card.querySelector('.emoji').remove(); contentDiv.innerHTML = '';
 
-        // Inyectamos inputs
-        const editEmoji = document.createElement('input'); 
-        editEmoji.className = 'editable-emoji'; 
-        editEmoji.value = item.emoji;
-        
-        const editTitle = document.createElement('input'); 
-        editTitle.className = 'editable-title'; 
-        editTitle.value = item.titulo;
+        const emoji = document.createElement('input'); emoji.className = 'editable-emoji'; emoji.value = item.emoji;
+        const title = document.createElement('input'); title.className = 'editable-title'; title.value = item.titulo;
+        const text = document.createElement('textarea'); text.className = 'editable-content'; text.value = item.contenido;
 
-        const editContent = document.createElement('textarea'); 
-        editContent.className = 'editable-content'; 
-        editContent.value = item.contenido;
-
-        card.prepend(editTitle);
-        card.prepend(editEmoji);
-        contentDiv.appendChild(editContent);
+        card.prepend(title); card.prepend(emoji); contentDiv.appendChild(text);
     });
 }
 
 async function saveAllChanges() {
     if (!admin) return;
-    
-    // 1. Guardar tarjetas
     const updates = [];
     document.querySelectorAll(".card").forEach(card => {
-        const id = card.dataset.id;
-        const idx = card.dataset.index;
+        const id = card.dataset.id, idx = card.dataset.index;
+        const e = card.querySelector('.editable-emoji').value, t = card.querySelector('.editable-title').value, c = card.querySelector('.editable-content').value;
         
-        const newEmoji = card.querySelector('.editable-emoji').value;
-        const newTitle = card.querySelector('.editable-title').value;
-        const newContent = card.querySelector('.editable-content').value;
-
-        // Comparamos si hubo cambios
-        if (newContent !== currentData[idx].contenido || 
-            newTitle !== currentData[idx].titulo || 
-            newEmoji !== currentData[idx].emoji) {
-            
-            updates.push(supabase.from('items').update({
-                emoji: newEmoji,
-                titulo: newTitle,
-                contenido: newContent,
-                last_edited_timestamp: new Date().toISOString()
-            }).eq('id', id));
+        if (c !== currentData[idx].contenido || t !== currentData[idx].titulo || e !== currentData[idx].emoji) {
+            updates.push(supabase.from('items').update({ emoji: e, titulo: t, contenido: c, last_edited_timestamp: new Date().toISOString() }).eq('id', id));
         }
     });
 
-    // 2. Guardar Déficit
-    const deficitInput = document.getElementById('editDeficit');
-    if (deficitInput && deficitInput.value !== currentStatus.deficit_mw) {
-        updates.push(supabase.from('status_data').update({
-            deficit_mw: deficitInput.value,
-            deficit_edited_at: new Date().toISOString()
-        }).eq('id', 1));
+    const def = document.getElementById('editDeficit');
+    if (def && def.value !== currentStatus.deficit_mw) {
+        updates.push(supabase.from('status_data').update({ deficit_mw: def.value, deficit_edited_at: new Date().toISOString() }).eq('id', 1));
     }
 
-    if (updates.length > 0) {
-        const btn = document.getElementById('saveBtn');
-        btn.textContent = '⏳ Guardando...';
+    if (updates.length) {
+        document.getElementById('saveBtn').textContent = 'Guardando...';
         await Promise.all(updates);
-        alert("✅ Cambios guardados correctamente");
-        location.reload();
-    } else {
-        alert("No detecté cambios.");
-    }
+        alert("✅ Guardado"); location.reload();
+    } else alert("Sin cambios");
 }
 
 // ----------------------------------------------------
-// 🗞️ NOTICIAS (Ticker)
+// 🗞️ NOTICIAS (Últimas 24h)
 // ----------------------------------------------------
-function linkify(text) {
-    // Convierte URLs en enlaces clickeables de forma segura
-    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
-        const fullUrl = url.startsWith('http') ? url : 'http://' + url;
-        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
+async function loadNews() {
+    // Calculamos corte de hace 24 horas
+    const cutoffDate = new Date(Date.now() - ONE_DAY_MS).toISOString();
+
+    // 1. SOLICITAR SOLO NOTICIAS RECIENTES (> hace 24h)
+    const { data } = await supabase
+        .from('noticias')
+        .select('*')
+        .gt('timestamp', cutoffDate) 
+        .order('timestamp', { ascending: false });
+    
+    if (!data || data.length === 0) {
+        DOM.newsTicker.style.display = 'none';
+        return;
+    }
+
+    currentNews = data;
+    const newsHTML = data.map(n => 
+        `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`
+    ).join('<span class="news-item"> | </span>');
+
+    DOM.newsTickerContent.innerHTML = newsHTML + '<span class="news-item"> | </span>' + newsHTML;
+    DOM.newsTicker.style.display = 'flex';
+
+    // Animación corregida
+    requestAnimationFrame(() => {
+        const fullWidth = DOM.newsTickerContent.scrollWidth;
+        const halfWidth = fullWidth / 2;
+        const duration = halfWidth / 50; 
+        DOM.dynamicStyles.innerHTML = `
+            @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-${halfWidth}px); } }
+            .news-ticker-content { animation: ticker ${duration}s linear infinite; padding-left: 0 !important; display: inline-block; }
+        `;
     });
 }
 
-async function loadNews() {
-    const { data } = await supabase.from('noticias').select('*').order('timestamp', { ascending: false });
-    
-    if (data && data.length > 0) {
-        // Filtramos noticias muy viejas (opcional, aquí las dejamos todas por ahora)
-        currentNews = data;
-        
-        const newsHTML = data.map(n => 
-            `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`
-        ).join('<span class="news-item"> | </span>');
-
-        // Duplicamos el contenido para el efecto infinito
-        DOM.newsTickerContent.innerHTML = newsHTML + '<span class="news-item"> | </span>' + newsHTML;
-        DOM.newsTicker.style.display = 'flex';
-
-        // Calculamos velocidad de animación
-        const width = DOM.newsTickerContent.scrollWidth / 2;
-        const duration = width / 50; // 50px por segundo
-        DOM.dynamicStyles.innerHTML = `
-            @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }
-            .news-ticker-content { animation: ticker ${duration}s linear infinite; }
-        `;
-    }
-}
-
-// Operaciones de Noticias (Admin)
-async function addNews() {
-    const text = prompt("Escribe la noticia:");
-    if (text) {
-        await supabase.from('noticias').insert([{ text }]);
-        loadNews();
-    }
-}
-
-async function deleteNews() {
-    if (currentNews.length === 0) return alert("No hay noticias.");
-    const list = currentNews.map((n, i) => `${i+1}. ${n.text}`).join('\n');
-    const idx = prompt(`Elige el número a borrar:\n${list}`);
-    if (idx && currentNews[idx-1]) {
-        if(confirm("¿Seguro?")) {
-            await supabase.from('noticias').delete().eq('id', currentNews[idx-1].id);
-            loadNews();
-        }
-    }
-}
-
 // ----------------------------------------------------
-// 💬 COMENTARIOS
+// 💬 COMENTARIOS (Últimos 7 días)
 // ----------------------------------------------------
-function generateAvatarColor(name) {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${Math.abs(hash) % 360}, 60%, 50%)`;
-}
-
 function createCommentDOM(comment, userLikesMap) {
     const isLiked = userLikesMap.has(comment.id);
     const initial = comment.name.charAt(0).toUpperCase();
-    const color = generateAvatarColor(comment.name);
     
-    // HTML del comentario
+    // Generador de color de avatar basado en el nombre
+    let hash = 0; for (let i = 0; i < comment.name.length; i++) hash = comment.name.charCodeAt(i) + ((hash << 5) - hash);
+    const color = `hsl(${Math.abs(hash) % 360}, 60%, 50%)`;
+
     return `
     <div class="comment-item ${comment.parent_id ? 'reply' : ''}" data-id="${comment.id}">
         <div class="comment-main-row">
@@ -425,57 +334,55 @@ function createCommentDOM(comment, userLikesMap) {
                 </div>
             </div>
         </div>
-        
-        ${!comment.parent_id ? `
-            <div id="reply-box-${comment.id}" class="replies-container">
-                <!-- Respuestas aquí -->
-            </div>
+        ${!comment.parent_id ? `<div id="reply-box-${comment.id}" class="replies-container"></div>
             <div id="reply-form-${comment.id}" class="reply-form" style="display:none; margin-top:10px;">
-                <input type="text" id="reply-name-${comment.id}" placeholder="Tu Nombre">
+                <input type="text" id="reply-name-${comment.id}" placeholder="Nombre">
                 <textarea id="reply-text-${comment.id}" placeholder="Respuesta..."></textarea>
                 <button class="btn btn-sm btn-success" onclick="postReply('${comment.id}')">Enviar</button>
-            </div>
-        ` : ''}
+            </div>` : ''}
     </div>`;
 }
 
 async function loadComments() {
-    const { data: comments } = await supabase.from('comentarios').select('*').order('timestamp', { ascending: false });
+    // Corte de hace 7 días
+    const cutoffDate = new Date(Date.now() - ONE_WEEK_MS).toISOString();
+
+    // Pedir solo comentarios recientes
+    const { data: comments } = await supabase
+        .from('comentarios')
+        .select('*')
+        .gt('timestamp', cutoffDate)
+        .order('timestamp', { ascending: false });
+
     const { data: likes } = await supabase.from('likes').select('comment_id').eq('user_web_id', userWebId);
-    
     const userLikesMap = new Set(likes?.map(l => l.comment_id));
     
     if (comments) {
         DOM.commentsContainer.innerHTML = '';
         const parents = comments.filter(c => !c.parent_id);
-        const replies = comments.filter(c => c.parent_id).reverse(); // Ordenar respuestas cronológicamente
+        const replies = comments.filter(c => c.parent_id).reverse();
 
-        if(parents.length === 0) DOM.commentsContainer.innerHTML = '<p style="text-align:center; opacity:0.5">Sé el primero en comentar.</p>';
+        if(parents.length === 0) DOM.commentsContainer.innerHTML = '<p style="text-align:center; opacity:0.5">Sé el primero en comentar esta semana.</p>';
 
         parents.forEach(p => {
             DOM.commentsContainer.innerHTML += createCommentDOM(p, userLikesMap);
-            // Insertar respuestas
-            const pReplies = replies.filter(r => r.parent_id === p.id);
             setTimeout(() => {
-                const replyBox = document.getElementById(`reply-box-${p.id}`);
-                if(replyBox) {
-                    pReplies.forEach(r => replyBox.innerHTML += createCommentDOM(r, userLikesMap));
-                }
+                const box = document.getElementById(`reply-box-${p.id}`);
+                const pReplies = replies.filter(r => r.parent_id === p.id);
+                if(box && pReplies.length) pReplies.forEach(r => box.innerHTML += createCommentDOM(r, userLikesMap));
             }, 0);
         });
     }
 }
 
-// Funciones globales para HTML (window binding)
+// Funciones Globales (Comentarios)
 window.toggleLike = async (id) => {
     const btn = document.querySelector(`button[onclick="toggleLike('${id}')"]`);
     const counter = document.getElementById(`likes-${id}`);
     const isLiked = btn.classList.contains('liked');
     
-    // Optimistic UI update
     btn.classList.toggle('liked');
-    const current = parseInt(counter.textContent);
-    counter.textContent = isLiked ? current - 1 : current + 1;
+    counter.textContent = isLiked ? parseInt(counter.textContent) - 1 : parseInt(counter.textContent) + 1;
 
     if (isLiked) {
         await supabase.from('likes').delete().eq('comment_id', id).eq('user_web_id', userWebId);
@@ -486,70 +393,68 @@ window.toggleLike = async (id) => {
     }
 };
 
-window.showReplyForm = (id) => {
-    const form = document.getElementById(`reply-form-${id}`);
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+window.showReplyForm = (id) => { const f = document.getElementById(`reply-form-${id}`); f.style.display = f.style.display === 'none' ? 'block' : 'none'; };
+window.postReply = async (pId) => {
+    const n = document.getElementById(`reply-name-${pId}`).value, t = document.getElementById(`reply-text-${pId}`).value;
+    if(n && t) { await supabase.from('comentarios').insert([{ name: n, text: t, parent_id: pId }]); loadComments(); }
 };
 
-window.postReply = async (parentId) => {
-    const name = document.getElementById(`reply-name-${parentId}`).value;
-    const text = document.getElementById(`reply-text-${parentId}`).value;
-    if(name && text) {
-        await supabase.from('comentarios').insert([{ name, text, parent_id: parentId }]);
-        loadComments();
-    }
-};
-
-// Publicar Comentario Principal
 document.getElementById('publishCommentBtn').addEventListener('click', async () => {
-    const name = document.getElementById('commenterName').value;
-    const text = document.getElementById('commentText').value;
-    if(name && text) {
-        await supabase.from('comentarios').insert([{ name, text }]);
-        document.getElementById('commentText').value = '';
-        loadComments();
-    }
+    const n = document.getElementById('commenterName').value, t = document.getElementById('commentText').value;
+    if(n && t) { await supabase.from('comentarios').insert([{ name: n, text: t }]); document.getElementById('commentText').value=''; loadComments(); }
+});
+
+// Admin News
+document.getElementById('addNewsBtn').addEventListener('click', async () => {
+    const t = prompt("Noticia:"); if(t) { await supabase.from('noticias').insert([{ text: t }]); loadNews(); }
+});
+document.getElementById('deleteNewsBtn').addEventListener('click', async () => {
+    if(!currentNews.length) return alert("Nada que borrar");
+    const idx = prompt(`Borrar #:\n${currentNews.map((n,i)=>`${i+1}. ${n.text}`).join('\n')}`);
+    if(idx && currentNews[idx-1]) { await supabase.from('noticias').delete().eq('id', currentNews[idx-1].id); loadNews(); }
 });
 
 // ----------------------------------------------------
 // 🚀 INICIALIZACIÓN
 // ----------------------------------------------------
 async function init() {
-    // 1. Cargar datos básicos
-    const { data: items } = await supabase.from('items').select('*').order('id');
-    if (items) {
-        currentData = items;
-        renderCards();
-    }
+    // 1. Cargar Tarjetas
+    const { data } = await supabase.from('items').select('*').order('id');
+    if(data) { currentData = data; renderCards(); }
 
-    // 2. Cargar estado (Deficit/Divisas)
-    const { data: status } = await supabase.from('status_data').select('*').eq('id', 1).single();
-    if (status) {
-        currentStatus = { ...currentStatus, ...status };
-        renderStatusPanel();
-        fetchElToqueRates(); // Intenta actualizar si es viejo
-    }
+    // 2. Cargar Status
+    const { data: st } = await supabase.from('status_data').select('*').eq('id', 1).single();
+    if(st) { currentStatus = {...currentStatus, ...st}; renderStatusPanel(); fetchElToqueRates(); }
 
-    // 3. Cargar dinámicos
+    // 3. Cargar Dinámicos (Filtrados)
     loadNews();
     loadComments();
 
-    // 4. Contador de Visitas
+    // 4. Contador de Visitas (Solo últimas 24h)
     const todayKey = 'visit_' + new Date().toDateString();
+    const cutoff24h = new Date(Date.now() - ONE_DAY_MS).toISOString();
+
     if (!localStorage.getItem(todayKey)) {
         await supabase.from('page_views').insert({});
         localStorage.setItem(todayKey, 'true');
     }
-    const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true });
-    document.getElementById('viewCounter').textContent = `👀 ${count ? count.toLocaleString() : '...'}`;
+    
+    // Contar solo las de las últimas 24h
+    const { count } = await supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true })
+        .gt('created_at', cutoff24h);
+        
+    document.getElementById('viewCounter').textContent = `👀 24h: ${count ? count.toLocaleString() : '...'}`;
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
 
-    // Event Listeners Admin
+    // Listeners
     DOM.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     document.getElementById('saveBtn').addEventListener('click', saveAllChanges);
-    document.getElementById('addNewsBtn').addEventListener('click', addNews);
-    document.getElementById('deleteNewsBtn').addEventListener('click', deleteNews);
+
+    // 5. EJECUTAR LIMPIEZA SILENCIOSA
+    // Esto intentará borrar los datos viejos en segundo plano
+    runBackgroundCleanup();
 }
 
-// Arrancar motor
 init();
