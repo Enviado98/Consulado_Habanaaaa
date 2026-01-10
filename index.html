@@ -8,8 +8,10 @@
 <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+<!-- Vinculamos el CSS -->
 <link rel="stylesheet" href="styles.css"> 
 
+<!-- Estilos dinámicos para el rodillo -->
 <style id="dynamicTickerStyles"></style>
 
 </head>
@@ -47,11 +49,13 @@
     </div>
 </div>
 
+<!-- RODILLO DE NOTICIAS -->
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
     <strong class="news-ticker-fixed-label">NOTICIAS</strong>
     <div class="news-ticker-wrap">
         <div id="newsTickerContent" class="news-ticker-content">
-            </div>
+            <!-- El JS inyectará el texto aquí -->
+        </div>
     </div>
 </div>
 
@@ -76,14 +80,16 @@
 </div>
 
 <div class="container" id="contenedor">
-  </div>
+  <!-- Tarjetas aquí -->
+</div>
 
+<!-- SECCIÓN DE COMENTARIOS (VOLVERÁ A SER BLANCA) -->
 <section class="comments-section">
     <h2>🗣️ Comentarios de la Comunidad</h2>
     
     <div class="comments-display-wrap">
         <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
+            <p style="text-align: center; color: #666; margin: 15px;">Cargando comentarios...</p>
         </div>
     </div>
 
