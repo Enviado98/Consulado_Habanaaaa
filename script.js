@@ -192,9 +192,7 @@ function createCardHTML(item, index) {
         const { text, diff } = timeAgo(item.last_edited_timestamp);
         timeText = text;
         if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
-            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!RECIENTE!</div>'; labelText = 'Reciente';
-        } else if (diff >= OLD_THRESHOLD_MS) {
-            cardClass = 'card-old'; labelHTML = '<div class="card-label">Antiguo</div>'; labelText = 'Antiguo';
+            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!RECIENTE!</div>'; labelText = 'Reciente';        
         } else { labelText = 'Actualizado'; }
     }
     const neonColor = getCardColor(item.id);
