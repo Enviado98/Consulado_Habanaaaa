@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
 
-    <!-- Icono de pestaña -->
-    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
-    
-    <!-- Fuentes de Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Hoja de Estilos (La cargaremos en el siguiente paso) -->
-    <link rel="stylesheet" href="styles.css"> 
+<link rel="stylesheet" href="styles.css"> 
 
-    <!-- Estilos Dinámicos para el Ticker de Noticias -->
-    <style id="dynamicTickerStyles"></style>
+<style id="dynamicTickerStyles"></style>
+
 </head>
 <body>
 
-<!-- ENCABEZADO -->
 <header>
   <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
-  <p>Web NO OFICIAL - Actualizada por la comunidad <span id="fecha-actualizacion">Cargando...</span></p>
+  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
   
   <div class="header-action-container">
     <a href="news.html" class="btn btn-news" role="button">
@@ -33,9 +28,9 @@
   <div id="viewCounter" class="view-counter" aria-live="polite">
     Cargando...
   </div>
+
 </header>
 
-<!-- PANEL DE ESTADO (ECONOMÍA Y ENERGÍA) -->
 <div id="statusPanel" class="status-panel-container">
     <div class="status-panel-header">
         <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
@@ -52,18 +47,17 @@
     </div>
 </div>
 
-<!-- TICKER DE NOTICIAS -->
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
     <strong class="news-ticker-fixed-label">NOTICIAS</strong>
     <div class="news-ticker-wrap">
-        <div id="newsTickerContent" class="news-ticker-content"></div>
+        <div id="newsTickerContent" class="news-ticker-content">
+            </div>
     </div>
 </div>
 
-<!-- CONTROLES DE ADMINISTRACIÓN -->
 <div class="login-controls">
   <div id="statusMessage" class="login-message">
-      Activa modo edición y actualiza la información
+            Activa modo edición y actualiza la información
   </div>
   
   <button id="toggleAdminBtn" class="btn btn-primary">
@@ -72,7 +66,7 @@
 
   <div id="adminControlsPanel">
     <div class="admin-group">
-        <button id="saveBtn" class="btn btn-success">💾 Guardar Cambios</button>
+        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
     </div>
     <div class="admin-group">
         <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
@@ -81,12 +75,9 @@
   </div>
 </div>
 
-<!-- CONTENEDOR PRINCIPAL DE TARJETAS -->
 <div class="container" id="contenedor">
-    <!-- Las tarjetas se generan aquí con Javascript -->
-</div>
+  </div>
 
-<!-- SECCIÓN DE COMENTARIOS -->
 <section class="comments-section">
     <h2>🗣️ Comentarios de la Comunidad</h2>
     
@@ -104,10 +95,9 @@
 </section>
 
 <footer>
-  <div>© 2025 – Información actualizada periódicamente por descendientes.</div>
+  <div>© 2025 – Información actualizada periódicamente.</div>
 </footer>
 
-<!-- LÓGICA DEL SISTEMA (JS) -->
 <script type="module" src="script.js"></script>
 
 </body>
