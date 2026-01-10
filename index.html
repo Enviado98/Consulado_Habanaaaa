@@ -1,108 +1,116 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta name="description" content="Calendario de Trámites Consulares de España en La Habana. Información actualizada por la comunidad sobre citas, estado energético y noticias.">
-    <meta name="theme-color" content="#1a202c">
-    
-    <title>Calendario Consular La Habana 🇪🇸🇨🇺 | Comunidad</title>
+    <title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
 
+    <!-- Icono de pestaña -->
     <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fuentes de Google -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+    <!-- Hoja de Estilos (La cargaremos en el siguiente paso) -->
     <link rel="stylesheet" href="styles.css"> 
+
+    <!-- Estilos Dinámicos para el Ticker de Noticias -->
     <style id="dynamicTickerStyles"></style>
 </head>
 <body>
 
-    <div class="bg-animation"></div>
+<!-- ENCABEZADO -->
+<header>
+  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
+  <p>Web NO OFICIAL - Actualizada por la comunidad <span id="fecha-actualizacion">Cargando...</span></p>
+  
+  <div class="header-action-container">
+    <a href="news.html" class="btn btn-news" role="button">
+        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
+    </a>
+  </div>
+  
+  <div id="viewCounter" class="view-counter" aria-live="polite">
+    Cargando...
+  </div>
+</header>
 
-    <header class="site-header">
-        <div class="header-content glass-panel">
-            <h1>🇪🇸 Calendario Consular 🇨🇺</h1>
-            <p>Comunidad de Descendientes • <span id="fecha-actualizacion">Actualizando...</span></p>
-            
-            <div class="header-actions">
-                <a href="news.html" class="btn btn-news" role="button">
-                    <span class="pulse-icon">🔴</span> NOTICIAS Y AVISOS
-                </a>
-            </div>
-            
-            <div id="viewCounter" class="view-counter glass-badge" aria-label="Visitas de hoy">
-                👁️ ...
-            </div>
+<!-- PANEL DE ESTADO (ECONOMÍA Y ENERGÍA) -->
+<div id="statusPanel" class="status-panel-container">
+    <div class="status-panel-header">
+        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
+        
+        <div class="live-container">
+            <span class="live-dot"></span>
+            EN VIVO
         </div>
-    </header>
+        
+        <span id="lastEditedTime" style="display: none;"></span>
+    </div>
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
+    </div>
+</div>
 
-    <section id="statusPanel" class="status-panel glass-panel warning-border">
-        <div class="status-header">
-            <span class="status-title">⚡ ESTADO DE LA RED Y DIVISAS</span>
-            <div class="live-indicator">
-                <span class="live-dot"></span> EN VIVO
-            </div>
-        </div>
-        <div id="statusDataContainer" class="status-grid">
-            <div class="loading-text">Cargando datos...</div>
-        </div>
-    </section>
+<!-- TICKER DE NOTICIAS -->
+<div id="newsTicker" class="news-ticker-container" style="display:none;">
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+    <div class="news-ticker-wrap">
+        <div id="newsTickerContent" class="news-ticker-content"></div>
+    </div>
+</div>
 
-    <div id="newsTicker" class="news-ticker" style="display:none;" aria-live="polite">
-        <div class="ticker-label">ÚLTIMA HORA</div>
-        <div class="ticker-wrap">
-            <div id="newsTickerContent" class="ticker-content"></div>
+<!-- CONTROLES DE ADMINISTRACIÓN -->
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
+      Activa modo edición y actualiza la información
+  </div>
+  
+  <button id="toggleAdminBtn" class="btn btn-primary">
+      🛡️ ACTIVAR EL MODO EDICIÓN
+  </button>
+
+  <div id="adminControlsPanel">
+    <div class="admin-group">
+        <button id="saveBtn" class="btn btn-success">💾 Guardar Cambios</button>
+    </div>
+    <div class="admin-group">
+        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
+    </div>
+  </div>
+</div>
+
+<!-- CONTENEDOR PRINCIPAL DE TARJETAS -->
+<div class="container" id="contenedor">
+    <!-- Las tarjetas se generan aquí con Javascript -->
+</div>
+
+<!-- SECCIÓN DE COMENTARIOS -->
+<section class="comments-section">
+    <h2>🗣️ Comentarios de la Comunidad</h2>
+    
+    <div class="comments-display-wrap">
+        <div id="commentsContainer" class="comments-list-container">
+            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
         </div>
     </div>
 
-    <div class="admin-controls-wrapper glass-panel" id="adminWrapper">
-        <div id="statusMessage" class="admin-message">Vista de Visitante</div>
-        
-        <button id="toggleAdminBtn" class="btn btn-primary btn-block">
-            🛡️ ACCESO EDITOR
-        </button>
-
-        <div id="adminControlsPanel" class="admin-tools" style="display: none;">
-            <div class="tool-group">
-                <button id="saveBtn" class="btn btn-success">💾 Guardar Todo</button>
-            </div>
-            <div class="tool-group">
-                <button id="addNewsBtn" class="btn btn-secondary">➕ Noticia</button> 
-                <button id="deleteNewsBtn" class="btn btn-danger">🗑️ Borrar</button> 
-            </div>
-        </div>
+    <div class="comment-form-container">
+        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
+        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
+        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
     </div>
+</section>
 
-    <main class="main-content">
-        <div class="cards-grid" id="contenedor">
-            <div class="loader-container">Cargando calendario...</div>
-        </div>
-    </main>
+<footer>
+  <div>© 2025 – Información actualizada periódicamente por descendientes.</div>
+</footer>
 
-    <section class="comments-section glass-panel">
-        <h2>🗣️ La Comunidad Comenta</h2>
-        
-        <div class="comments-window custom-scrollbar">
-            <div id="commentsContainer" class="comments-list">
-                <div class="loader-text">Cargando debate...</div>
-            </div>
-        </div>
-
-        <div class="comment-form-wrapper">
-            <input type="text" id="commenterName" class="form-input" placeholder="Tu Nombre o Alias" maxlength="30" aria-label="Nombre">
-            <textarea id="commentText" class="form-input" placeholder="Escribe tu aporte (Máx 250 carácteres)..." maxlength="250" rows="3" aria-label="Comentario"></textarea>
-            <button id="publishCommentBtn" class="btn btn-success btn-block">Publicar Comentario</button>
-        </div>
-    </section>
-
-    <footer class="site-footer">
-        <p>© 2025 Consulado Habana (No Oficial) - Desarrollado por la comunidad.</p>
-    </footer>
-
-    <script type="module" src="script.js"></script>
+<!-- LÓGICA DEL SISTEMA (JS) -->
+<script type="module" src="script.js"></script>
 
 </body>
 </html>
+```
