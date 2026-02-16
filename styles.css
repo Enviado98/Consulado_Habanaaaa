@@ -16,8 +16,8 @@
   --color-acento: #D97757;             /* Terracota (acento principal) */
   
   /* Acentos funcionales */
-  --acento-verde: #10b981;
-  --acento-rojo: #ef233c;
+  --acento-verde: #059669;
+  --acento-rojo: #dc2626;
   --acento-morado: #9b87c7;
   
   /* Sombras suaves */
@@ -179,11 +179,13 @@ header p {
   display: block; 
   color: var(--color-acento); 
   border-color: var(--color-acento); 
+  background: rgba(217, 119, 87, 0.1);
 }
 .card-old .card-label { 
   display: block; 
-  color: #00bcd4; 
-  border-color: #00bcd4; 
+  color: #8b9dc3; 
+  border-color: #8b9dc3; 
+  background: rgba(139, 157, 195, 0.1);
 }
 
 /* --- EDICIÓN (MODO ADMIN) --- */
@@ -220,42 +222,44 @@ header p {
     justify-content: center;
     padding: 10px 20px; 
     border: none; 
-    border-radius: 50px;
-    font-weight: 800; 
+    border-radius: 12px;
+    font-weight: 700; 
     font-size: 0.9rem; 
     cursor: pointer;
     text-decoration: none; 
     transition: all 0.3s ease;
     backdrop-filter: blur(5px); 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     color: white;
 }
 .btn:hover { 
   transform: translateY(-2px); 
-  filter: brightness(1.15); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 
 .btn-news { 
-  background: var(--acento-verde); 
-  border: 1px solid rgba(255,255,255,0.2); 
+  background: linear-gradient(135deg, var(--acento-verde) 0%, #059669 100%); 
+  border: 1px solid rgba(255,255,255,0.15); 
   margin: 10px auto; 
   padding: 8px 16px; 
   font-size: 0.85rem; 
 }
 .btn-primary { 
-  background: var(--acento-morado); 
-  border: 1px solid rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, var(--acento-morado) 0%, #7c6ba8 100%);
+  border: 1px solid rgba(255,255,255,0.15);
 }
 .btn-success { 
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+  background: linear-gradient(135deg, #059669 0%, #047857 100%); 
+  border: 1px solid rgba(255,255,255,0.15);
 }
 .btn-danger { 
-  background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); 
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); 
+  border: 1px solid rgba(255,255,255,0.15);
 }
 .btn-secondary { 
-  background: #52525b; 
-  color: white; 
-  border: 1px solid white; 
+  background: linear-gradient(135deg, #52525b 0%, #3f3f46 100%);
+  color: var(--color-cream); 
+  border: 1px solid var(--color-borde); 
 }
 .btn-sm { 
   padding: 5px 10px; 
@@ -293,13 +297,13 @@ header p {
 /* --- NEWS TICKER --- */
 .news-ticker-container {
     width: 100%;
-    background: rgba(217, 119, 87, 0.9); 
-    backdrop-filter: blur(5px);
-    border-top: 1px solid rgba(255,255,255,0.3); 
-    border-bottom: 1px solid rgba(255,255,255,0.3);
-    color: white; 
+    background: linear-gradient(135deg, rgba(217, 119, 87, 0.15) 0%, rgba(180, 90, 60, 0.15) 100%);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--color-borde);
+    border-bottom: 1px solid var(--color-borde);
+    color: var(--color-cream); 
     overflow: hidden; 
-    padding: 4px 0; 
+    padding: 6px 0; 
     margin-bottom: 10px; 
     display: flex; 
     align-items: center;
@@ -309,15 +313,17 @@ header p {
 }
 .news-ticker-fixed-label {
     font-weight: 900; 
-    margin-right: 6px; 
-    padding: 0 6px; 
+    margin-right: 8px; 
+    padding: 4px 8px; 
     font-size: 0.7rem; 
-    background-color: rgba(0, 0, 0, 0.35); 
-    border-radius: 4px; 
+    background: var(--color-acento);
+    border-radius: 6px; 
     flex-shrink: 0; 
     line-height: 1.2; 
     z-index: 2; 
-    margin-left: 4px;
+    margin-left: 6px;
+    color: white;
+    box-shadow: 0 2px 8px rgba(217, 119, 87, 0.3);
 }
 .news-ticker-wrap { 
   overflow: hidden; 
@@ -339,21 +345,26 @@ header p {
   padding: 0 15px; 
   display: inline-block; 
   font-weight: 700; 
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.4); 
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); 
 }
 .news-item small { 
   opacity: 0.9; 
   margin-left: 4px; 
   font-size: 0.65rem; 
-  color: #1a1a1a; 
-  background-color: #ffc107; 
-  padding: 1px 4px; 
-  border-radius: 3px;
+  color: var(--color-fondo-principal); 
+  background-color: var(--color-cream); 
+  padding: 2px 5px; 
+  border-radius: 4px;
+  font-weight: 800;
 }
 .news-item a { 
-  color: var(--color-cream); 
+  color: var(--color-acento); 
   text-decoration: underline; 
-  font-weight: 800; 
+  font-weight: 800;
+  transition: color 0.2s;
+}
+.news-item a:hover {
+  color: #e08868;
 }
 
 
@@ -492,10 +503,10 @@ header p {
 }
 .like-button:hover { 
   transform: scale(1.15); 
-  color: var(--acento-rojo); 
+  color: var(--color-acento); 
 }
 .like-button.liked { 
-  color: var(--acento-rojo); 
+  color: var(--color-acento); 
   animation: popHeart 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 @keyframes popHeart { 
@@ -588,7 +599,7 @@ header p {
 .comment-form-container input:focus, .reply-form input:focus, textarea:focus {
     outline: none; 
     border-color: var(--color-acento); 
-    box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.3); 
+    box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15); 
     background: var(--color-fondo-principal);
 }
 
