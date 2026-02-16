@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noticias Destacadas - Consulado 🇪🇸🇨🇺</title>
+
+<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/000000/spain-flag.png"> 
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css"> 
+<link rel="stylesheet" href="news_styles.css">
+
+</head>
+<body>
+
+<header class="news-header">
+    <a href="index.html" class="back-btn" role="button">⬅️ Volver al Calendario</a>
+    <h1>📰 Noticias e Información Importante</h1>
+    <p>Comunicados oficiales y datos de interés de la comunidad.</p>
+    
+    <div class="news-admin-controls">
+        <button id="toggleNewsAdminBtn" class="primary-admin-btn">🛡️ ACTIVAR EDICIÓN</button>
+        <div id="newsAdminPanel" style="display: none;">
+            <button id="exitAdminBtn" class="primary-admin-btn">❌ SALIR DEL MODO EDICIÓN</button>
+            <button id="addBannerBtn" class="admin-btn">➕ Añadir Nueva Pancarta</button>
+        </div>
+    </div>
+</header>
+
+<main class="news-container">
+    <section id="bannerCreationSection" class="banner-form-section" style="display: none;">
+        <h2>✍️ Crear Nueva Pancarta</h2>
+        <input type="text" id="bannerTitle" placeholder="Título de la Noticia (máx. 80 caracteres)" maxlength="80">
+        <textarea id="bannerContent" placeholder="Contenido completo de la Pancarta. Puedes incluir enlaces (se detectarán automáticamente)." rows="6"></textarea>
+        <div class="form-actions">
+            <button id="publishBannerBtn" class="primary-admin-btn">✅ Publicar Pancarta</button>
+            <button id="cancelBannerBtn" class="admin-btn secondary-btn">❌ Cancelar</button>
+        </div>
+    </section>
+
+    <div id="newsBannersContainer" class="banners-list-container">
+        <p style="text-align: center; color: white; margin: 30px; font-weight: bold;">Cargando noticias destacadas...</p>
+    </div>
+</main>
+
+<footer>
+    <div>© 2025 Consulado – Sección de Noticias.</div>
+</footer>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module" src="news_script.js"></script>
+
+</body>
+</html>
