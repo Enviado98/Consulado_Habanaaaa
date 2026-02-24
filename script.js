@@ -120,7 +120,8 @@ const DIVISAS = [
 ];
 
 // Extrae el valor correcto de una entrada de statistics de El Toque
-function elToqueVal(s) {
+// dec: número de decimales a conservar (0 para USD/EUR/MLC/CAD, 2 para MXN/BRL/CLA)
+function elToqueVal(s, dec = 0) {
     if (!s) return null;
     const count = s.count_values ?? 0;
     let v;
@@ -131,7 +132,10 @@ function elToqueVal(s) {
     } else {
         v = s.median;           // fallback
     }
-    return v != null ? String(Math.round(v)) : null;
+    if (v == null) return null;
+    return dec === 0
+        ? String(Math.round(v))
+        : String(+(v.toFixed(dec)));  // conserva los decimales reales (ej: "12.50")
 }
 
 // Valida que un valor esté dentro del rango esperado para su divisa
@@ -174,7 +178,7 @@ function extractRatesFromNextData(html) {
     if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
     const rates = {};
     for (const d of DIVISAS) {
-        rates[d.key] = elToqueVal(stats[d.stat]);
+        rates[d.key] = elToqueVal(stats[d.stat], d.dec);  // ✅ respeta decimales por divisa
     }
     return rates;
 }
@@ -750,5 +754,6 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
+
 
 
