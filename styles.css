@@ -213,7 +213,7 @@ header p { margin: 0.3rem 0 0; font-size: 0.85rem; font-weight: 600; opacity: 0.
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
 .status-panel-data { 
-    display: flex; flex-direction: column; gap: 3px;
+    display: flex; flex-direction: column; gap: 3px; text-align: center;
 }
 .status-panel-row {
     display: flex; justify-content: space-between; align-items: center;
