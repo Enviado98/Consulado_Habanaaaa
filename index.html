@@ -2,202 +2,147 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>🔍 Test El Toque – Tasas de cambio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
+
+<!-- 🟢 ICONOS (FAVICON) -->
+<link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
+
+<!-- Fuentes -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Estilos Principales -->
+<link rel="stylesheet" href="styles.css"> 
+
+<!-- 🎨 ESTILOS EXTRA (Créditos) -->
 <style>
-  body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
-  h1 { color: #58a6ff; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 12px 0; }
-  .ok  { color: #3fb950; }
-  .err { color: #f85149; }
-  .warn { color: #d29922; }
-  table { border-collapse: collapse; width: 100%; }
-  td, th { border: 1px solid #30363d; padding: 8px 12px; text-align: left; }
-  th { color: #58a6ff; }
-  .highlight { background: #1f2937; font-weight: bold; }
-  pre { overflow-x: auto; background: #0d1117; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 300px; overflow-y: auto; }
-  button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 4px; }
-  button:hover { background: #2ea043; }
-  #log { color: #8b949e; font-size: 12px; }
+    .dev-credit {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px dashed rgba(255,255,255,0.08);
+        text-align: center;
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.3);
+        letter-spacing: 0.03em;
+    }
+    .dev-credit a {
+        color: rgba(255,255,255,0.45);
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.2s;
+    }
+    .dev-credit a:hover { color: rgba(255,255,255,0.8); }
 </style>
+
+<!-- 🖼️ META ETIQUETAS PARA REDES SOCIALES -->
+<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba. Actualizado por la comunidad.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
+<meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
+<meta property="og:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
+<meta name="twitter:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
+
+<style id="dynamicTickerStyles"></style>
+
 </head>
 <body>
-<h1>🔍 Diagnóstico – Tasas de cambio El Toque</h1>
-<p>Este test compara <strong>avg vs median</strong> para EUR/ECU, y muestra los valores crudos del JSON de El Toque.</p>
 
-<button onclick="runTest()">▶ Ejecutar test ahora</button>
-<button onclick="clearLog()">🗑 Limpiar log</button>
+<header>
+  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
+  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
+  
+  <div class="header-action-container">
+    <a href="news.html" class="btn btn-news" role="button">
+        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
+    </a>
+  </div>
+  
+  <div id="viewCounter" class="view-counter" aria-live="polite">
+    Cargando...
+  </div>
 
-<div class="card" id="resultado">
-  <em>Haz clic en "Ejecutar test" para comenzar…</em>
-</div>
+</header>
 
-<div class="card">
-  <strong>📋 Log detallado:</strong>
-  <pre id="log"></pre>
-</div>
-
-<div class="card" id="raw-stats" style="display:none">
-  <strong>📦 statistics RAW (del __NEXT_DATA__):</strong>
-  <pre id="raw-json"></pre>
-</div>
-
-<script>
-const proxies = [
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-];
-
-const TARGET = "https://eltoque.com/tasas-de-cambio-cuba";
-
-function log(msg, cls='') {
-  const pre = document.getElementById('log');
-  const ts = new Date().toLocaleTimeString('es-ES');
-  pre.innerHTML += `<span class="${cls}">[${ts}] ${msg}</span>\n`;
-  pre.scrollTop = pre.scrollHeight;
-}
-
-function clearLog() {
-  document.getElementById('log').innerHTML = '';
-  document.getElementById('resultado').innerHTML = '<em>Log limpiado.</em>';
-  document.getElementById('raw-stats').style.display = 'none';
-}
-
-async function fetchViaProxy(targetUrl, proxyFn) {
-  const proxyUrl = proxyFn(targetUrl);
-  const shortProxy = proxyUrl.slice(0, 45);
-  log(`⏳ Intentando proxy: ${shortProxy}...`);
-  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.text();
-}
-
-function extractStats(html) {
-  const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-  if (!match) throw new Error("__NEXT_DATA__ no encontrado en el HTML");
-  const json = JSON.parse(match[1]);
-  const stats = json?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
-  if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
-  return stats;
-}
-
-async function fetchFromYadio() {
-  log("⏳ Consultando Yadio.io como fallback...", "warn");
-  const res = await fetch("https://api.yadio.io/exrates/CUP", { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) throw new Error(`Yadio HTTP ${res.status}`);
-  const j = await res.json();
-  return {
-    usd: j.CUP?.USD ? Math.round(1 / j.CUP.USD) : null,
-    eur: j.CUP?.EUR ? Math.round(1 / j.CUP.EUR) : null,
-    mlc: null,
-    source: "Yadio.io"
-  };
-}
-
-async function runTest() {
-  document.getElementById('resultado').innerHTML = '<em>⏳ Ejecutando…</em>';
-  document.getElementById('raw-stats').style.display = 'none';
-  log("═══════════════════════════════════════");
-  log("🚀 Iniciando test de tasas El Toque");
-
-  let html = null;
-  let proxyUsed = null;
-
-  for (let i = 0; i < proxies.length; i++) {
-    try {
-      html = await fetchViaProxy(TARGET, proxies[i]);
-      proxyUsed = i === 0 ? "allorigins.win" : "codetabs.com";
-      log(`✅ Proxy ${i+1} OK (${proxyUsed}), HTML: ${html.length} chars`, "ok");
-      break;
-    } catch(e) {
-      log(`❌ Proxy ${i+1} falló: ${e.message}`, "err");
-    }
-  }
-
-  if (!html) {
-    log("⚠️ Todos los proxies fallaron, usando Yadio como fallback...", "warn");
-    try {
-      const y = await fetchFromYadio();
-      showResult(y, "⚠️ Fallback Yadio.io (sin MLC)", null);
-    } catch(e) {
-      log(`❌ Yadio también falló: ${e.message}`, "err");
-      document.getElementById('resultado').innerHTML = '<span class="err">❌ Todos los métodos fallaron. Revisa la consola del navegador (F12).</span>';
-    }
-    return;
-  }
-
-  let stats;
-  try {
-    stats = extractStats(html);
-    log("✅ __NEXT_DATA__ extraído correctamente", "ok");
-  } catch(e) {
-    log(`❌ Error parseando datos: ${e.message}`, "err");
-    document.getElementById('resultado').innerHTML = `<span class="err">❌ ${e.message}</span>`;
-    return;
-  }
-
-  // Mostrar JSON crudo de las monedas relevantes
-  const relevantStats = { USD: stats.USD, ECU: stats.ECU, MLC: stats.MLC };
-  document.getElementById('raw-json').textContent = JSON.stringify(relevantStats, null, 2);
-  document.getElementById('raw-stats').style.display = 'block';
-
-  // Comparar avg vs median para cada moneda
-  const currencies = [
-    { key: 'USD', label: '💵 USD', symbol: 'USD' },
-    { key: 'ECU', label: '💶 EUR (ECU)', symbol: 'EUR' },
-    { key: 'MLC', label: '💳 MLC', symbol: 'MLC' },
-  ];
-
-  log("─── Comparación avg vs median ───");
-  let tableRows = '';
-  for (const cur of currencies) {
-    const s = stats[cur.key];
-    if (!s) {
-      log(`⚠️ ${cur.key}: no encontrado en statistics`, "warn");
-      tableRows += `<tr><td>${cur.label}</td><td colspan="4" class="err">No disponible</td></tr>`;
-      continue;
-    }
-    const avg    = s.avg    != null ? s.avg.toFixed(2)    : 'N/A';
-    const median = s.median != null ? s.median.toFixed(2) : 'N/A';
-    const q1     = s.q1     != null ? s.q1.toFixed(2)     : 'N/A';
-    const q3     = s.q3     != null ? s.q3.toFixed(2)     : 'N/A';
-
-    const diff = s.avg != null && s.median != null ? (s.avg - s.median).toFixed(2) : 'N/A';
-    const diffCls = Math.abs(parseFloat(diff)) > 5 ? 'err' : 'ok';
-
-    log(`${cur.key}: avg=${avg} | median=${median} | diff=${diff}`, diffCls);
-
-    tableRows += `
-      <tr>
-        <td>${cur.label}</td>
-        <td class="warn">${avg}</td>
-        <td class="ok highlight">${median}</td>
-        <td>${q1} – ${q3}</td>
-        <td class="${diffCls}">${diff}</td>
-      </tr>`;
-  }
-
-  const usd = stats.USD?.median != null ? Math.round(stats.USD.median) : '?';
-  const eur_avg    = stats.ECU?.avg    != null ? Math.round(stats.ECU.avg)    : '?';
-  const eur_median = stats.ECU?.median != null ? Math.round(stats.ECU.median) : '?';
-  const mlc = stats.MLC?.median != null ? Math.round(stats.MLC.median) : '?';
-
-  document.getElementById('resultado').innerHTML = `
-    <h2>✅ Resultado (proxy: ${proxyUsed})</h2>
-    <table>
-      <tr><th>Moneda</th><th>avg (❌ antes)</th><th>median (✅ correcto)</th><th>Rango (q1–q3)</th><th>Diferencia</th></tr>
-      ${tableRows}
-    </table>
-    <br>
-    <div class="ok">
-      ✅ <strong>Valores correctos a mostrar en la web:</strong><br>
-      💵 USD: <strong>${usd}</strong> CUP<br>
-      💶 EUR: <strong>${eur_median}</strong> CUP &nbsp;(con avg serían ${eur_avg} — ese era el bug)<br>
-      💳 MLC: <strong>${mlc}</strong> CUP
+<div id="statusPanel" class="status-panel-container">
+    <div class="status-panel-header">
+        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
+        
+        <div class="live-container">
+            <span class="live-dot"></span>
+            EN VIVO
+        </div>
+        
+        <span id="lastEditedTime" style="display: none;"></span>
     </div>
-  `;
-  log("✅ Test completado", "ok");
-}
-</script>
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
+    </div>
+</div>
+
+<div id="newsTicker" class="news-ticker-container" style="display:none;">
+    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+    <div class="news-ticker-wrap">
+        <div id="newsTickerContent" class="news-ticker-content">
+            </div>
+    </div>
+</div>
+
+<div class="login-controls">
+  <div id="statusMessage" class="login-message">
+            Activa modo edición y actualiza la información
+  </div>
+  
+  <button id="toggleAdminBtn" class="btn btn-primary">
+      🛡️ ACTIVAR EL MODO EDICIÓN
+  </button>
+
+  <div id="adminControlsPanel">
+    <div class="admin-group">
+        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
+    </div>
+    <div class="admin-group">
+        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
+        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
+    </div>
+  </div>
+</div>
+
+<div class="container" id="contenedor">
+  </div>
+
+<section class="comments-section">
+    <h2>🗣️ Comentarios de la Comunidad</h2>
+    
+    <div class="comments-display-wrap">
+        <div id="commentsContainer" class="comments-list-container">
+            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
+        </div>
+    </div>
+
+    <div class="comment-form-container">
+        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
+        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
+        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
+    </div>
+</section>
+
+<!-- FOOTER CON PERFIL DE CONTACTO -->
+<footer>
+  <div style="opacity: 0.7; font-size: 0.8rem; margin-bottom: 15px;">© 2026 – Información actualizada periódicamente.</div>
+
+  <!-- Créditos -->
+  <div class="dev-credit">
+      Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a>
+  </div>
+</footer>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
-
