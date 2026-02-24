@@ -122,11 +122,16 @@ const DIVISAS = [
 // Extrae el valor correcto de una entrada de statistics de El Toque
 function elToqueVal(s) {
     if (!s) return null;
-    const v = (s.count_values ?? 0) >= 11 && s.median != null
-        ? s.median
-        : (s.ema_value ?? s.median);
-    if (v == null) return null;
-    return String(Math.round(v));  // siempre entero, sin decimales
+    const count = s.count_values ?? 0;
+    let v;
+    if (count >= 11 && s.median != null) {
+        v = s.median;           // suficientes muestras → median
+    } else if (s.ema_value != null) {
+        v = s.ema_value;        // pocas muestras → ema_value
+    } else {
+        v = s.median;           // fallback
+    }
+    return v != null ? String(Math.round(v)) : null;
 }
 
 // Valida que un valor esté dentro del rango esperado para su divisa
@@ -745,3 +750,5 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
+
+
