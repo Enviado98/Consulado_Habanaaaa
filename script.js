@@ -104,13 +104,27 @@ function timeAgo(timestamp) {
 //     .ECU.avg    → tasa EUR (ej: 565)  ← El Toque usa "ECU" internamente
 //     .MLC.median → tasa MLC (ej: 405)
 
-const RATE_VALID = { usd:{min:200,max:700}, eur:{min:200,max:800}, mlc:{min:150,max:700} };
+const RATE_VALID = { 
+    usd:{min:200,max:700}, eur:{min:200,max:800}, mlc:{min:150,max:700},
+    cad:{min:100,max:600}, mxn:{min:5,max:100},   brl:{min:20,max:200}, cla:{min:200,max:800}
+};
 
 function isValidRate(currency, value) {
-    const n = parseInt(value);
+    const n = parseFloat(value);
     if (isNaN(n)) return false;
     const { min, max } = RATE_VALID[currency] || { min:200, max:800 };
     return n >= min && n <= max;
+}
+
+// Replica la lógica exacta de El Toque:
+// count_values > 10 → median | count_values <= 10 → ema_value
+function elToqueVal(s, decimals = 0) {
+    if (!s) return null;
+    const v = (s.count_values ?? 0) > 10 && s.median != null
+        ? s.median
+        : (s.ema_value ?? s.median);
+    if (v == null) return null;
+    return decimals === 0 ? String(Math.round(v)) : String(+(v.toFixed(decimals)));
 }
 
 // Fetch con timeout, intenta dos proxies en orden
@@ -137,18 +151,6 @@ async function fetchViaProxy(targetUrl, timeoutMs = 12000) {
 }
 
 // Extrae tasas del __NEXT_DATA__ de El Toque
-// Lógica exacta de El Toque:
-// Si count_values > 10 → median (suficientes reportes del día)
-// Si count_values <= 10 → ema_value (media móvil histórica, más estable)
-function elToqueVal(s, decimals = 0) {
-    if (!s) return null;
-    const v = (s.count_values ?? 0) > 10 && s.median != null
-        ? s.median
-        : (s.ema_value ?? s.median);
-    if (v == null) return null;
-    return decimals === 0 ? String(Math.round(v)) : String(+(v.toFixed(decimals)));
-}
-
 function extractRatesFromNextData(html) {
     const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
     if (!match) throw new Error("__NEXT_DATA__ no encontrado");
@@ -197,13 +199,17 @@ async function fetchElToqueRates() {
             rates = extractRatesFromNextData(html);
             console.log(`✅ El Toque: USD=${rates.usd} EUR=${rates.eur} MLC=${rates.mlc} CAD=${rates.cad} MXN=${rates.mxn} BRL=${rates.brl} CLA=${rates.cla}`);
         } catch (e) {
-            // Fallback: Yadio (USD + EUR, sin MLC)
+            // Fallback: Yadio (USD + EUR, sin el resto)
             console.warn("⚠️ El Toque falló, usando Yadio:", e.message);
             try {
                 const y = await fetchFromYadio();
                 rates.usd = y.usd;
                 rates.eur = y.eur;
-                rates.mlc = currentStatus.mlc_cup || null; // conservar último MLC conocido
+                rates.mlc = currentStatus.mlc_cup || null;
+                rates.cad = currentStatus.cad_cup || null;
+                rates.mxn = currentStatus.mxn_cup || null;
+                rates.brl = currentStatus.brl_cup || null;
+                rates.cla = currentStatus.cla_cup || null;
                 console.log(`✅ Yadio: USD=${rates.usd} EUR=${rates.eur}`);
             } catch (e2) {
                 console.error("⚠️ Yadio también falló:", e2.message);
@@ -218,10 +224,10 @@ async function fetchElToqueRates() {
         const usdPrice = rates.usd;
         const eurPrice = isValidRate('eur', rates.eur) ? rates.eur : (currentStatus.euro_cup || '---');
         const mlcPrice = isValidRate('mlc', rates.mlc) ? rates.mlc : (currentStatus.mlc_cup || '---');
-        const cadPrice = rates.cad || currentStatus.cad_cup || '---';
-        const mxnPrice = rates.mxn || currentStatus.mxn_cup || '---';
-        const brlPrice = rates.brl || currentStatus.brl_cup || '---';
-        const claPrice = rates.cla || currentStatus.cla_cup || '---';
+        const cadPrice = isValidRate('cad', rates.cad) ? rates.cad : (currentStatus.cad_cup || '---');
+        const mxnPrice = isValidRate('mxn', rates.mxn) ? rates.mxn : (currentStatus.mxn_cup || '---');
+        const brlPrice = isValidRate('brl', rates.brl) ? rates.brl : (currentStatus.brl_cup || '---');
+        const claPrice = isValidRate('cla', rates.cla) ? rates.cla : (currentStatus.cla_cup || '---');
         const newTime  = new Date().toISOString();
 
         currentStatus.dollar_cup       = usdPrice;
@@ -235,9 +241,8 @@ async function fetchElToqueRates() {
         renderStatusPanel(currentStatus);
 
         await supabase.from('status_data').update({
-            dollar_cup: usdPrice, euro_cup: eurPrice,
-            mlc_cup: mlcPrice, cad_cup: cadPrice,
-            mxn_cup: mxnPrice, brl_cup: brlPrice,
+            dollar_cup: usdPrice, euro_cup: eurPrice, mlc_cup: mlcPrice,
+            cad_cup: cadPrice, mxn_cup: mxnPrice, brl_cup: brlPrice,
             cla_cup: claPrice, divisa_edited_at: newTime
         }).eq('id', 1);
 
@@ -713,6 +718,7 @@ function renderStatusPanel(status) {
             <div class="status-item divisa"><span class="label">💎 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
         </div>`;
 }
+}
 
 async function loadStatusData() {
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
@@ -752,3 +758,4 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
+
