@@ -1,754 +1,429 @@
-// ----------------------------------------------------
-// 🚨 CONFIGURACIÓN DE SUPABASE (BAAS) 🚨
-// ----------------------------------------------------
-const SUPABASE_URL = "https://mkvpjsvqjqeuniabjjwr.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg"; 
-
-// ----------------------------------------------------
-// ⏱ CONFIGURACIÓN DE ACTUALIZACIÓN AUTOMÁTICA
-// ----------------------------------------------------
-const CACHE_DURATION        = 10 * 60 * 1000; // 10 minutos — tasas de cambio
-const DEFICIT_CACHE_DURATION = 10 * 60 * 1000; // 10 minutos — déficit energético
-
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ----------------------------------------------------
-// 🎨 PALETA DE COLORES NEÓN (PREMIUM)
-// ----------------------------------------------------
-const NEON_PALETTE = [
-    '#00ffff', '#ff00ff', '#00ff00', '#ffff00', '#ff0099', 
-    '#9D00FF', '#FF4D00', '#00E5FF', '#76ff03', '#ff1744'
-];
-
-function getCardColor(id) {
-    let hash = 0;
-    const str = String(id);
-    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-    const index = Math.abs(hash) % NEON_PALETTE.length;
-    return NEON_PALETTE[index];
+/* ----------------------------------------------------------------
+   ESTILOS PREMIUM - DARK MODE (BASE ORIGINAL)
+   ---------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-// Variables Globales
-let admin = false; 
-const ONE_HOUR = 3600000;
-const ONE_DAY = 24 * ONE_HOUR;
-const RECENT_THRESHOLD_MS = ONE_DAY; 
-const OLD_THRESHOLD_MS = 7 * ONE_DAY;
-const NEWS_SCROLL_SPEED_PX_PER_SEC = 50; 
-const TIME_PANEL_AUTOHIDE_MS = 3000; 
-
-let currentData = [];
-let currentNews = []; 
-let currentStatus = {
-    deficit_mw: 'Cargando...', dollar_cup: '...', euro_cup: '...', mlc_cup: '...',
-    cad_cup: '...', mxn_cup: '...', brl_cup: '...', cla_cup: '...',
-    deficit_edited_at: null, divisa_edited_at: null
-}; 
-
-let userWebId = localStorage.getItem('userWebId');
-if (!userWebId) {
-    userWebId = crypto.randomUUID(); 
-    localStorage.setItem('userWebId', userWebId);
+:root {
+  /* CAMBIO: Colores de texto claros para fondo oscuro */
+  --color-texto-principal: #f4f4f5;
+  --color-texto-secundario: #a1a1aa;
+  
+  /* Acentos Originales (Intactos) */
+  --acento-rojo: #ef233c;
+  --acento-verde: #10b981;
+  --acento-morado: #4f46e5;
+  --acento-cian: #00bcd4;
+  
+  /* CAMBIO: Variables Glass oscuras */
+  --glass-bg: #27272a; 
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  
+  --fuente-principal: 'Nunito', sans-serif;
 }
 
-// Elementos del DOM
-const DOMElements = {
-    body: document.body,
-    contenedor: document.getElementById('contenedor'),
-    newsTicker: document.getElementById('newsTicker'),
-    newsTickerContent: document.getElementById('newsTickerContent'),
-    commentsContainer: document.getElementById('commentsContainer'),
-    commenterName: document.getElementById('commenterName'),
-    commentText: document.getElementById('commentText'),
-    publishCommentBtn: document.getElementById('publishCommentBtn'),
-    adminControlsPanel: document.getElementById('adminControlsPanel'),
-    statusMessage: document.getElementById('statusMessage'),
-    toggleAdminBtn: document.getElementById('toggleAdminBtn'), 
-    saveBtn: document.getElementById('saveBtn'),
-    addNewsBtn: document.getElementById('addNewsBtn'),
-    deleteNewsBtn: document.getElementById('deleteNewsBtn'),
-    dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
-    statusPanel: document.getElementById('statusPanel'),
-    statusDataContainer: document.getElementById('statusDataContainer')
-};
-
-function timeAgo(timestamp) {
-    if (!timestamp) return { text: 'Sin fecha de edición.', diff: -1, date: null };
-    const then = new Date(timestamp).getTime();
-    const now = Date.now();
-    const diff = now - then;
-    if (diff < 0) return { text: 'Ahora mismo', diff: 0, date: new Date(timestamp) }; 
-    const SECONDS = Math.floor(diff / 1000);
-    const MINUTES = Math.floor(SECONDS / 60);
-    const HOURS = Math.floor(MINUTES / 60);
-    const DAYS = Math.floor(HOURS / 24);
-    let text;
-    if (DAYS >= 30) { text = `hace ${Math.floor(DAYS / 30)} meses`; } 
-    else if (DAYS >= 7) { const weeks = Math.floor(DAYS / 7); text = `hace ${weeks} sem.`; } 
-    else if (DAYS >= 2) { text = `hace ${DAYS} días`; } 
-    else if (DAYS === 1) { text = 'hace 1 día'; } 
-    else if (HOURS >= 2) { text = `hace ${HOURS} h.`; } 
-    else if (HOURS === 1) { text = 'hace 1 hora'; } 
-    else if (MINUTES >= 1) { text = `hace ${MINUTES} min.`; } 
-    else { text = 'hace unos momentos'; }
-    return { text, diff, date: new Date(timestamp) };
+/* CAMBIO: Fondo Oscuro Estático (Sin animación pesada) */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--fuente-principal);
+  background-color: #18181b; /* Gris muy oscuro (Casi negro) */
+  background-image: radial-gradient(circle at 50% 0%, #27272a 0%, #18181b 60%);
+  color: var(--color-texto-principal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-// ----------------------------------------------------
-// 💰 SISTEMA UNIFICADO DE TASAS — El Toque + Yadio fallback
-// ----------------------------------------------------
-// Todas las divisas usan exactamente la misma lógica:
-//   1. Se obtienen de El Toque (fuente primaria)
-//   2. Se validan con isValidRate()
-//   3. Se guardan en Supabase
-//   4. Se leen de Supabase al cargar la página
-//
-// Lógica de El Toque para elegir el valor a mostrar:
-//   count_values > 10 → median  (suficientes reportes del día)
-//   count_values <= 10 → ema_value (media móvil, más estable)
-//
-// Mapa completo de divisas: clave interna → columna Supabase
-const DIVISAS = [
-    { key: 'USD', stat: 'USD',  col: 'dollar_cup', dec: 0, min: 200, max: 700 },
-    { key: 'EUR', stat: 'ECU',  col: 'euro_cup',   dec: 0, min: 200, max: 800 },
-    { key: 'MLC', stat: 'MLC',  col: 'mlc_cup',    dec: 0, min: 150, max: 700 },
-    { key: 'CAD', stat: 'CAD',  col: 'cad_cup',    dec: 0, min: 100, max: 600 },
-    { key: 'MXN', stat: 'MXN',  col: 'mxn_cup',    dec: 2, min: 5,   max: 100 },
-    { key: 'BRL', stat: 'BRL',  col: 'brl_cup',    dec: 2, min: 20,  max: 200 },
-    { key: 'CLA', stat: 'CLA',  col: 'cla_cup',    dec: 2, min: 200, max: 800 },
-];
+/* --- HEADER --- */
+header {
+  width: 100%;
+  text-align: center;
+  padding: 1rem;
+  /* CAMBIO: Oscuro translúcido */
+  background: rgba(24, 24, 27, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  color: white;
+  position: relative;
+  z-index: 100;
+}
+header h1 { margin: 0; font-size: 1.4rem; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+header p { margin: 0.3rem 0 0; font-size: 0.85rem; font-weight: 600; opacity: 0.95; color: var(--color-texto-secundario); }
+#fecha-actualizacion { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 8px; color: var(--acento-verde); }
 
-// Extrae el valor correcto de una entrada de statistics de El Toque
-function elToqueVal(s) {
-    if (!s) return null;
-    const count = s.count_values ?? 0;
-    let v;
-    if (count >= 11 && s.median != null) {
-        v = s.median;           // suficientes muestras → median
-    } else if (s.ema_value != null) {
-        v = s.ema_value;        // pocas muestras → ema_value
-    } else {
-        v = s.median;           // fallback
-    }
-    return v != null ? String(Math.round(v)) : null;
+/* --- CONTENEDOR Y TARJETAS (CORE) --- */
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  width: 98%;
+  max-width: 1000px;
+  padding: 20px 10px;
 }
 
-// Valida que un valor esté dentro del rango esperado para su divisa
-function isValidRate(divisa, value) {
-    const n = parseFloat(value);
-    if (isNaN(n)) return false;
-    const d = DIVISAS.find(d => d.col === divisa || d.key === divisa);
-    const min = d?.min ?? 0, max = d?.max ?? 99999;
-    return n >= min && n <= max;
+.card {
+  /* CAMBIO: Fondo Tarjeta Oscuro */
+  background: #27272a;
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  
+  padding: 15px;
+  text-align: center;
+  color: var(--color-texto-principal);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
 }
 
-// Fetch con timeout, intenta dos proxies en orden
-async function fetchViaProxy(targetUrl, timeoutMs = 12000) {
-    const proxies = [
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-    ];
-    for (const url of proxies) {
-        try {
-            const res = await Promise.race([
-                fetch(url),
-                new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout")), timeoutMs))
-            ]);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const text = await res.text();
-            if (text.length < 500) throw new Error(`Respuesta muy corta`);
-            return text;
-        } catch (e) {
-            console.warn(`⚠️ Proxy falló (${url.slice(0,40)}...): ${e.message}`);
-        }
-    }
-    throw new Error("Todos los proxies fallaron");
+.card:hover:not(.admin-mode) {
+  transform: translateY(-5px) scale(1.01);
+  background: #3f3f46; /* Gris un poco más claro al hover */
+  box-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-// Extrae TODAS las divisas del __NEXT_DATA__ de El Toque
-function extractRatesFromNextData(html) {
-    const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-    if (!match) throw new Error("__NEXT_DATA__ no encontrado");
-    const stats = JSON.parse(match[1])?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
-    if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
-    const rates = {};
-    for (const d of DIVISAS) {
-        rates[d.key] = elToqueVal(stats[d.stat]);
-    }
-    return rates;
+/* Emojis y Títulos */
+.card span.emoji {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+    transition: transform 0.3s;
+}
+.card:hover span.emoji { transform: scale(1.2) rotate(5deg); }
+
+.card h3 {
+    margin: 5px 0 8px 0;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, #ffffff 0%, var(--card-neon, #fff) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 8px var(--card-neon, rgba(255,255,255,0.3)));
+    position: relative; z-index: 2;
 }
 
-// Fallback: Yadio.io — solo tiene USD y EUR
-async function fetchFromYadio() {
-    const res = await Promise.race([
-        fetch("https://api.yadio.io/exrates/CUP"),
-        new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout")), 8000))
-    ]);
-    if (!res.ok) throw new Error(`Yadio HTTP ${res.status}`);
-    const j = await res.json();
-    return {
-        USD: j.CUP?.USD ? String(Math.round(1 / j.CUP.USD)) : null,
-        EUR: j.CUP?.EUR ? String(Math.round(1 / j.CUP.EUR)) : null,
-    };
+.card-content p {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-texto-secundario); /* Texto gris para leer mejor */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    white-space: pre-wrap; 
 }
 
-async function fetchElToqueRates() {
-    try {
-        const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
-        if ((Date.now() - lastUpdate) < CACHE_DURATION) {
-            console.log("💾 Tasas en caché.");
-            return;
-        }
-        console.log("🔄 Actualizando tasas...");
+/* Paneles de tiempo y etiquetas */
+.card-time-panel {
+    position: absolute; bottom: 0; left: 0; width: 100%; padding: 6px;
+    font-size: 0.7rem; font-weight: 700;
+    background: #52525b; color: white;
+    transform: translateY(100%); transition: transform 0.3s;
+    border-radius: 10px 10px 0 0;
+}
+.card.show-time-panel .card-time-panel { transform: translateY(0); }
 
-        // Intentar El Toque primero
-        let rawRates = {};
-        try {
-            const html = await fetchViaProxy("https://eltoque.com/tasas-de-cambio-cuba");
-            rawRates = extractRatesFromNextData(html);
-            console.log("✅ El Toque OK:", JSON.stringify(rawRates));
-        } catch (e) {
-            console.warn("⚠️ El Toque falló, usando Yadio:", e.message);
-            try {
-                const y = await fetchFromYadio();
-                rawRates = { USD: y.USD, EUR: y.EUR };
-                console.log(`✅ Yadio: USD=${rawRates.USD} EUR=${rawRates.EUR}`);
-            } catch (e2) {
-                console.error("⚠️ Yadio también falló:", e2.message);
-            }
-        }
+.card-label {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 0.55rem; font-weight: 900; padding: 3px 6px;
+    border-radius: 10px; background: #18181b; border: 1px solid var(--glass-border); color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 5; display: none;
+}
+.card-recent .card-label { display: block; color: var(--acento-rojo); border-color: var(--acento-rojo); }
+.card-old .card-label { display: block; color: var(--acento-cian); border-color: var(--acento-cian); }
 
-        // Validar USD — si no hay USD válido, no actualizar nada
-        if (!isValidRate('USD', rawRates.USD)) {
-            console.warn("⚠️ USD fuera de rango, sin actualizar.");
-            return;
-        }
-
-        // Para cada divisa: usar nuevo valor si es válido, si no conservar el último de Supabase
-        const update = { divisa_edited_at: new Date().toISOString() };
-        for (const d of DIVISAS) {
-            const fresh = rawRates[d.key];
-            const prev  = currentStatus[d.col] || null;
-            const final = isValidRate(d.key, fresh) ? fresh : (prev || '---');
-            currentStatus[d.col] = final;
-            update[d.col]        = final;
-        }
-
-        renderStatusPanel(currentStatus);
-
-        await supabase.from('status_data').update(update).eq('id', 1);
-
-        console.log("✅ Tasas guardadas:", DIVISAS.map(d => `${d.key}=${currentStatus[d.col]}`).join(' '));
-    } catch (err) {
-        console.error("⚠️ fetchElToqueRates:", err.message);
-    }
+/* --- EDICIÓN (MODO ADMIN) --- */
+.card .editable-title, .card .editable-emoji {
+    background: #18181b; border: 2px dashed #52525b;
+    color: white; border-radius: 8px; width: 100%; padding: 4px;
+    font-family: var(--fuente-principal); margin-bottom: 4px; font-size: 0.85rem;
 }
 
-// ----------------------------------------------------
-// ⚡ DÉFICIT ENERGÉTICO — Cubadebate RSS
-// ----------------------------------------------------
-// La UNE publica cada mañana en Cubadebate con títulos como:
-//   "Unión Eléctrica pronostica 1 680 MW de déficit en pico nocturno"
-//   "UNE prevé afectación de 1 880 MW en horario pico"
-// El RSS es XML puro — sin JS, sin rendering del cliente.
-
-const UNE_KEYWORDS = ["déficit","deficit","afectación","afectacion",
-                      "unión eléctrica","union electrica",
-                      "une pronostica","une prevé","une prev"];
-
-function isUNETitle(title) {
-    const t = title.toLowerCase();
-    return UNE_KEYWORDS.some(k => t.includes(k));
+.card .editable-content {
+    background: #18181b; 
+    border: 2px dashed #52525b;
+    color: white; 
+    border-radius: 8px; 
+    width: 100%; 
+    padding: 8px; 
+    font-family: var(--fuente-principal); 
+    margin-bottom: 4px; 
+    font-size: 0.85rem;
+    min-height: 160px; 
+    resize: vertical;  
 }
 
-function extractMWFromTitle(title) {
-    // Maneja: "1 680 MW", "1680 MW", "1.680 MW"
-    const m = title.match(/(\d[\d\s\.]{0,6}\d|\d{3,4})\s*mw/i);
-    if (!m) return null;
-    const n = parseInt(m[1].replace(/[\s\.]/g, ""));
-    return (n >= 100 && n <= 5000) ? n : null;
+/* --- BOTONES --- */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 20px; border: none; border-radius: 50px;
+    font-weight: 800; font-size: 0.9rem; cursor: pointer;
+    text-decoration: none; transition: all 0.3s ease;
+    backdrop-filter: blur(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    color: white;
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+
+.btn-news { background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid rgba(255,255,255,0.3); margin: 10px auto; padding: 8px 16px; font-size: 0.85rem; }
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.btn-danger { background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%); }
+.btn-secondary { background: #52525b; color: white; border: 1px solid white; }
+.btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+/* --- PANELES --- */
+.login-controls, .comments-section, .status-panel-container {
+    /* CAMBIO: Paneles oscuros */
+    background: #27272a;
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; box-shadow: var(--glass-shadow);
+    margin-bottom: 15px; width: 98%; max-width: 800px;
 }
 
-async function fetchDeficitFromCubadebate() {
-    try {
-        const lastUpdate = new Date(currentStatus.deficit_edited_at || 0).getTime();
-        if ((Date.now() - lastUpdate) < DEFICIT_CACHE_DURATION) {
-            console.log("💾 Déficit en caché.");
-            return;
-        }
-        console.log("🔄 Buscando déficit en Cubadebate RSS...");
+.login-controls { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 10; margin-top: 15px; }
+#adminControlsPanel { display: none; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
 
-        const xml = await fetchViaProxy("http://www.cubadebate.cu/feed/", 12000);
+/* --- STATUS PANEL --- */
+.status-panel-container { 
+    background: #1e1e24; /* Un poco más oscuro para diferenciar */
+    padding: 8px; 
+    color: var(--color-texto-principal); 
+}
+.status-panel-header { 
+    display: flex; justify-content: space-between; font-size: 0.7rem; 
+    border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; margin-bottom: 4px; 
+}
+.live-container { background: rgba(255,255,255,0.1); color: var(--acento-rojo); padding: 1px 6px; border-radius: 15px; font-weight: 900; font-size: 0.55rem; display: flex; align-items: center; gap: 4px; }
+.live-dot { width: 6px; height: 6px; background: var(--acento-rojo); border-radius: 50%; animation: blink 1.5s infinite; }
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        // Extraer todos los <title> del XML (saltar el primero = nombre del sitio)
-        const titles = [...xml.matchAll(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/gi)]
-            .map(m => m[1].trim())
-            .filter(t => t.length > 5)
-            .slice(1);
+.status-panel-data { 
+    display: flex; flex-direction: column; gap: 3px; text-align: center;
+}
+.status-panel-row {
+    display: flex; justify-content: space-between; align-items: stretch;
+    flex-wrap: nowrap; gap: 3px;
+}
+.status-panel-row + .status-panel-row {
+    border-top: 1px dashed rgba(255,255,255,0.08);
+    padding-top: 3px;
+}
+.status-item { 
+    background: #27272a; padding: 4px; border-radius: 6px; border: 1px solid var(--glass-border);
+    flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center;
+}
+.status-item .value { font-size: 0.95rem; font-weight: 900; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+.status-item .label { font-size: 0.6rem; font-weight: 600; margin-bottom: 1px; color: var(--color-texto-secundario); }
+.status-item.deficit .value { color: var(--acento-rojo); }
+.status-item.divisa .value { color: var(--acento-verde); }
 
-        let deficitMW = null;
-        for (const title of titles) {
-            if (!isUNETitle(title)) continue;
-            const mw = extractMWFromTitle(title);
-            if (mw) {
-                deficitMW = mw;
-                console.log(`✅ Déficit: "${title}" → ${mw} MW`);
-                break;
-            }
-            console.warn(`⚠️ Título UNE sin MW: "${title}"`);
-        }
+/* Panel de estado oculto en modo edición — es automático, no editable */
+.status-panel-container.admin-mode { display: none; }
 
-        if (!deficitMW) {
-            console.warn("⚠️ Sin artículo de déficit en el RSS (¿aún no publicado hoy?)");
-            return;
-        }
+/* --- NEWS TICKER (INTACTO - ROJO ORIGINAL) --- */
+.news-ticker-container {
+    width: 100%;
+    background: rgba(220, 20, 60, 0.9); backdrop-filter: blur(5px);
+    border-top: 1px solid rgba(255,255,255,0.3); border-bottom: 1px solid rgba(255,255,255,0.3);
+    color: white; 
+    overflow: hidden; 
+    padding: 4px 0; margin-bottom: 10px; display: flex; align-items: center;
+    position: sticky; top: 0; z-index: 998;
+}
+.news-ticker-fixed-label {
+    font-weight: 900; margin-right: 6px; padding: 0 6px; font-size: 0.7rem; 
+    background-color: rgba(0, 0, 0, 0.35); border-radius: 4px; flex-shrink: 0; line-height: 1.2; z-index: 2; margin-left: 4px;
+}
+.news-ticker-wrap { overflow: hidden; flex-grow: 1; position: relative; height: 100%; }
+.news-ticker-content { white-space: nowrap; font-size: 0.75rem; display: inline-block; }
+@keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        const deficitStr = `${deficitMW} MW`;
-        const newTime    = new Date().toISOString();
-        currentStatus.deficit_mw       = deficitStr;
-        currentStatus.deficit_edited_at = newTime;
-        renderStatusPanel(currentStatus);
+.news-item { padding: 0 15px; display: inline-block; font-weight: 700; text-shadow: 0 0 2px rgba(0, 0, 0, 0.4); }
+.news-item small { opacity: 0.9; margin-left: 4px; font-size: 0.65rem; color: #1a1a1a; background-color: #ffc107; padding: 1px 4px; border-radius: 3px;}
+.news-item a { color: #ffcc00; text-decoration: underline; font-weight: 800; }
 
-        await supabase.from('status_data').update({
-            deficit_mw: deficitStr, deficit_edited_at: newTime
-        }).eq('id', 1);
 
-        console.log(`✅ Déficit guardado: ${deficitStr}`);
-    } catch (e) {
-        console.error("⚠️ fetchDeficitFromCubadebate:", e.message);
-    }
+/* ----------------------------------------------------------------
+   --- COMENTARIOS (ADAPTADO A DARK MODE) ---
+   ---------------------------------------------------------------- */
+.comments-section { 
+    padding: 8px 5px;
+    max-width: 900px;
+    margin: 0 auto;
+    /* CAMBIO: Fondo oscuro */
+    background: #27272a; 
 }
 
-
-// ----------------------------------------------------
-// UI & ADMIN
-// ----------------------------------------------------
-function updateAdminUI(isAdmin) {
-    admin = isAdmin;
-    if (isAdmin) {
-        DOMElements.body.classList.add('admin-mode');
-        DOMElements.adminControlsPanel.style.display = "flex";
-        DOMElements.statusMessage.textContent = "¡🔴 EDITA CON RESPONSABILIDAD!";
-        DOMElements.statusMessage.style.color = "#ef233c"; 
-        DOMElements.toggleAdminBtn.textContent = "🛑 SALIR MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.classList.remove('btn-primary');
-        DOMElements.toggleAdminBtn.classList.add('btn-danger');
-        enableEditing(); 
-    } else {
-        DOMElements.body.classList.remove('admin-mode');
-        DOMElements.adminControlsPanel.style.display = "none";
-        DOMElements.statusMessage.textContent = "Activa modo edición y actualiza la información"; 
-        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
-        DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
-        DOMElements.toggleAdminBtn.classList.remove('btn-danger');
-        DOMElements.toggleAdminBtn.classList.add('btn-primary');
-        disableEditing(); 
-    }
-    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
-    renderStatusPanel(currentStatus); 
+.comments-section h2 { 
+    font-size: 1.2rem; margin-bottom: 10px; text-align: center; color: var(--color-texto-principal); text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-function toggleAdminMode() {
-    if (!admin) {
-        updateAdminUI(true); alert("¡🔴 EDITA CON RESPONSABILIDAD!");
-    } else {
-        if (!confirm("✅️ ¿Terminar la edición?")) return;
-        updateAdminUI(false); loadData(); loadStatusData(); 
-    }
+.comments-display-wrap {
+    max-height: 320px; 
+    overflow-y: auto; 
+    padding: 10px; 
+    margin-bottom: 15px;
+    /* CAMBIO: Fondo oscuro interior */
+    background: #18181b; 
+    border: 1px solid var(--glass-border); border-radius: 16px; 
+}
+.comments-display-wrap::-webkit-scrollbar { width: 4px; }
+.comments-display-wrap::-webkit-scrollbar-thumb { background: #52525b; border-radius: 10px; }
+.comments-display-wrap::-webkit-scrollbar-track { background: transparent; }
+
+/* --- ITEM DE COMENTARIO --- */
+.comment-item {
+    display: block; 
+    margin-bottom: 12px;
+    animation: fadeInComment 0.4s ease-out;
+    width: 100%;
+}
+@keyframes fadeInComment { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Fila horizontal */
+.comment-main-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    align-items: flex-start;
 }
 
-function enableEditing() { toggleEditing(true); }
-function disableEditing() { toggleEditing(false); }
-
-function createCardHTML(item, index) {
-    let cardClass = '', labelHTML = '', labelText = 'Sin fecha', timeText = 'Sin editar';
-    if (item.last_edited_timestamp) {
-        const { text, diff } = timeAgo(item.last_edited_timestamp);
-        timeText = text;
-        if (diff >= 0 && diff < RECENT_THRESHOLD_MS) {
-            cardClass = 'card-recent'; labelHTML = '<div class="card-label">!RECIENTE!</div>'; labelText = 'Reciente';        
-        } else { labelText = 'Actualizado'; }
-    }
-    const neonColor = getCardColor(item.id);
-    return `
-    <div class="card ${cardClass}" data-index="${index}" data-id="${item.id}"> 
-        ${labelHTML} <span class="emoji">${item.emoji}</span>
-        <h3 style="--card-neon: ${neonColor}">${item.titulo}</h3>
-        <div class="card-content"><p>${item.contenido}</p></div>
-        <div class="card-time-panel" data-id="${item.id}"><strong>${labelText}</strong> (${timeText})</div>
-    </div>`;
+/* Avatar Circular */
+.comment-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--comment-color, #667eea); color: #fff;
+    font-weight: 800; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+    text-transform: uppercase; user-select: none;
 }
 
-function toggleEditing(enable) {
-    document.querySelectorAll(".card").forEach(card => {
-        const item = currentData[card.getAttribute('data-index')];
-        const contentDiv = card.querySelector('.card-content');
-        if (enable) {
-            card.classList.add('editing-active'); card.removeEventListener('click', toggleTimePanel); 
-            card.querySelector('.card-time-panel').style.display = 'none';
-            if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = 'none';
-            card.querySelector('.emoji').remove(); card.querySelector('h3').remove(); contentDiv.querySelector('p').remove();
-            
-            const editableEmoji = document.createElement('input'); editableEmoji.className = 'editable-emoji'; editableEmoji.value = item.emoji; editableEmoji.maxLength = 2;
-            const editableTitle = document.createElement('input'); editableTitle.className = 'editable-title'; editableTitle.value = item.titulo;
-            const editableContent = document.createElement('textarea'); editableContent.className = 'editable-content'; editableContent.value = item.contenido;
-            
-            card.insertBefore(editableTitle, card.firstChild); card.insertBefore(editableEmoji, card.firstChild); contentDiv.appendChild(editableContent);
-        } else {
-            card.classList.remove('editing-active');
-            if (card.querySelector('.editable-emoji')) {
-                card.querySelector('.editable-emoji').remove(); card.querySelector('.editable-title').remove(); card.querySelector('.editable-content').remove();
-                const newEmoji = document.createElement('span'); newEmoji.className = 'emoji'; newEmoji.textContent = item.emoji;
-                const newTitle = document.createElement('h3'); newTitle.textContent = item.titulo; newTitle.style.setProperty('--card-neon', getCardColor(item.id));
-                const newP = document.createElement('p'); newP.textContent = item.contenido;
-                
-                card.insertBefore(newTitle, card.firstChild); card.insertBefore(newEmoji, card.firstChild); contentDiv.appendChild(newP);
-                card.querySelector('.card-time-panel').style.display = '';
-                if (card.querySelector('.card-label')) card.querySelector('.card-label').style.display = '';
-                card.addEventListener('click', toggleTimePanel);
-            }
-        }
-    });
+/* Burbuja (Dark Mode) */
+.comment-bubble {
+    flex-grow: 1;
+    /* CAMBIO: Burbuja gris oscuro */
+    background: #3f3f46; 
+    padding: 10px 12px;
+    border-radius: 0 14px 14px 14px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: relative;
+    max-width: 100%;
 }
 
-function toggleTimePanel(event) {
-    if (admin) return;
-    const clicked = event.currentTarget;
-    document.querySelectorAll('.card').forEach(c => { if (c !== clicked) c.classList.remove('show-time-panel'); });
-    if (clicked.classList.toggle('show-time-panel')) setTimeout(() => clicked.classList.remove('show-time-panel'), TIME_PANEL_AUTOHIDE_MS);
+.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.comment-name { color: var(--color-texto-principal); font-weight: 800; font-size: 0.85rem; letter-spacing: 0.2px; }
+.comment-date { font-size: 0.65rem; color: var(--color-texto-secundario); font-weight: 600; }
+.comment-content { color: #e4e4e7; font-size: 0.85rem; line-height: 1.35; font-weight: 500; word-wrap: break-word; }
+
+/* Acciones */
+.comment-actions {
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    margin-top: 5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 5px;
+}
+.like-button {
+    background: transparent; border: none; cursor: pointer; font-size: 0.95rem;
+    color: var(--color-texto-secundario); transition: all 0.2s; display: flex; align-items: center; gap: 3px; padding: 0;
+}
+.like-button:hover { transform: scale(1.15); color: var(--acento-rojo); }
+.like-button.liked { color: var(--acento-rojo); animation: popHeart 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popHeart { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+.like-count { font-size: 0.75rem; font-weight: 700; color: var(--color-texto-secundario); }
+.reply-form-toggle {
+    font-size: 0.65rem; color: var(--acento-morado); font-weight: 800; cursor: pointer;
+    text-transform: uppercase; padding: 2px 6px; border-radius: 4px; transition: background 0.2s;
+}
+.reply-form-toggle:hover { background: rgba(79, 70, 229, 0.2); }
+
+/* --- RESPUESTAS (HILOS) --- */
+.replies-container {
+    margin-top: 6px;
+    padding-left: 10px; 
+    margin-left: 16px;
+    border-left: 2px solid rgba(255,255,255,0.1);
+    display: block; 
+    width: calc(100% - 16px);
 }
 
-function linkify(text) {
-    return text.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, (url) => {
-        let fullUrl = url.startsWith('http') ? url : 'http://' + url;
-        return `<a href="${fullUrl}" target="_blank">${url}</a>`;
-    });
+.comment-item.reply-style {
+    margin-bottom: 8px;
+    transform: scale(1);
+}
+.comment-item.reply-style .comment-avatar { width: 26px; height: 26px; font-size: 0.75rem; }
+.comment-item.reply-style .comment-bubble { background: #52525b; border-radius: 0 12px 12px 12px; padding: 8px 10px;}
+.comment-item.reply-style .comment-content { font-size: 0.8rem; }
+
+/* Formularios Dark Mode */
+.comment-form-container, .reply-form {
+    background: #27272a; 
+    padding: 15px; border-radius: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+}
+.reply-form { 
+    display: none; margin-top: 10px; background: #27272a;
+    animation: slideDown 0.3s ease;
+    margin-left: 42px; width: calc(100% - 42px); padding: 10px;
+}
+@keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+.comment-form-container input, .comment-form-container textarea, 
+.reply-form input, .reply-form textarea {
+    width: 100%; padding: 8px 12px; margin-bottom: 8px; border: 1px solid #52525b;
+    border-radius: 10px; background: #18181b; font-family: var(--fuente-principal);
+    font-size: 0.85rem; transition: border-color 0.3s, box-shadow 0.3s; color: white;
+}
+.comment-form-container input:focus, .reply-form input:focus, textarea:focus {
+    outline: none; border-color: var(--acento-morado); box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3); background: #18181b;
 }
 
-async function loadNews() {
-    const { data: newsData, error } = await supabase.from('noticias').select('id, text, timestamp').order('timestamp', { ascending: false });
-    if (error) return;
-    const validNews = []; const cutoff = Date.now() - RECENT_THRESHOLD_MS;
-    newsData.forEach(n => { if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n); else supabase.from('noticias').delete().eq('id', n.id); });
-    currentNews = validNews;
-    if (validNews.length > 0) {
-        const html = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
-        DOMElements.newsTickerContent.innerHTML = `${html}<span class="news-item"> | </span>${html}`;
-        DOMElements.newsTicker.style.display = 'flex';
-        const width = DOMElements.newsTickerContent.scrollWidth / 2; const dur = width / NEWS_SCROLL_SPEED_PX_PER_SEC;
-        DOMElements.dynamicTickerStyles.innerHTML = `@keyframes ticker-move-dynamic { 0% { transform: translateX(0); } 100% { transform: translateX(-${width}px); } }`;
-        DOMElements.newsTickerContent.style.animation = `ticker-move-dynamic ${dur}s linear infinite`;
-    } else {
-        DOMElements.newsTicker.style.display = 'flex';
-        DOMElements.newsTickerContent.innerHTML = `<span class="news-item">Sin Noticias recientes... || 🛡 Activa el modo edición para publicar</span>`.repeat(2);
-        DOMElements.newsTickerContent.style.animation = `ticker-move-static 15s linear infinite`;
-    }
+/* Footer & Counter */
+footer {
+    width: 100%; text-align: center; padding: 15px; background: rgba(0,0,0,0.2); color: var(--color-texto-secundario); backdrop-filter: blur(5px);
+    margin-top: auto; border-top: 1px solid var(--glass-border); font-size: 0.8rem;
 }
-
-async function addQuickNews() {
-    if (!admin) return;
-    const text = prompt("✍️ Escribe tu noticia:");
-    if (text && confirm("¿Publicar?")) { await supabase.from('noticias').insert([{ text: text.trim() }]); loadNews(); }
+.view-counter {
+    position: fixed; bottom: 10px; left: 10px; z-index: 999;
+    background: #27272a; backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border); color: var(--color-texto-principal); padding: 4px 10px; border-radius: 15px; font-size: 0.7rem; font-weight: 800;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 4px;
 }
-async function deleteNews() {
-    if (!admin || currentNews.length === 0) return alert("No hay noticias.");
-    const list = currentNews.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
-    const idx = parseInt(prompt(`Eliminar número:\n${list}`)) - 1;
-    if (currentNews[idx] && confirm("¿Eliminar?")) { await supabase.from('noticias').delete().eq('id', currentNews[idx].id); loadNews(); }
-}
+.view-counter:hover { transform: scale(1.05); background: #3f3f46; }
 
-// ----------------------------------------------------
-// LÓGICA DE COMENTARIOS (CORREGIDA: Layout Bloque)
-// ----------------------------------------------------
-function generateColorByName(str) {
-    let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${Math.abs(hash) % 360}, 75%, 55%)`; 
-}
-function formatCommentDate(timestamp) {
-    const date = new Date(timestamp), now = new Date();
-    if (date.toDateString() === now.toDateString()) return 'Hoy, ' + date.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
-    return date.toLocaleDateString('es-ES', {day:'2-digit', month:'short'}) + ' ' + date.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
-}
-
-function createCommentHTML(comment, isLiked) {
-    const color = generateColorByName(comment.name.toLowerCase());
-    const likeClass = isLiked ? 'liked' : '';
-    const itemClass = comment.parent_id ? 'comment-item reply-style' : 'comment-item';
-    const initial = comment.name ? comment.name.charAt(0).toUpperCase() : '?';
-
-    // ESTRUCTURA CORREGIDA: Row Visual + Contenedor Hijos
-    return `
-        <div class="${itemClass}" data-comment-id="${comment.id}">
-            <div class="comment-main-row">
-                <div class="comment-avatar" style="background-color: ${color};" title="${comment.name}">
-                    ${initial}
-                </div>
-
-                <div class="comment-bubble">
-                    <div class="comment-header">
-                        <span class="comment-name">${comment.name}</span>
-                        <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
-                    </div>
-                    
-                    <div class="comment-content">${comment.text}</div>
-                    
-                    <div class="comment-actions">
-                        <button class="like-button ${likeClass}" data-id="${comment.id}" title="Me gusta">
-                            <span class="heart">♥</span>
-                            <span class="like-count" data-counter-id="${comment.id}">${comment.likes_count || 0}</span>
-                        </button>
-                        ${!comment.parent_id ? `<span class="reply-form-toggle" data-id="${comment.id}">Responder</span>` : ''}
-                    </div>
-                </div>
-            </div>
-
-            ${!comment.parent_id ? `
-                <div class="reply-form" data-reply-to="${comment.id}">
-                    <input type="text" class="reply-name" placeholder="Tu Nombre" required maxlength="30">
-                    <textarea class="reply-text" placeholder="Responder..." required maxlength="250"></textarea>
-                    <div style="text-align: right;">
-                        <button class="btn btn-sm btn-success publish-reply-btn" data-parent-id="${comment.id}">Enviar</button>
-                    </div>
-                </div>
-                <div class="replies-container" data-parent-of="${comment.id}"></div>
-            ` : ''}
-        </div>`;
-}
-
-function drawReplies(container, replies, userLikesMap) {
-    container.innerHTML = ''; 
-    replies.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
-    replies.forEach((reply) => {
-        const isLiked = userLikesMap.get(reply.id) || false;
-        container.insertAdjacentHTML('beforeend', createCommentHTML(reply, isLiked));
-    });
-}
-
-async function purgeOldComments(allComments) {
-    const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-    const now = Date.now();
-
-    // Agrupar respuestas por comentario padre
-    const repliesMap = new Map();
-    allComments.forEach(c => {
-        if (c.parent_id !== null) {
-            if (!repliesMap.has(c.parent_id)) repliesMap.set(c.parent_id, []);
-            repliesMap.get(c.parent_id).push(c);
-        }
-    });
-
-    const toDelete = []; // IDs a borrar (comentarios + sus respuestas)
-
-    allComments
-        .filter(c => c.parent_id === null) // solo raíces
-        .forEach(root => {
-            const replies = repliesMap.get(root.id) || [];
-            // Timestamp más reciente del hilo: el raíz o la última respuesta
-            const allTimestamps = [root, ...replies].map(c => new Date(c.timestamp).getTime());
-            const mostRecent = Math.max(...allTimestamps);
-
-            if (now - mostRecent > THIRTY_DAYS) {
-                // Todo el hilo tiene más de 30 días sin actividad → borrar
-                toDelete.push(root.id, ...replies.map(r => r.id));
-            }
-        });
-
-    if (toDelete.length > 0) {
-        // Borrar likes asociados primero (integridad referencial)
-        await supabase.from('likes').delete().in('comment_id', toDelete);
-        await supabase.from('comentarios').delete().in('id', toDelete);
-        console.log(`🗑 Purgados ${toDelete.length} comentarios con +30 días sin actividad.`);
-        return true; // indica que hubo cambios
-    }
-    return false;
-}
-
-async function loadComments() {
-    const [commentsResponse, likesResponse] = await Promise.all([
-        supabase.from('comentarios').select('*').order('timestamp', { ascending: false }),
-        supabase.from('likes').select('comment_id').eq('user_web_id', userWebId)
-    ]);
-
-    if (commentsResponse.error) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #d90429;">❌ Error al cargar comentarios.</p>`;
+/* MEDIA QUERIES */
+@media (max-width: 600px) {
+    .container { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+    .card { min-height: 120px; padding: 10px 6px; }
+    .card span.emoji { font-size: 1.8rem; margin-bottom: 5px; }
+    .card h3 { font-size: 0.8rem; margin: 3px 0 6px 0; }
+    header h1 { font-size: 1.2rem; }
+    .status-panel-container { font-size: 0.7rem; padding: 5px; }
+    .status-panel-data { flex-direction: column; }
+    .status-panel-row { flex-wrap: nowrap; overflow-x: auto; }
+    .status-item { flex: 1 1 0; min-width: 0; padding: 3px; }
     
-    let allComments = commentsResponse.data;
-    const userLikesMap = new Map();
-    if (likesResponse.data) likesResponse.data.forEach(like => userLikesMap.set(like.comment_id, true));
-
-    // Limpiar comentarios con +30 días sin actividad (respuestas reinician el contador)
-    const purged = await purgeOldComments(allComments);
-    if (purged) {
-        // Recargar tras purga para mostrar estado actualizado
-        const { data } = await supabase.from('comentarios').select('*').order('timestamp', { ascending: false });
-        allComments = data || [];
-    }
+    /* Ajustes Mobile Comentarios */
+    .comment-main-row { gap: 8px; }
+    .comment-avatar { width: 30px; height: 30px; font-size: 0.85rem; }
+    .comment-bubble { padding: 8px 10px; }
+    .comment-content { font-size: 0.8rem; }
+    .replies-container { margin-left: 10px; padding-left: 8px; width: calc(100% - 10px); }
+    .reply-form { margin-left: 0; width: 100%; }
     
-    const principalComments = allComments.filter(c => c.parent_id === null);
-    const repliesMap = allComments.reduce((map, comment) => {
-        if (comment.parent_id !== null) { 
-            if (!map.has(comment.parent_id)) map.set(comment.parent_id, []); 
-            map.get(comment.parent_id).push(comment); 
-        }
-        return map;
-    }, new Map());
-    
-    if (principalComments.length === 0) return DOMElements.commentsContainer.innerHTML = `<p style="text-align: center; color: #fff; opacity: 0.8;">Sé el primero en comentar 👇</p>`;
-    
-    DOMElements.commentsContainer.innerHTML = principalComments.map(c => createCommentHTML(c, userLikesMap.get(c.id))).join('');
-
-    principalComments.forEach(comment => {
-        const replies = repliesMap.get(comment.id);
-        if (replies) { 
-            // Ahora buscamos dentro del nuevo layout
-            const cardElement = document.querySelector(`.comment-item[data-comment-id="${comment.id}"]`);
-            if (cardElement) {
-                const container = cardElement.querySelector(`.replies-container`);
-                if (container) drawReplies(container, replies, userLikesMap); 
-            }
-        }
-    });
-
-    document.querySelectorAll('.reply-form-toggle').forEach(btn => btn.addEventListener('click', toggleReplyForm));
-    document.querySelectorAll('.publish-reply-btn').forEach(btn => btn.addEventListener('click', handlePublishReply));
-    document.querySelectorAll('.like-button').forEach(btn => btn.addEventListener('click', handleLikeToggle));
-}
-
-function toggleReplyForm(event) {
-    const commentId = event.target.getAttribute('data-id');
-    const item = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-    const form = item.querySelector(`.reply-form`);
-    if (form) {
-        document.querySelectorAll('.reply-form').forEach(f => { if (f !== form) f.style.display = 'none'; });
-        form.style.display = form.style.display === 'block' ? 'none' : 'block';
-        if (form.style.display === 'block') form.querySelector('.reply-name').focus();
-    }
-}
-
-async function publishComment() {
-    const name = DOMElements.commenterName.value.trim(); const text = DOMElements.commentText.value.trim();
-    if (name.length < 2 || text.length < 2) return alert("Datos insuficientes.");
-    DOMElements.publishCommentBtn.disabled = true;
-    const { error } = await supabase.from('comentarios').insert([{ name, text, likes_count: 0 }]);
-    if (!error) { DOMElements.commenterName.value = ''; DOMElements.commentText.value = ''; await loadComments(); } else { alert("❌ Error."); }
-    DOMElements.publishCommentBtn.disabled = false;
-}
-
-async function handlePublishReply(event) {
-    const parentId = event.target.getAttribute('data-parent-id'); const form = event.target.closest('.reply-form');
-    const name = form.querySelector('.reply-name').value.trim(); const text = form.querySelector('.reply-text').value.trim();
-    if (name.length < 2 || text.length < 2) return alert("Datos insuficientes.");
-    event.target.disabled = true;
-    const { error } = await supabase.from('comentarios').insert([{ name, text, parent_id: parentId, likes_count: 0 }]);
-    if (!error) { form.style.display = 'none'; await loadComments(); } else { alert("❌ Error."); }
-    event.target.disabled = false;
-}
-
-async function handleLikeToggle(event) {
-    const btn = event.currentTarget;
-    const id = btn.getAttribute('data-id');
-    const isLiked = btn.classList.contains('liked');
-    const counter = btn.querySelector('.like-count');
-    btn.disabled = true;
-
-    try {
-        if (isLiked) {
-            // Quitar like: borrar de tabla likes y decrementar en comentarios
-            await supabase.from('likes').delete().eq('comment_id', id).eq('user_web_id', userWebId);
-            const newCount = Math.max(0, parseInt(counter.textContent) - 1);
-            await supabase.from('comentarios').update({ likes_count: newCount }).eq('id', id);
-            btn.classList.remove('liked');
-            counter.textContent = newCount;
-        } else {
-            // Dar like: insertar en tabla likes (ignorar si ya existe) y incrementar
-            const { error } = await supabase.from('likes').insert([{ comment_id: id, user_web_id: userWebId }]);
-            if (!error || error.code === '23505') {
-                // '23505' = unique constraint violation (ya le había dado like) — igual actualizamos UI
-                if (!error) {
-                    // Solo incrementar en DB si el insert fue nuevo (no duplicado)
-                    const newCount = parseInt(counter.textContent) + 1;
-                    await supabase.from('comentarios').update({ likes_count: newCount }).eq('id', id);
-                    counter.textContent = newCount;
-                }
-                btn.classList.add('liked');
-            }
-        }
-    } catch (e) {
-        console.error('⚠️ Error en like:', e);
-    }
-
-    btn.disabled = false;
-}
-
-// ----------------------------------------------------
-// VISTAS & ESTADO
-// ----------------------------------------------------
-const VISIT_KEY = 'lastPageView';
-async function registerPageView() {
-    const last = localStorage.getItem(VISIT_KEY);
-    if (last && (Date.now() - parseInt(last)) < 24 * 60 * 60 * 1000) return;
-    const { error } = await supabase.from('page_views').insert({});
-    if (!error) localStorage.setItem(VISIT_KEY, Date.now());
-}
-async function getAndDisplayViewCount() {
-    const el = document.getElementById('viewCounter'); if (!el) return;
-    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-    const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
-    el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} `;
-}
-function renderStatusPanel(status) {
-    DOMElements.statusDataContainer.innerHTML = `
-        <div class="status-panel-row">
-            <div class="status-item deficit"><span class="label">🔌 Déficit</span><span class="value">${status.deficit_mw || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💵 USD</span><span class="value">${status.dollar_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💶 EUR</span><span class="value">${status.euro_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💳 MLC</span><span class="value">${status.mlc_cup || '---'}</span></div>
-        </div>
-        <div class="status-panel-row">
-            <div class="status-item divisa"><span class="label">🇨🇦 CAD</span><span class="value">${status.cad_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">🇲🇽 MXN</span><span class="value">${status.mxn_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">🇧🇷 BRL</span><span class="value">${status.brl_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💎 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
-        </div>`;
-}
-
-async function loadStatusData() {
-    const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
-    if (data) currentStatus = { ...currentStatus, ...data };
-    renderStatusPanel(currentStatus); fetchElToqueRates(); fetchDeficitFromCubadebate();
-}
-async function saveChanges() {
-    if (!admin) return;
-    const updates = [];
-    document.querySelectorAll(".card").forEach(card => {
-        const emoji = card.querySelector('.editable-emoji').value;
-        const titulo = card.querySelector('.editable-title').value;
-        const contenido = card.querySelector('.editable-content').value;
-        const id = card.dataset.id; const idx = card.dataset.index;
-        if (contenido !== currentData[idx].contenido || titulo !== currentData[idx].titulo || emoji !== currentData[idx].emoji) {
-             updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: new Date().toISOString() }).eq('id', id));
-        }
-    });
-    if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else { alert("No hay cambios."); }
-}
-document.addEventListener('DOMContentLoaded', () => {
-    DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
-    DOMElements.saveBtn.addEventListener('click', saveChanges);
-    DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
-    DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
-    DOMElements.publishCommentBtn.addEventListener('click', publishComment);
-    document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
-    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData();
-    // Actualización automática cada 10 minutos en pestañas abiertas
-    setInterval(fetchElToqueRates,          10 * 60 * 1000);
-    setInterval(fetchDeficitFromCubadebate, 10 * 60 * 1000);
-});
-async function loadData() {
-    const { data } = await supabase.from('items').select('*').order('id');
-    if (data) {
-        currentData = data; DOMElements.contenedor.innerHTML = data.map((item, i) => createCardHTML(item, i)).join('');
-        document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
-    }
-            }
-
+    /* .status-panel-container oculto en admin-mode — ver regla global */
+   }
 
