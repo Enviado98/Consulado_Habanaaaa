@@ -191,10 +191,12 @@ async function fetchFromYadio() {
 async function fetchElToqueRates() {
     try {
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
-        if ((Date.now() - lastUpdate) < CACHE_DURATION) {
+        const hayDivisasVacias = DIVISAS.some(d => !currentStatus[d.col] || currentStatus[d.col] === '...' || currentStatus[d.col] === '---' || currentStatus[d.col] === null);
+        if ((Date.now() - lastUpdate) < CACHE_DURATION && !hayDivisasVacias) {
             console.log("💾 Tasas en caché.");
             return;
         }
+        if (hayDivisasVacias) console.log("⚠️ Hay divisas vacías, forzando actualización...");
         console.log("🔄 Actualizando tasas...");
 
         // Intentar El Toque primero
@@ -745,5 +747,3 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
-
-
