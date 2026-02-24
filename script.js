@@ -155,13 +155,13 @@ function extractRatesFromNextData(html) {
     const stats = JSON.parse(match[1])?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
     if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
     return {
-        usd: elToqueVal(stats.USD),       // siempre median (muchas muestras)
-        eur: elToqueVal(stats.ECU),       // siempre median
-        mlc: elToqueVal(stats.MLC),       // siempre median
-        cad: elToqueVal(stats.CAD),       // siempre median
-        mxn: elToqueVal(stats.MXN, 2),   // ema_value cuando pocas muestras
-        brl: elToqueVal(stats.BRL, 2),   // casi siempre ema_value
-        cla: elToqueVal(stats.CLA, 2),   // casi siempre ema_value
+        usd: elToqueVal(stats.USD),
+        eur: elToqueVal(stats.ECU),
+        mlc: elToqueVal(stats.MLC),
+        cad: elToqueVal(stats.CAD),
+        mxn: elToqueVal(stats.MXN, 2),
+        brl: elToqueVal(stats.BRL, 2),
+        cla: elToqueVal(stats.CLA, 2),
     };
 }
 
@@ -713,6 +713,7 @@ function renderStatusPanel(status) {
             <div class="status-item divisa"><span class="label">💎 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
         </div>`;
 }
+}
 
 async function loadStatusData() {
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
@@ -752,4 +753,3 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
-
