@@ -537,10 +537,83 @@ function renderStatusPanel(status, isAdminMode) {
             <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>`;
     }
 }
+// ----------------------------------------------------
+// ⚡ DÉFICIT ENERGÉTICO — Cubadebate RSS
+// ----------------------------------------------------
+// El RSS de Cubadebate es XML puro, sin JavaScript.
+// La UNE publica un artículo diario con el déficit en el título.
+// Patrones: "pronostica X MW de déficit" | "afectación de X MW"
+const DEFICIT_CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 horas
+
+async function fetchDeficitFromCubadebate() {
+    try {
+        const lastUpdate = new Date(currentStatus.deficit_edited_at || 0).getTime();
+        if ((Date.now() - lastUpdate) < DEFICIT_CACHE_DURATION) {
+            console.log("💾 Déficit en caché, sin actualizar.");
+            return;
+        }
+
+        console.log("🔄 Buscando déficit en Cubadebate RSS...");
+
+        const rssUrl = "http://www.cubadebate.cu/feed/";
+        const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
+
+        const res = await Promise.race([
+            fetch(proxy),
+            new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout")), 12000))
+        ]);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const xml = await res.text();
+
+        // Buscar el artículo más reciente de la UNE sobre déficit
+        // Los títulos siguen estos patrones:
+        //   "Unión Eléctrica pronostica 1 680 MW de déficit..."
+        //   "UNE prevé afectación de 1 880 MW en horario pico..."
+        //   "UNE pronostica afectación de 1 768 MW..."
+        const titleMatches = [...xml.matchAll(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/gi)];
+
+        let deficitMW = null;
+        for (const m of titleMatches) {
+            const title = (m[1] || m[2] || "").toLowerCase();
+            if (!title.includes("déficit") && !title.includes("deficit") && !title.includes("afectación") && !title.includes("une") && !title.includes("unión eléctrica")) continue;
+            // Extraer número con posibles espacios (ej: "1 680" o "1680")
+            const numMatch = title.match(/(\d[\d\s]{2,6}\d)\s*mw/);
+            if (numMatch) {
+                const mw = parseInt(numMatch[1].replace(/\s/g, ""));
+                if (mw >= 100 && mw <= 4000) {
+                    deficitMW = mw;
+                    console.log(`✅ Déficit encontrado en título: "${m[1] || m[2]}" → ${mw} MW`);
+                    break;
+                }
+            }
+        }
+
+        if (!deficitMW) {
+            console.warn("⚠️ No se encontró déficit en el RSS de Cubadebate.");
+            return;
+        }
+
+        const deficitStr = `${deficitMW} MW`;
+        const newTime = new Date().toISOString();
+        currentStatus.deficit_mw = deficitStr;
+        currentStatus.deficit_edited_at = newTime;
+        renderStatusPanel(currentStatus, admin);
+
+        await supabase.from('status_data').update({
+            deficit_mw: deficitStr,
+            deficit_edited_at: newTime
+        }).eq('id', 1);
+
+        console.log(`✅ Déficit guardado en Supabase: ${deficitStr}`);
+    } catch (e) {
+        console.error("⚠️ Error obteniendo déficit:", e.message);
+    }
+}
+
 async function loadStatusData() {
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
     if (data) currentStatus = { ...currentStatus, ...data };
-    renderStatusPanel(currentStatus, admin); fetchElToqueRates(); 
+    renderStatusPanel(currentStatus, admin); fetchElToqueRates(); fetchDeficitFromCubadebate();
 }
 async function saveChanges() {
     if (!admin) return;
@@ -571,6 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
     registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData();
     // Refrescar tasas automáticamente cada 2 horas en pestañas abiertas
     setInterval(fetchElToqueRates, 2 * 60 * 60 * 1000);
+    setInterval(fetchDeficitFromCubadebate, 2 * 60 * 60 * 1000);
 });
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
