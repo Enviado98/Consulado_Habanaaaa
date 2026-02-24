@@ -713,7 +713,6 @@ function renderStatusPanel(status) {
             <div class="status-item divisa"><span class="label">💎 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
         </div>`;
 }
-}
 
 async function loadStatusData() {
     const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
