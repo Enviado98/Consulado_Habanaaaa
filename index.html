@@ -79,16 +79,16 @@
 </style>
 
 <!-- 🖼️ META ETIQUETAS PARA REDES SOCIALES -->
-<meta name="description" content="Estado en tiempo real de trámites consulares, citas y legalizaciones en Cuba. Actualizado por la comunidad.">
+<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba. Actualizado por la comunidad.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
-<meta property="og:description" content="Estado de citas y legalizaciones. Entra para ver actualizaciones en vivo.">
+<meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
 <meta property="og:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
-<meta name="twitter:description" content="Estado de citas y legalizaciones. Entra para ver actualizaciones en vivo.">
+<meta name="twitter:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
 
 <style id="dynamicTickerStyles"></style>
@@ -112,6 +112,21 @@
 
 </header>
 
+<div id="statusPanel" class="status-panel-container">
+    <div class="status-panel-header">
+        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
+        
+        <div class="live-container">
+            <span class="live-dot"></span>
+            EN VIVO
+        </div>
+        
+        <span id="lastEditedTime" style="display: none;"></span>
+    </div>
+    <div id="statusDataContainer" class="status-panel-data">
+        Cargando datos de estado...
+    </div>
+</div>
 
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
     <strong class="news-ticker-fixed-label">NOTICIAS</strong>
