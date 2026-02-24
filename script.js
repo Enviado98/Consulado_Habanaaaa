@@ -104,7 +104,7 @@ function timeAgo(timestamp) {
 //     .ECU.avg    → tasa EUR (ej: 565)  ← El Toque usa "ECU" internamente
 //     .MLC.median → tasa MLC (ej: 405)
 
-const RATE_VALID = { 
+const RATE_VALID = {
     usd:{min:200,max:700}, eur:{min:200,max:800}, mlc:{min:150,max:700},
     cad:{min:100,max:600}, mxn:{min:5,max:100},   brl:{min:20,max:200}, cla:{min:200,max:800}
 };
@@ -199,7 +199,7 @@ async function fetchElToqueRates() {
             rates = extractRatesFromNextData(html);
             console.log(`✅ El Toque: USD=${rates.usd} EUR=${rates.eur} MLC=${rates.mlc} CAD=${rates.cad} MXN=${rates.mxn} BRL=${rates.brl} CLA=${rates.cla}`);
         } catch (e) {
-            // Fallback: Yadio (USD + EUR, sin el resto)
+            // Fallback: Yadio (USD + EUR, sin MLC)
             console.warn("⚠️ El Toque falló, usando Yadio:", e.message);
             try {
                 const y = await fetchFromYadio();
