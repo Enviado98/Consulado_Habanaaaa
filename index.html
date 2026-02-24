@@ -2,147 +2,1223 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Consulado La Habana 🇪🇸🇨🇺</title>
 
-<!-- 🟢 ICONOS (FAVICON) -->
 <link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Fuentes -->
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-
-<!-- Estilos Principales -->
-<link rel="stylesheet" href="styles.css"> 
-
-<!-- 🎨 ESTILOS EXTRA (Créditos) -->
 <style>
-    .dev-credit {
-        margin-top: 18px;
-        padding-top: 14px;
-        border-top: 1px dashed rgba(255,255,255,0.08);
-        text-align: center;
-        font-size: 0.7rem;
-        color: rgba(255,255,255,0.3);
-        letter-spacing: 0.03em;
-    }
-    .dev-credit a {
-        color: rgba(255,255,255,0.45);
-        text-decoration: none;
-        font-weight: 700;
-        transition: color 0.2s;
-    }
-    .dev-credit a:hover { color: rgba(255,255,255,0.8); }
+/* ============================================================
+   RESET & ROOT
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0f0f11;
+  --bg2:         #18181b;
+  --bg3:         #27272a;
+  --border:      rgba(255,255,255,0.08);
+  --text:        #f4f4f5;
+  --text2:       #a1a1aa;
+  --accent-red:  #ef233c;
+  --accent-green:#10b981;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #00d4ff;
+  --accent-gold: #f59e0b;
+  --bar-height:  62px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --header-h:    48px;
+  --status-h:    64px;
+  --ticker-h:    38px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ============================================================
+   TOP HEADER — fixed, minimal
+   ============================================================ */
+#top-header {
+  position: fixed;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  z-index: 200;
+  background: rgba(15,15,17,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  height: var(--header-h);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-logo .flags { font-size: 1.1rem; }
+.header-logo .site-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.header-logo .site-sub {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+#viewCounter {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text2);
+  background: var(--bg3);
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+/* ============================================================
+   STICKY STATUS BAR — just below header
+   ============================================================ */
+#status-bar {
+  position: fixed;
+  top: var(--header-h);
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  z-index: 190;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 10px;
+  height: var(--status-h);
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.status-live {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: var(--accent-red);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  padding-right: 10px;
+  border-right: 1px solid var(--border);
+  margin-right: 10px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+
+.status-items {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+.status-items::-webkit-scrollbar { display: none; }
+
+.s-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 5px 10px;
+  min-width: 56px;
+  flex-shrink: 0;
+  gap: 1px;
+}
+.s-chip .s-label {
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.s-chip .s-value {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.s-chip.deficit .s-value { color: var(--accent-red); }
+.s-chip.usd .s-value     { color: var(--accent-green); }
+.s-chip.eur .s-value     { color: var(--accent-gold); }
+.s-chip.mlc .s-value     { color: var(--accent-cyan); }
+
+/* ============================================================
+   NEWS TICKER — below status bar
+   ============================================================ */
+#news-ticker-bar {
+  position: fixed;
+  top: calc(var(--header-h) + var(--status-h));
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  z-index: 180;
+  background: #1a1a2e;
+  border-bottom: 1px solid rgba(0,212,255,0.15);
+  height: var(--ticker-h);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ticker-label {
+  background: var(--accent-cyan);
+  color: #000;
+  font-size: 0.55rem;
+  font-weight: 900;
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.ticker-wrap {
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+#ticker-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  gap: 0;
+  will-change: transform;
+}
+
+#ticker-content .t-item {
+  padding: 0 16px;
+  color: rgba(255,255,255,0.8);
+}
+#ticker-content .t-sep {
+  color: var(--accent-cyan);
+  opacity: 0.6;
+  font-size: 0.8rem;
+}
+
+@keyframes ticker-static {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   MAIN SCROLLABLE AREA
+   ============================================================ */
+#main-scroll {
+  position: fixed;
+  top: calc(var(--header-h) + var(--status-h) + var(--ticker-h));
+  bottom: calc(var(--bar-height) + var(--safe-bottom) + 1px);
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  background: var(--bg);
+}
+#main-scroll::-webkit-scrollbar { display: none; }
+
+/* ============================================================
+   VIEWS / TABS CONTENT
+   ============================================================ */
+.view { display: none; padding: 12px 10px 12px; }
+.view.active { display: block; }
+
+/* ---- CALENDARIO view ---- */
+.section-title {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  margin: 0 2px 10px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--card-neon, rgba(255,255,255,0.2));
+  opacity: 0.7;
+}
+.card:active {
+  transform: scale(0.97);
+  background: #2f2f33;
+}
+.card .emoji { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+.card h3 {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--card-neon, #fff);
+  margin-bottom: 6px;
+  text-shadow: 0 0 12px var(--card-neon, transparent);
+}
+.card .card-content p {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text2);
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+.card-label {
+  position: absolute; top: 7px; right: 7px;
+  font-size: 0.45rem; font-weight: 900;
+  padding: 2px 5px; border-radius: 6px;
+  background: var(--bg); border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  display: none;
+}
+.card-recent .card-label { display: block; }
+
+/* time panel */
+.card-time-panel {
+  font-size: 0.6rem; font-weight: 700;
+  color: var(--text2); margin-top: 6px;
+  background: var(--bg2);
+  border-radius: 6px; padding: 3px 6px;
+  display: none;
+}
+.card.show-time .card-time-panel { display: block; }
+
+/* edit mode */
+.card .editable-emoji,
+.card .editable-title {
+  background: var(--bg2); border: 1px dashed #52525b;
+  color: #fff; border-radius: 6px; width: 100%;
+  padding: 4px; font-size: 0.8rem; margin-bottom: 4px;
+  font-family: inherit;
+}
+.card .editable-content {
+  background: var(--bg2); border: 1px dashed #52525b;
+  color: #fff; border-radius: 6px; width: 100%;
+  padding: 6px; font-size: 0.72rem;
+  min-height: 70px; resize: vertical;
+  font-family: inherit;
+}
+
+/* ---- admin login panel ---- */
+.admin-panel {
+  margin: 12px 0;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.admin-panel p { font-size: 0.72rem; color: var(--text2); text-align: center; }
+#adminExtraControls {
+  display: none;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+/* ---- NOTICIAS view ---- */
+.news-list { display: flex; flex-direction: column; gap: 10px; }
+
+.news-banner {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.news-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-blue));
+  border-radius: 3px 0 0 3px;
+}
+.news-banner h4 {
+  font-size: 0.78rem; font-weight: 800;
+  color: var(--text); margin-bottom: 6px; padding-left: 8px;
+}
+.news-banner p {
+  font-size: 0.7rem; font-weight: 500;
+  color: var(--text2); line-height: 1.5;
+  padding-left: 8px;
+  white-space: pre-wrap;
+}
+.news-banner .news-meta {
+  font-size: 0.58rem; color: var(--text2);
+  margin-top: 8px; padding-left: 8px;
+  opacity: 0.7;
+}
+.news-banner a { color: var(--accent-cyan); }
+
+.news-banner .del-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(239,35,60,0.15);
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  border-radius: 8px; padding: 3px 8px;
+  font-size: 0.6rem; font-weight: 700;
+  cursor: pointer; display: none;
+}
+body.admin-mode .news-banner .del-btn { display: block; }
+
+/* ---- CHAT/COMENTARIOS view ---- */
+.comments-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+
+.comment-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  animation: fadeIn 0.3s ease;
+}
+.comment-main-row { display: flex; gap: 10px; align-items: flex-start; }
+
+.comment-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 800;
+  color: #fff; flex-shrink: 0;
+}
+.comment-bubble { flex: 1; }
+.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.comment-name { font-size: 0.72rem; font-weight: 800; color: var(--text); }
+.comment-date { font-size: 0.58rem; color: var(--text2); }
+.comment-content { font-size: 0.72rem; color: var(--text2); line-height: 1.5; }
+
+.comment-actions { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+
+.like-button {
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.68rem; color: var(--text2);
+  padding: 3px 8px; border-radius: 20px;
+  background: var(--bg2); border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.like-button:active, .like-button.liked {
+  background: rgba(239,35,60,0.1);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+.like-button .heart { font-size: 0.8rem; }
+
+.reply-form-toggle {
+  font-size: 0.65rem; font-weight: 700;
+  color: var(--accent-cyan); cursor: pointer;
+}
+
+.reply-form {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.reply-form input, .reply-form textarea {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 8px 10px;
+  font-size: 0.7rem; font-family: inherit;
+  margin-bottom: 6px; resize: none;
+}
+.reply-form input:focus, .reply-form textarea:focus {
+  outline: none; border-color: var(--accent-cyan);
+}
+.replies-container { margin-top: 8px; padding-top: 8px; padding-left: 12px; border-left: 2px solid var(--border); }
+.reply-style { background: var(--bg2); }
+
+.new-comment-form {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.new-comment-form h4 { font-size: 0.72rem; font-weight: 800; margin-bottom: 10px; color: var(--text2); }
+.new-comment-form input,
+.new-comment-form textarea {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text); padding: 10px 12px;
+  font-size: 0.75rem; font-family: inherit;
+  margin-bottom: 8px; resize: none;
+}
+.new-comment-form input:focus,
+.new-comment-form textarea:focus {
+  outline: none; border-color: var(--accent-cyan);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 18px; border: none; border-radius: 50px;
+  font-weight: 800; font-size: 0.78rem; cursor: pointer;
+  transition: all 0.2s; color: white; font-family: inherit;
+}
+.btn:active { transform: scale(0.97); filter: brightness(0.9); }
+
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); }
+.btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.btn-danger  { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+.btn-secondary { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); }
+.btn-sm { padding: 6px 12px; font-size: 0.7rem; }
+.btn-block { width: 100%; }
+
+/* ============================================================
+   BOTTOM NAV BAR
+   ============================================================ */
+#bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  z-index: 200;
+  background: rgba(15,15,17,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding-bottom: var(--safe-bottom);
+}
+
+.nav-separator {
+  height: 1px;
+  background: var(--border);
+}
+
+.nav-buttons {
+  display: flex;
+  height: var(--bar-height);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.nav-btn .nav-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+.nav-btn .nav-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.nav-btn.active .nav-label { color: var(--accent-cyan); }
+.nav-btn.active .nav-icon  { transform: scale(1.1); }
+.nav-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 2px;
+  background: var(--accent-cyan);
+  border-radius: 0 0 3px 3px;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
+
+/* ============================================================
+   FOOTER CREDIT (inside bottom nav)
+   ============================================================ */
+.nav-credit {
+  text-align: center;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.2);
+  padding: 4px 0 2px;
+  display: none; /* shown in bottom-nav through its own logic */
+}
+.nav-credit a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* Put credit inside the nav area nicely */
+#bottom-nav .credit-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 0 6px;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.02em;
+}
+#bottom-nav .credit-row a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* ============================================================
+   LOADING STATE
+   ============================================================ */
+.loader { text-align: center; color: var(--text2); font-size: 0.75rem; padding: 30px 0; }
+
+/* ============================================================
+   BADGE on chat icon
+   ============================================================ */
+.nav-badge {
+  position: absolute;
+  top: 8px; right: calc(50% - 18px);
+  background: var(--accent-red);
+  color: #fff; font-size: 0.45rem; font-weight: 900;
+  border-radius: 20px; padding: 1px 4px;
+  display: none;
+}
 </style>
-
-<!-- 🖼️ META ETIQUETAS PARA REDES SOCIALES -->
-<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba. Actualizado por la comunidad.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
-<meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
-<meta property="og:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
-<meta name="twitter:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
-
-<style id="dynamicTickerStyles"></style>
-
 </head>
 <body>
 
-<header>
-  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
-  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
-  
-  <div class="header-action-container">
-    <a href="news.html" class="btn btn-news" role="button">
-        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
-    </a>
+<!-- ======== HEADER ======== -->
+<header id="top-header">
+  <div class="header-logo">
+    <span class="flags">🇪🇸🇨🇺</span>
+    <div>
+      <div class="site-name">Consulado La Habana</div>
+      <div class="site-sub">Info no oficial · Comunidad de Descendientes</div>
+    </div>
   </div>
-  
-  <div id="viewCounter" class="view-counter" aria-live="polite">
-    Cargando...
-  </div>
-
+  <div id="viewCounter">👀 –</div>
 </header>
 
-<div id="statusPanel" class="status-panel-container">
-    <div class="status-panel-header">
-        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
-        
-        <div class="live-container">
-            <span class="live-dot"></span>
-            EN VIVO
+<!-- ======== STATUS BAR ======== -->
+<div id="status-bar">
+  <div class="status-live">
+    <span class="live-dot"></span>
+    VIVO
+  </div>
+  <div class="status-items">
+    <div class="s-chip deficit">
+      <span class="s-label">⚡ Déficit</span>
+      <span class="s-value" id="s-deficit">···</span>
+    </div>
+    <div class="s-chip usd">
+      <span class="s-label">💵 USD</span>
+      <span class="s-value" id="s-usd">···</span>
+    </div>
+    <div class="s-chip eur">
+      <span class="s-label">💶 EUR</span>
+      <span class="s-value" id="s-eur">···</span>
+    </div>
+    <div class="s-chip mlc">
+      <span class="s-label">💳 MLC</span>
+      <span class="s-value" id="s-mlc">···</span>
+    </div>
+  </div>
+</div>
+
+<!-- ======== NEWS TICKER ======== -->
+<div id="news-ticker-bar">
+  <span class="ticker-label">📡&nbsp;NOTICIAS</span>
+  <div class="ticker-wrap">
+    <div id="ticker-content">
+      <span class="t-item">Cargando noticias...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ======== MAIN SCROLL ======== -->
+<main id="main-scroll">
+
+  <!-- TAB: CALENDARIO -->
+  <section class="view active" id="view-calendario">
+    <div class="admin-panel">
+      <p id="adminMsg">Activa modo edición para actualizar información</p>
+      <button id="toggleAdminBtn" class="btn btn-primary">🛡️ Modo Edición</button>
+      <div id="adminExtraControls">
+        <button id="saveBtn" class="btn btn-success btn-sm">💾 Guardar</button>
+        <button id="addNewsBtn" class="btn btn-secondary btn-sm">✅ Añadir Noticia</button>
+        <button id="deleteNewsBtn" class="btn btn-danger btn-sm">⛔ Borrar Noticia</button>
+      </div>
+    </div>
+    <p class="section-title">Trámites Consulares</p>
+    <div class="cards-grid" id="cards-container">
+      <div class="loader">Cargando...</div>
+    </div>
+  </section>
+
+  <!-- TAB: NOTICIAS -->
+  <section class="view" id="view-noticias">
+    <p class="section-title">Noticias Destacadas</p>
+    <div class="news-list" id="news-banners-container">
+      <div class="loader">Cargando noticias...</div>
+    </div>
+  </section>
+
+  <!-- TAB: CHAT -->
+  <section class="view" id="view-chat">
+    <p class="section-title">Comentarios de la Comunidad</p>
+    <div class="comments-list" id="comments-container">
+      <div class="loader">Cargando comentarios...</div>
+    </div>
+    <div class="new-comment-form">
+      <h4>💬 Deja tu comentario</h4>
+      <input type="text" id="commenterName" placeholder="Tu nombre" maxlength="30">
+      <textarea id="commentText" placeholder="Tu comentario (máx. 250 caracteres)" maxlength="250" rows="3"></textarea>
+      <button id="publishCommentBtn" class="btn btn-success btn-block">Publicar</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======== BOTTOM NAV ======== -->
+<nav id="bottom-nav">
+  <div class="nav-separator"></div>
+  <div class="nav-buttons">
+    <button class="nav-btn active" data-view="calendario" onclick="switchView('calendario', this)">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Calendario</span>
+    </button>
+    <button class="nav-btn" data-view="noticias" onclick="switchView('noticias', this)">
+      <span class="nav-icon">📰</span>
+      <span class="nav-label">Noticias</span>
+    </button>
+    <button class="nav-btn" data-view="chat" onclick="switchView('chat', this)">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Chat</span>
+      <span class="nav-badge" id="chatBadge">!</span>
+    </button>
+  </div>
+  <div class="credit-row">
+    Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a>
+  </div>
+</nav>
+
+<!-- ======================================================
+     SCRIPT
+     ====================================================== -->
+<script type="module">
+// ---- Supabase ----
+const SUPABASE_URL      = "https://mkvpjsvqjqeuniabjjwr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ---- Globals ----
+const NEON_PALETTE = ['#00ffff','#ff00ff','#00ff00','#ffff00','#ff0099','#9D00FF','#FF4D00','#00E5FF','#76ff03','#ff1744'];
+let admin = false;
+let currentData = [];
+let currentNews = [];
+let currentStatus = { deficit_mw:'···', dollar_cup:'···', euro_cup:'···', mlc_cup:'···' };
+const ONE_DAY = 24*3600000;
+const NEWS_SPEED = 50; // px/sec
+const CACHE_DURATION = 10*60*1000;
+
+let userWebId = localStorage.getItem('userWebId');
+if (!userWebId) { userWebId = crypto.randomUUID(); localStorage.setItem('userWebId', userWebId); }
+
+// ---- Helpers ----
+function getCardColor(id) {
+  let h=0; const s=String(id);
+  for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h);
+  return NEON_PALETTE[Math.abs(h)%NEON_PALETTE.length];
+}
+
+function timeAgo(ts) {
+  if (!ts) return 'sin fecha';
+  const diff = Date.now() - new Date(ts).getTime();
+  if (diff < 0) return 'ahora';
+  const m=Math.floor(diff/60000), h=Math.floor(m/60), d=Math.floor(h/24);
+  if (d>=30) return `hace ${Math.floor(d/30)} meses`;
+  if (d>=7)  return `hace ${Math.floor(d/7)} sem.`;
+  if (d>=2)  return `hace ${d} días`;
+  if (d===1) return 'hace 1 día';
+  if (h>=2)  return `hace ${h} h.`;
+  if (h===1) return 'hace 1 hora';
+  if (m>=1)  return `hace ${m} min.`;
+  return 'ahora mismo';
+}
+
+function linkify(t) {
+  return t.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig,(u)=>{
+    const f=u.startsWith('http')?u:'http://'+u;
+    return `<a href="${f}" target="_blank">${u}</a>`;
+  });
+}
+
+// ---- Status Panel ----
+function renderStatus(s) {
+  document.getElementById('s-deficit').textContent = s.deficit_mw || '···';
+  document.getElementById('s-usd').textContent     = s.dollar_cup || '···';
+  document.getElementById('s-eur').textContent     = s.euro_cup   || '···';
+  document.getElementById('s-mlc').textContent     = s.mlc_cup    || '···';
+}
+
+// ---- Tickers ----
+function renderTicker(news) {
+  const tc = document.getElementById('ticker-content');
+  if (!news.length) {
+    tc.innerHTML = `<span class="t-item">Sin noticias recientes</span><span class="t-sep"> · </span><span class="t-item">Sin noticias recientes</span>`;
+    tc.style.animation = 'ticker-static 15s linear infinite';
+    return;
+  }
+  const html = news.map(n=>`<span class="t-item">${linkify(n.text)} <small style="opacity:0.5">(${timeAgo(n.timestamp)})</small></span><span class="t-sep"> ★ </span>`).join('');
+  tc.innerHTML = html + html;
+  // measure after paint
+  requestAnimationFrame(()=>{
+    const w = tc.scrollWidth / 2;
+    const dur = w / NEWS_SPEED;
+    const style = document.createElement('style');
+    style.id = 'dyn-ticker';
+    document.getElementById('dyn-ticker')?.remove();
+    style.textContent = `@keyframes t-dyn{0%{transform:translateX(0)}100%{transform:translateX(-${w}px)}}`;
+    document.head.appendChild(style);
+    tc.style.animation = `t-dyn ${dur}s linear infinite`;
+  });
+}
+
+// ---- Cards ----
+function buildCardHTML(item, idx) {
+  const neon = getCardColor(item.id);
+  const isRecent = item.last_edited_timestamp && (Date.now()-new Date(item.last_edited_timestamp).getTime()) < ONE_DAY;
+  const badge = isRecent ? '<div class="card-label">RECIENTE</div>' : '';
+  const ta = item.last_edited_timestamp ? timeAgo(item.last_edited_timestamp) : 'sin editar';
+  return `
+  <div class="card ${isRecent?'card-recent':''}" data-idx="${idx}" data-id="${item.id}" style="--card-neon:${neon}">
+    ${badge}
+    <span class="emoji">${item.emoji||'📋'}</span>
+    <h3>${item.titulo||'Trámite'}</h3>
+    <div class="card-content"><p>${item.contenido||''}</p></div>
+    <div class="card-time-panel">🕓 ${ta}</div>
+  </div>`;
+}
+
+async function loadData() {
+  const {data} = await supabase.from('items').select('*').order('id');
+  if (!data) return;
+  currentData = data;
+  const container = document.getElementById('cards-container');
+  container.innerHTML = data.map((item,i)=>buildCardHTML(item,i)).join('');
+  container.querySelectorAll('.card').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      if(admin) return;
+      const open = c.classList.contains('show-time');
+      document.querySelectorAll('.card.show-time').forEach(x=>x.classList.remove('show-time'));
+      if(!open) {
+        c.classList.add('show-time');
+        setTimeout(()=>c.classList.remove('show-time'), 2500);
+      }
+    });
+  });
+}
+
+// ---- News banners ----
+async function loadNewsBanners() {
+  const {data} = await supabase.from('banners').select('*').order('created_at', {ascending:false});
+  const container = document.getElementById('news-banners-container');
+  if (!data || !data.length) {
+    container.innerHTML = `<div class="loader">Sin noticias destacadas aún.</div>`;
+    return;
+  }
+  container.innerHTML = data.map(b=>`
+    <div class="news-banner" data-id="${b.id}">
+      <h4>📢 ${b.titulo||b.title||''}</h4>
+      <p>${linkify(b.contenido||b.content||'')}</p>
+      <div class="news-meta">🕓 ${timeAgo(b.created_at)}</div>
+      <button class="del-btn" onclick="deleteBanner(${b.id})">✕ Borrar</button>
+    </div>`).join('');
+}
+
+window.deleteBanner = async (id) => {
+  if (!admin || !confirm('¿Borrar esta noticia?')) return;
+  await supabase.from('banners').delete().eq('id', id);
+  await loadNewsBanners();
+};
+
+// ---- Quick news ticker ----
+async function loadNews() {
+  const {data} = await supabase.from('noticias').select('id,text,timestamp').order('timestamp',{ascending:false});
+  if (!data) return;
+  const cutoff = Date.now() - ONE_DAY;
+  const valid = [];
+  for (const n of data) {
+    if (new Date(n.timestamp).getTime() > cutoff) valid.push(n);
+    else supabase.from('noticias').delete().eq('id',n.id);
+  }
+  currentNews = valid;
+  renderTicker(valid);
+}
+
+// ---- Status data ----
+async function loadStatusData() {
+  const {data} = await supabase.from('status_data').select('*').eq('id',1).single();
+  if (data) { currentStatus = {...currentStatus,...data}; renderStatus(currentStatus); }
+  fetchRates(); fetchDeficit();
+}
+
+// ---- Exchange rates ----
+const RATE_VALID = {usd:{min:200,max:700},eur:{min:200,max:800},mlc:{min:150,max:700}};
+function validRate(cur,v) { const n=parseInt(v); if(isNaN(n)) return false; const {min,max}=RATE_VALID[cur]||{}; return n>=min&&n<=max; }
+
+async function fetchViaProxy(url, ms=12000) {
+  const proxies=[`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`];
+  for (const p of proxies) {
+    try {
+      const r = await Promise.race([fetch(p), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+      if (!r.ok) throw new Error('bad status');
+      const t = await r.text(); if(t.length<500) throw new Error('too short');
+      return t;
+    } catch(e) { console.warn('proxy failed:', p.slice(0,40), e.message); }
+  }
+  throw new Error('all proxies failed');
+}
+
+async function fetchRates() {
+  try {
+    const last = new Date(currentStatus.divisa_edited_at||0).getTime();
+    if (Date.now()-last < CACHE_DURATION) return;
+    let rates = {usd:null,eur:null,mlc:null};
+    try {
+      const html = await fetchViaProxy('https://eltoque.com/tasas-de-cambio-cuba');
+      const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+      if(m) {
+        const stats = JSON.parse(m[1])?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
+        if(stats) { rates.usd=stats.USD?.median?String(Math.round(stats.USD.median)):null; rates.eur=stats.ECU?.avg?String(Math.round(stats.ECU.avg)):null; rates.mlc=stats.MLC?.median?String(Math.round(stats.MLC.median)):null; }
+      }
+    } catch {
+      const r = await fetch('https://api.yadio.io/exrates/CUP');
+      const j = await r.json();
+      rates.usd=j.CUP?.USD?String(Math.round(1/j.CUP.USD)):null;
+      rates.eur=j.CUP?.EUR?String(Math.round(1/j.CUP.EUR)):null;
+    }
+    if (!validRate('usd',rates.usd)) return;
+    const newTime=new Date().toISOString();
+    currentStatus.dollar_cup=rates.usd; currentStatus.euro_cup=validRate('eur',rates.eur)?rates.eur:(currentStatus.euro_cup||'---'); currentStatus.mlc_cup=validRate('mlc',rates.mlc)?rates.mlc:(currentStatus.mlc_cup||'---'); currentStatus.divisa_edited_at=newTime;
+    renderStatus(currentStatus);
+    await supabase.from('status_data').update({dollar_cup:rates.usd,euro_cup:currentStatus.euro_cup,mlc_cup:currentStatus.mlc_cup,divisa_edited_at:newTime}).eq('id',1);
+  } catch(e){console.warn('rates:',e.message);}
+}
+
+async function fetchDeficit() {
+  try {
+    const last = new Date(currentStatus.deficit_edited_at||0).getTime();
+    if (Date.now()-last < CACHE_DURATION) return;
+    const xml = await fetchViaProxy('http://www.cubadebate.cu/feed/');
+    const titles = [...xml.matchAll(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/gi)].map(m=>m[1].trim()).filter(t=>t.length>5).slice(1);
+    const KW = ['déficit','deficit','afectación','afectacion','unión eléctrica','une pronostica','une prevé'];
+    for (const t of titles) {
+      if (!KW.some(k=>t.toLowerCase().includes(k))) continue;
+      const mm = t.match(/(\d[\d\s\.]{0,6}\d|\d{3,4})\s*mw/i);
+      if (!mm) continue;
+      const n = parseInt(mm[1].replace(/[\s\.]/g,''));
+      if (n<100||n>5000) continue;
+      const val=`${n} MW`, newTime=new Date().toISOString();
+      currentStatus.deficit_mw=val; currentStatus.deficit_edited_at=newTime;
+      renderStatus(currentStatus);
+      await supabase.from('status_data').update({deficit_mw:val,deficit_edited_at:newTime}).eq('id',1);
+      break;
+    }
+  } catch(e){console.warn('deficit:',e.message);}
+}
+
+// ---- Comments ----
+function colorByName(s) { let h=0; for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h); return `hsl(${Math.abs(h)%360},70%,50%)`; }
+function fmtDate(ts) {
+  const d=new Date(ts),n=new Date();
+  return d.toDateString()===n.toDateString()?'Hoy '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+
+function buildCommentHTML(c, liked) {
+  const clr = colorByName(c.name||'?');
+  const init = (c.name||'?').charAt(0).toUpperCase();
+  return `
+  <div class="comment-item ${c.parent_id?'reply-style':''}" data-cid="${c.id}">
+    <div class="comment-main-row">
+      <div class="comment-avatar" style="background:${clr}">${init}</div>
+      <div class="comment-bubble">
+        <div class="comment-header">
+          <span class="comment-name">${c.name}</span>
+          <span class="comment-date">${fmtDate(c.timestamp)}</span>
         </div>
-        
-        <span id="lastEditedTime" style="display: none;"></span>
-    </div>
-    <div id="statusDataContainer" class="status-panel-data">
-        Cargando datos de estado...
-    </div>
-</div>
-
-<div id="newsTicker" class="news-ticker-container" style="display:none;">
-    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
-    <div class="news-ticker-wrap">
-        <div id="newsTickerContent" class="news-ticker-content">
-            </div>
-    </div>
-</div>
-
-<div class="login-controls">
-  <div id="statusMessage" class="login-message">
-            Activa modo edición y actualiza la información
-  </div>
-  
-  <button id="toggleAdminBtn" class="btn btn-primary">
-      🛡️ ACTIVAR EL MODO EDICIÓN
-  </button>
-
-  <div id="adminControlsPanel">
-    <div class="admin-group">
-        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
-    </div>
-    <div class="admin-group">
-        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
-        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
-    </div>
-  </div>
-</div>
-
-<div class="container" id="contenedor">
-  </div>
-
-<section class="comments-section">
-    <h2>🗣️ Comentarios de la Comunidad</h2>
-    
-    <div class="comments-display-wrap">
-        <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
+        <div class="comment-content">${c.text}</div>
+        <div class="comment-actions">
+          <button class="like-button ${liked?'liked':''}" data-id="${c.id}">
+            <span class="heart">♥</span>
+            <span class="like-count">${c.likes_count||0}</span>
+          </button>
+          ${!c.parent_id?`<span class="reply-form-toggle" data-id="${c.id}">Responder</span>`:''}
         </div>
+      </div>
     </div>
+    ${!c.parent_id?`
+      <div class="reply-form" data-reply-to="${c.id}">
+        <input class="reply-name" placeholder="Tu nombre" maxlength="30">
+        <textarea class="reply-text" placeholder="Responder..." maxlength="250" rows="2"></textarea>
+        <button class="btn btn-sm btn-success pub-reply" data-parent="${c.id}">Enviar</button>
+      </div>
+      <div class="replies-container" data-parent="${c.id}"></div>`:''}
+  </div>`;
+}
 
-    <div class="comment-form-container">
-        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
-        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
-        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
-    </div>
-</section>
+async function loadComments() {
+  const [cr,lr] = await Promise.all([
+    supabase.from('comentarios').select('*').order('timestamp',{ascending:false}),
+    supabase.from('likes').select('comment_id').eq('user_web_id',userWebId)
+  ]);
+  const container = document.getElementById('comments-container');
+  if (cr.error) { container.innerHTML='<div class="loader">❌ Error al cargar</div>'; return; }
+  const all = cr.data||[];
+  const likesMap = new Map((lr.data||[]).map(l=>[l.comment_id,true]));
+  const roots = all.filter(c=>!c.parent_id);
+  const repliesMap = all.reduce((m,c)=>{ if(c.parent_id){ const a=m.get(c.parent_id)||[]; a.push(c); m.set(c.parent_id,a); } return m; }, new Map());
+  if (!roots.length) { container.innerHTML='<div class="loader">Sé el primero en comentar 👇</div>'; return; }
+  container.innerHTML = roots.map(c=>buildCommentHTML(c,likesMap.get(c.id))).join('');
+  roots.forEach(c=>{
+    const replies = repliesMap.get(c.id)||[];
+    if (replies.length) {
+      const rc = container.querySelector(`.replies-container[data-parent="${c.id}"]`);
+      if(rc) rc.innerHTML = replies.sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)).map(r=>buildCommentHTML(r,likesMap.get(r.id))).join('');
+    }
+  });
+  // badge
+  const badge = document.getElementById('chatBadge');
+  if (roots.length) { badge.textContent = roots.length; badge.style.display='block'; } else { badge.style.display='none'; }
+  // events
+  container.querySelectorAll('.reply-form-toggle').forEach(btn=>btn.addEventListener('click', e=>{
+    const f = container.querySelector(`[data-reply-to="${e.target.dataset.id}"]`);
+    container.querySelectorAll('.reply-form').forEach(x=>{ if(x!==f)x.style.display='none'; });
+    f.style.display = f.style.display==='block'?'none':'block';
+  }));
+  container.querySelectorAll('.pub-reply').forEach(btn=>btn.addEventListener('click', async e=>{
+    const pid=e.target.dataset.parent;
+    const f=container.querySelector(`[data-reply-to="${pid}"]`);
+    const name=f.querySelector('.reply-name').value.trim();
+    const text=f.querySelector('.reply-text').value.trim();
+    if(name.length<2||text.length<2) return alert('Datos insuficientes');
+    e.target.disabled=true;
+    await supabase.from('comentarios').insert([{name,text,parent_id:pid,likes_count:0}]);
+    f.style.display='none'; await loadComments();
+    e.target.disabled=false;
+  }));
+  container.querySelectorAll('.like-button').forEach(btn=>btn.addEventListener('click', async e=>{
+    const b=e.currentTarget, id=b.dataset.id, liked=b.classList.contains('liked');
+    const counter=b.querySelector('.like-count'); b.disabled=true;
+    if(liked) {
+      await supabase.from('likes').delete().eq('comment_id',id).eq('user_web_id',userWebId);
+      const n=Math.max(0,parseInt(counter.textContent)-1);
+      await supabase.from('comentarios').update({likes_count:n}).eq('id',id);
+      b.classList.remove('liked'); counter.textContent=n;
+    } else {
+      const {error}=await supabase.from('likes').insert([{comment_id:id,user_web_id:userWebId}]);
+      if(!error||error.code==='23505') {
+        if(!error){ const n=parseInt(counter.textContent)+1; await supabase.from('comentarios').update({likes_count:n}).eq('id',id); counter.textContent=n; }
+        b.classList.add('liked');
+      }
+    }
+    b.disabled=false;
+  }));
+}
 
-<!-- FOOTER CON PERFIL DE CONTACTO -->
-<footer>
-  <div style="opacity: 0.7; font-size: 0.8rem; margin-bottom: 15px;">© 2026 – Información actualizada periódicamente.</div>
+async function publishComment() {
+  const name=document.getElementById('commenterName').value.trim();
+  const text=document.getElementById('commentText').value.trim();
+  if(name.length<2||text.length<2) return alert('Datos insuficientes');
+  const btn=document.getElementById('publishCommentBtn'); btn.disabled=true;
+  await supabase.from('comentarios').insert([{name,text,likes_count:0}]);
+  document.getElementById('commenterName').value=''; document.getElementById('commentText').value='';
+  await loadComments(); btn.disabled=false;
+}
 
-  <!-- Créditos -->
-  <div class="dev-credit">
-      Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a>
-  </div>
-</footer>
+// ---- Admin ----
+function setAdmin(on) {
+  admin=on;
+  document.body.classList.toggle('admin-mode',on);
+  const ext = document.getElementById('adminExtraControls');
+  const msg = document.getElementById('adminMsg');
+  const btn = document.getElementById('toggleAdminBtn');
+  ext.style.display = on?'flex':'none';
+  if(on){ msg.textContent='🔴 EDITA CON RESPONSABILIDAD'; msg.style.color='#ef233c'; btn.textContent='🛑 Salir'; btn.className='btn btn-danger'; enableEditing(); }
+  else { msg.textContent='Activa modo edición para actualizar información'; msg.style.color=''; btn.textContent='🛡️ Modo Edición'; btn.className='btn btn-primary'; disableEditing(); }
+}
 
-<script type="module" src="script.js"></script>
+function enableEditing() {
+  document.querySelectorAll('.card').forEach(card=>{
+    const idx=card.dataset.idx; const item=currentData[idx];
+    const p=card.querySelector('.card-content p');
+    const em=card.querySelector('.emoji');
+    const h3=card.querySelector('h3');
+    if(p) p.remove(); if(em) em.remove(); if(h3) h3.remove();
+    const iEmoji=document.createElement('input'); iEmoji.className='editable-emoji'; iEmoji.value=item.emoji||'📋'; iEmoji.maxLength=2;
+    const iTitle=document.createElement('input'); iTitle.className='editable-title'; iTitle.value=item.titulo||'';
+    const iCont=document.createElement('textarea'); iCont.className='editable-content'; iCont.value=item.contenido||'';
+    card.querySelector('.card-time-panel').style.display='none';
+    card.insertBefore(iTitle,card.firstChild); card.insertBefore(iEmoji,card.firstChild);
+    card.querySelector('.card-content').appendChild(iCont);
+  });
+}
+function disableEditing() {
+  document.querySelectorAll('.card').forEach(card=>{
+    const idx=card.dataset.idx; const item=currentData[idx];
+    const ee=card.querySelector('.editable-emoji'); const et=card.querySelector('.editable-title'); const ec=card.querySelector('.editable-content');
+    if(!ee) return;
+    ee.remove(); et.remove(); ec.remove();
+    const neon=getCardColor(item.id);
+    const newEm=document.createElement('span'); newEm.className='emoji'; newEm.textContent=item.emoji||'📋';
+    const newH3=document.createElement('h3'); newH3.textContent=item.titulo||''; newH3.style.setProperty('--card-neon',neon);
+    const newP=document.createElement('p'); newP.textContent=item.contenido||'';
+    card.insertBefore(newH3,card.firstChild); card.insertBefore(newEm,card.firstChild);
+    card.querySelector('.card-content').appendChild(newP);
+    card.querySelector('.card-time-panel').style.display='';
+  });
+}
+
+async function saveChanges() {
+  const updates=[];
+  document.querySelectorAll('.card').forEach(card=>{
+    const ee=card.querySelector('.editable-emoji'); if(!ee) return;
+    const emoji=ee.value; const titulo=card.querySelector('.editable-title').value; const contenido=card.querySelector('.editable-content').value;
+    const idx=card.dataset.idx; const id=card.dataset.id;
+    if(contenido!==currentData[idx].contenido||titulo!==currentData[idx].titulo||emoji!==currentData[idx].emoji)
+      updates.push(supabase.from('items').update({emoji,titulo,contenido,last_edited_timestamp:new Date().toISOString()}).eq('id',id));
+  });
+  if(updates.length){ await Promise.all(updates); alert('✅ Guardado.'); location.reload(); } else { alert('Sin cambios.'); }
+}
+
+async function addQuickNews() {
+  const text=prompt('✍️ Escribe la noticia:'); if(!text) return;
+  if(confirm('¿Publicar?')){ await supabase.from('noticias').insert([{text:text.trim()}]); await loadNews(); }
+}
+async function deleteNews() {
+  if(!currentNews.length) return alert('No hay noticias.');
+  const list=currentNews.map((n,i)=>`${i+1}. ${n.text}`).join('\n');
+  const idx=parseInt(prompt(`Eliminar número:\n${list}`))-1;
+  if(currentNews[idx]&&confirm('¿Eliminar?')){ await supabase.from('noticias').delete().eq('id',currentNews[idx].id); await loadNews(); }
+}
+
+// ---- Views ----
+function toggleAdmin() {
+  if(!admin) { setAdmin(true); alert('¡🔴 EDITA CON RESPONSABILIDAD!'); }
+  else { if(!confirm('¿Salir del modo edición?')) return; setAdmin(false); loadData(); loadStatusData(); }
+}
+
+// ---- Page Views ----
+async function regView() {
+  const last=localStorage.getItem('lv');
+  if(last&&(Date.now()-parseInt(last))<ONE_DAY) return;
+  const {error}=await supabase.from('page_views').insert({});
+  if(!error) localStorage.setItem('lv',Date.now());
+}
+async function getViews() {
+  const el=document.getElementById('viewCounter');
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const {count}=await supabase.from('page_views').select('*',{count:'exact',head:true}).gt('created_at',y.toISOString());
+  el.textContent=`👀 ${(count||0).toLocaleString('es-ES')}`;
+}
+
+// ---- Init ----
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('toggleAdminBtn').addEventListener('click', toggleAdmin);
+  document.getElementById('saveBtn').addEventListener('click', saveChanges);
+  document.getElementById('addNewsBtn').addEventListener('click', addQuickNews);
+  document.getElementById('deleteNewsBtn').addEventListener('click', deleteNews);
+  document.getElementById('publishCommentBtn').addEventListener('click', publishComment);
+
+  regView(); getViews();
+  loadData(); loadNews(); loadComments(); loadStatusData(); loadNewsBanners();
+
+  setInterval(fetchRates,    10*60*1000);
+  setInterval(fetchDeficit,  10*60*1000);
+});
+
+// expose tab switcher
+window.switchView = function(name, btn) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b===btn));
+  if(name==='chat') document.getElementById('chatBadge').style.display='none';
+};
+</script>
 
 </body>
 </html>
