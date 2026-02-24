@@ -213,17 +213,15 @@ header p { margin: 0.3rem 0 0; font-size: 0.85rem; font-weight: 600; opacity: 0.
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
 .status-panel-data { 
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 3px; text-align: center;
+    display: flex; flex-direction: column; gap: 3px;
 }
 .status-panel-row {
     display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: nowrap; gap: 3px; width: 100%;
+    flex-wrap: nowrap; gap: 3px;
 }
 .status-panel-row + .status-panel-row {
     border-top: 1px dashed rgba(255,255,255,0.08);
     padding-top: 3px;
-    margin-top: 1px;
 }
 .status-item { 
     background: #27272a; padding: 4px; border-radius: 6px; border: 1px solid var(--glass-border);
@@ -414,7 +412,8 @@ footer {
     .card h3 { font-size: 0.8rem; margin: 3px 0 6px 0; }
     header h1 { font-size: 1.2rem; }
     .status-panel-container { font-size: 0.7rem; padding: 5px; }
-    .status-panel-data { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; }
+    .status-panel-data { flex-direction: column; }
+    .status-panel-row { flex-wrap: nowrap; overflow-x: auto; }
     .status-item { min-width: 70px; flex-shrink: 0; padding: 3px; }
     
     /* Ajustes Mobile Comentarios */
