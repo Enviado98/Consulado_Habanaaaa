@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ----------------------------------------------------
 // Fuente primaria: Yadio.io (API abierta, sin token)
 // Fuente secundaria: El Toque HTML (para MLC)
-const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 horas
+const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 horas
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -96,8 +96,12 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 LÓGICA DE TASAS — Yadio (primaria) + El Toque HTML (MLC)
+// 💰 LÓGICA DE TASAS — El Toque HTML (trmiExchange.data.api.statistics)
 // ----------------------------------------------------
+// Ruta descubierta por ingeniería inversa del __NEXT_DATA__:
+//   pageProps.trmiExchange.data.api.statistics.USD.median  → 505
+//   pageProps.trmiExchange.data.api.statistics.ECU.avg     → 565 (ECU = EUR)
+//   pageProps.trmiExchange.data.api.statistics.MLC.median  → 405
 
 // Validación: rangos razonables para el mercado informal cubano
 const RATE_VALID = { usd:{min:200,max:700}, eur:{min:200,max:800}, mlc:{min:150,max:700} };
@@ -109,60 +113,41 @@ function isValidRate(currency, value) {
 }
 
 // Fetch con timeout sin AbortSignal (máxima compatibilidad)
-async function fetchWithTimeout(url, opts = {}, ms = 10000) {
+async function fetchWithTimeout(url, opts = {}, ms = 13000) {
     return Promise.race([
         fetch(url, opts),
         new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout")), ms))
     ]);
 }
 
-// Fuente 1: Yadio.io — API abierta, devuelve USD y EUR exactos
-async function fetchFromYadio() {
-    try {
-        const res = await fetchWithTimeout("https://api.yadio.io/exrates/CUP", {}, 8000);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        // Yadio da cuántos CUP = 1 unidad de moneda extranjera
-        const usd = json.CUP?.USD ? String(Math.round(1 / json.CUP.USD)) : null;
-        const eur = json.CUP?.EUR ? String(Math.round(1 / json.CUP.EUR)) : null;
-        if (usd && isValidRate('usd', usd)) {
-            console.log(`✅ Yadio: USD=${usd} EUR=${eur||'N/D'}`);
-            return { usd, eur };
-        }
-        return null;
-    } catch (e) {
-        console.warn("⚠️ Yadio falló:", e.message);
-        return null;
-    }
+// Extrae las tasas del __NEXT_DATA__ embebido en el HTML de El Toque
+// La ruta exacta es: props.pageProps.trmiExchange.data.api.statistics
+function extractRatesFromNextData(html) {
+    const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    if (!match) throw new Error("__NEXT_DATA__ no encontrado");
+
+    const json = JSON.parse(match[1]);
+    const stats = json?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
+    if (!stats) throw new Error("statistics no encontrado en trmiExchange");
+
+    // USD: usamos median (es el valor que El Toque muestra en pantalla)
+    const usd = stats.USD?.median ? String(Math.round(stats.USD.median)) : null;
+    // EUR: El Toque usa internamente "ECU" para Euro, muestra avg
+    const eur = stats.ECU?.avg ? String(Math.round(stats.ECU.avg)) : null;
+    // MLC: median
+    const mlc = stats.MLC?.median ? String(Math.round(stats.MLC.median)) : null;
+
+    return { usd, eur, mlc };
 }
 
-// Fuente 2: El Toque HTML — para MLC (que Yadio no tiene)
-// Extrae del __NEXT_DATA__ que viene embebido en el HTML estático
-async function fetchMlcFromElToque() {
-    try {
-        const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://eltoque.com/tasas-de-cambio-cuba")}`;
-        const res = await fetchWithTimeout(proxy, {}, 12000);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const html = await res.text();
-
-        // Extraer todos los números en rango válido cerca de "MLC"
-        const mlcMatches = [...html.matchAll(/MLC[^<\d]{0,60}(\d{3,4})/gi)];
-        const candidates = mlcMatches
-            .map(m => parseInt(m[1]))
-            .filter(n => isValidRate('mlc', n));
-
-        if (candidates.length > 0) {
-            // Tomar la mediana para evitar outliers
-            const sorted = [...new Set(candidates)].sort((a, b) => a - b);
-            const median = sorted[Math.floor(sorted.length / 2)];
-            console.log(`✅ El Toque MLC: candidatos=${sorted.join(',')} → mediana=${median}`);
-            return String(median);
-        }
-        return null;
-    } catch (e) {
-        console.warn("⚠️ El Toque MLC falló:", e.message);
-        return null;
-    }
+// Fallback: Yadio.io para USD/EUR si El Toque falla
+async function fetchFromYadio() {
+    const res = await fetchWithTimeout("https://api.yadio.io/exrates/CUP", {}, 8000);
+    if (!res.ok) throw new Error(`Yadio HTTP ${res.status}`);
+    const json = await res.json();
+    const usd = json.CUP?.USD ? String(Math.round(1 / json.CUP.USD)) : null;
+    const eur = json.CUP?.EUR ? String(Math.round(1 / json.CUP.EUR)) : null;
+    return { usd, eur, mlc: null };
 }
 
 async function fetchElToqueRates() {
@@ -174,23 +159,41 @@ async function fetchElToqueRates() {
             return;
         }
 
-        console.log("🔄 Actualizando tasas de cambio...");
+        console.log("🔄 Actualizando tasas desde El Toque HTML...");
 
-        // Lanzar ambas fuentes en paralelo
-        const [yadio, mlc] = await Promise.all([
-            fetchFromYadio(),
-            fetchMlcFromElToque()
-        ]);
+        let rates = { usd: null, eur: null, mlc: null };
 
-        const usdPrice = yadio?.usd || currentStatus.dollar_cup || '---';
-        const eurPrice = yadio?.eur || currentStatus.euro_cup || '---';
-        const mlcPrice = mlc || currentStatus.mlc_cup || '---';
+        // Intentar fuente primaria: El Toque HTML via proxy
+        try {
+            const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://eltoque.com/tasas-de-cambio-cuba")}`;
+            const res = await fetchWithTimeout(proxy, {}, 13000);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const html = await res.text();
+            rates = extractRatesFromNextData(html);
+            console.log(`✅ El Toque: USD=${rates.usd} EUR=${rates.eur} MLC=${rates.mlc}`);
+        } catch (e) {
+            console.warn("⚠️ El Toque falló, usando Yadio como fallback:", e.message);
+            try {
+                const yadio = await fetchFromYadio();
+                rates.usd = yadio.usd;
+                rates.eur = yadio.eur;
+                // MLC no disponible en Yadio, conservar el valor en caché
+                rates.mlc = currentStatus.mlc_cup || null;
+                console.log(`✅ Yadio fallback: USD=${rates.usd} EUR=${rates.eur}`);
+            } catch (e2) {
+                console.error("⚠️ Yadio también falló:", e2.message);
+            }
+        }
 
-        // Solo guardar si al menos tenemos USD válido
-        if (!isValidRate('usd', usdPrice)) {
-            console.warn("⚠️ USD inválido, no se actualiza Supabase.");
+        // Solo guardar si tenemos USD válido
+        if (!isValidRate('usd', rates.usd)) {
+            console.warn("⚠️ USD inválido, conservando datos en Supabase sin cambios.");
             return;
         }
+
+        const usdPrice = rates.usd;
+        const eurPrice = isValidRate('eur', rates.eur) ? rates.eur : (currentStatus.euro_cup || '---');
+        const mlcPrice = isValidRate('mlc', rates.mlc) ? rates.mlc : (currentStatus.mlc_cup || '---');
 
         const newTime = new Date().toISOString();
         currentStatus.dollar_cup = usdPrice;
@@ -206,7 +209,7 @@ async function fetchElToqueRates() {
             divisa_edited_at: newTime
         }).eq('id', 1);
 
-        console.log(`✅ Tasas guardadas: USD=${usdPrice} EUR=${eurPrice} MLC=${mlcPrice}`);
+        console.log(`✅ Tasas guardadas en Supabase: USD=${usdPrice} EUR=${eurPrice} MLC=${mlcPrice}`);
     } catch (error) {
         console.error("⚠️ Error actualizando tasas:", error.message);
     }
@@ -565,7 +568,9 @@ document.addEventListener('DOMContentLoaded', () => {
     DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
     DOMElements.publishCommentBtn.addEventListener('click', publishComment);
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
-    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData(); 
+    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData();
+    // Refrescar tasas automáticamente cada 2 horas en pestañas abiertas
+    setInterval(fetchElToqueRates, 2 * 60 * 60 * 1000);
 });
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
@@ -574,3 +579,4 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
         }
+
