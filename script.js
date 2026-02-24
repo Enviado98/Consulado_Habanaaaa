@@ -5,17 +5,11 @@ const SUPABASE_URL = "https://mkvpjsvqjqeuniabjjwr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg"; 
 
 // ----------------------------------------------------
-// 💰 CONFIGURACIÓN SCRAPER ELTOQUE (Caché Inteligente 24h)
+// 💰 CONFIGURACIÓN TASAS (Yadio + El Toque HTML)
 // ----------------------------------------------------
-// ✅ Ya no se usa la API de El Toque (bloqueada).
-// ✅ Sistema de caché inteligente:
-//    - Se lee Supabase primero (todos los usuarios).
-//    - Si los datos tienen más de 24h, el PRIMER usuario
-//      del día raspa eltoque.com y actualiza Supabase.
-//    - Los usuarios siguientes leen directo de la BD. 🎯
-
-const ELTOQUE_SCRAPE_URL = "https://eltoque.com/tasas-de-cambio-de-moneda-en-cuba-hoy";
-const CACHE_DURATION_24H = 24 * 60 * 60 * 1000; // 24 horas en ms
+// Fuente primaria: Yadio.io (API abierta, sin token)
+// Fuente secundaria: El Toque HTML (para MLC)
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 horas
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -102,126 +96,119 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 LÓGICA SCRAPER ELTOQUE (Caché Inteligente 24h)
+// 💰 LÓGICA DE TASAS — Yadio (primaria) + El Toque HTML (MLC)
 // ----------------------------------------------------
 
-/**
- * Raspa eltoque.com para obtener USD, EUR y MLC en CUP.
- * Usa un proxy CORS público para poder hacer fetch desde el navegador.
- * Devuelve { usdPrice, eurPrice, mlcPrice } o null si falla.
- */
-async function scrapeElToqueRates() {
-    // Lista de proxies CORS públicos como fallback
-    const proxies = [
-        "https://corsproxy.io/?",
-        "https://api.allorigins.win/raw?url=",
-        "https://cors-anywhere.herokuapp.com/"
-    ];
-
-    const targetUrl = ELTOQUE_SCRAPE_URL;
-
-    for (const proxy of proxies) {
-        try {
-            const response = await fetch(proxy + encodeURIComponent(targetUrl), {
-                method: 'GET',
-                headers: { 'Accept': 'text/html' }
-            });
-            if (!response.ok) continue;
-
-            const html = await response.text();
-
-            // ── Estrategia de extracción ──────────────────────────────────────
-            // El sitio eltoque.com muestra las tasas como texto con el patrón:
-            //   "USD ... 380 CUP" o en tablas/spans con las divisas.
-            // Usamos regex flexible para capturar el número que acompaña a cada moneda.
-
-            const extractRate = (currencyCode) => {
-                // Busca el código de moneda seguido de dígitos (con posible separador)
-                // Ejemplo: "USD</td><td>380" o "USD: 380" o "USD 380 CUP"
-                const patterns = [
-                    new RegExp(`${currencyCode}[^\\d]{1,30}?(\\d{2,4})(?:[,.]\\d+)?\\s*(?:CUP|cup)?`, 'i'),
-                    new RegExp(`"${currencyCode}"[^\\d]{1,30}?(\\d{2,4})`, 'i'),
-                    new RegExp(`>${currencyCode}<[^>]*>[^<]*(\\d{2,4})`, 'i'),
-                ];
-                for (const pattern of patterns) {
-                    const match = html.match(pattern);
-                    if (match && match[1]) {
-                        const val = parseInt(match[1], 10);
-                        // Validación de rango razonable (Cuba: entre 100 y 9999 CUP por USD)
-                        if (val >= 100 && val <= 9999) return String(val);
-                    }
-                }
-                return null;
-            };
-
-            const usdPrice = extractRate('USD');
-            const eurPrice = extractRate('EUR') || extractRate('ECU');
-            const mlcPrice = extractRate('MLC');
-
-            if (usdPrice) {
-                console.log(`✅ Scraping exitoso via ${proxy} → USD:${usdPrice} EUR:${eurPrice} MLC:${mlcPrice}`);
-                return {
-                    usdPrice: usdPrice || '---',
-                    eurPrice: eurPrice || '---',
-                    mlcPrice: mlcPrice || '---'
-                };
-            }
-        } catch (err) {
-            console.warn(`⚠️ Proxy falló (${proxy}):`, err.message);
-        }
-    }
-    return null; // Todos los proxies fallaron
+// Validación: rangos razonables para el mercado informal cubano
+const RATE_VALID = { usd:{min:200,max:700}, eur:{min:200,max:800}, mlc:{min:150,max:700} };
+function isValidRate(currency, value) {
+    const n = parseInt(value);
+    if (isNaN(n)) return false;
+    const { min, max } = RATE_VALID[currency] || { min:200, max:800 };
+    return n >= min && n <= max;
 }
 
-/**
- * Caché inteligente de 24 horas:
- * - Lee de Supabase primero (rápido para todos los usuarios).
- * - Si los datos tienen > 24h, hace scraping y actualiza Supabase.
- * - El PRIMER usuario del día hace el trabajo; los demás leen la BD. 🎯
- */
+// Fetch con timeout sin AbortSignal (máxima compatibilidad)
+async function fetchWithTimeout(url, opts = {}, ms = 10000) {
+    return Promise.race([
+        fetch(url, opts),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout")), ms))
+    ]);
+}
+
+// Fuente 1: Yadio.io — API abierta, devuelve USD y EUR exactos
+async function fetchFromYadio() {
+    try {
+        const res = await fetchWithTimeout("https://api.yadio.io/exrates/CUP", {}, 8000);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        // Yadio da cuántos CUP = 1 unidad de moneda extranjera
+        const usd = json.CUP?.USD ? String(Math.round(1 / json.CUP.USD)) : null;
+        const eur = json.CUP?.EUR ? String(Math.round(1 / json.CUP.EUR)) : null;
+        if (usd && isValidRate('usd', usd)) {
+            console.log(`✅ Yadio: USD=${usd} EUR=${eur||'N/D'}`);
+            return { usd, eur };
+        }
+        return null;
+    } catch (e) {
+        console.warn("⚠️ Yadio falló:", e.message);
+        return null;
+    }
+}
+
+// Fuente 2: El Toque HTML — para MLC (que Yadio no tiene)
+// Extrae del __NEXT_DATA__ que viene embebido en el HTML estático
+async function fetchMlcFromElToque() {
+    try {
+        const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://eltoque.com/tasas-de-cambio-cuba")}`;
+        const res = await fetchWithTimeout(proxy, {}, 12000);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const html = await res.text();
+
+        // Extraer todos los números en rango válido cerca de "MLC"
+        const mlcMatches = [...html.matchAll(/MLC[^<\d]{0,60}(\d{3,4})/gi)];
+        const candidates = mlcMatches
+            .map(m => parseInt(m[1]))
+            .filter(n => isValidRate('mlc', n));
+
+        if (candidates.length > 0) {
+            // Tomar la mediana para evitar outliers
+            const sorted = [...new Set(candidates)].sort((a, b) => a - b);
+            const median = sorted[Math.floor(sorted.length / 2)];
+            console.log(`✅ El Toque MLC: candidatos=${sorted.join(',')} → mediana=${median}`);
+            return String(median);
+        }
+        return null;
+    } catch (e) {
+        console.warn("⚠️ El Toque MLC falló:", e.message);
+        return null;
+    }
+}
+
 async function fetchElToqueRates() {
     try {
+        // Verificar caché: no actualizar si los datos son recientes
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
-        const now = Date.now();
-        const datosActualizados = (now - lastUpdate) < CACHE_DURATION_24H;
-
-        if (datosActualizados) {
-            // ✅ Los datos son frescos (< 24h). No hay que hacer nada.
-            console.log(`💾 Tasas en caché. Próxima actualización en ${Math.ceil((CACHE_DURATION_24H - (now - lastUpdate)) / 3600000)}h`);
+        if ((Date.now() - lastUpdate) < CACHE_DURATION) {
+            console.log("💾 Tasas en caché, sin actualizar.");
             return;
         }
 
-        // 🔄 Los datos son viejos. Este usuario hace el scraping (trabajo sucio).
-        console.log("🔍 Caché expirado. Iniciando scraping de eltoque.com...");
-        const rates = await scrapeElToqueRates();
+        console.log("🔄 Actualizando tasas de cambio...");
 
-        if (rates && rates.usdPrice !== '---') {
-            const newTime = new Date().toISOString();
-            currentStatus.dollar_cup = rates.usdPrice;
-            currentStatus.euro_cup  = rates.eurPrice;
-            currentStatus.mlc_cup   = rates.mlcPrice;
-            currentStatus.divisa_edited_at = newTime;
+        // Lanzar ambas fuentes en paralelo
+        const [yadio, mlc] = await Promise.all([
+            fetchFromYadio(),
+            fetchMlcFromElToque()
+        ]);
 
-            // Actualizar UI inmediatamente para este usuario
-            renderStatusPanel(currentStatus, admin);
+        const usdPrice = yadio?.usd || currentStatus.dollar_cup || '---';
+        const eurPrice = yadio?.eur || currentStatus.euro_cup || '---';
+        const mlcPrice = mlc || currentStatus.mlc_cup || '---';
 
-            // Guardar en Supabase para que los próximos usuarios lean de ahí
-            const { error } = await supabase.from('status_data').update({
-                dollar_cup: rates.usdPrice,
-                euro_cup:   rates.eurPrice,
-                mlc_cup:    rates.mlcPrice,
-                divisa_edited_at: newTime
-            }).eq('id', 1);
-
-            if (error) console.error("⚠️ Error al guardar en Supabase:", error.message);
-            else console.log("✅ Tasas guardadas en Supabase. Los próximos usuarios leerán de la BD.");
-
-        } else {
-            console.warn("⚠️ Scraping falló. Se mantendrán los valores anteriores de Supabase.");
+        // Solo guardar si al menos tenemos USD válido
+        if (!isValidRate('usd', usdPrice)) {
+            console.warn("⚠️ USD inválido, no se actualiza Supabase.");
+            return;
         }
 
+        const newTime = new Date().toISOString();
+        currentStatus.dollar_cup = usdPrice;
+        currentStatus.euro_cup = eurPrice;
+        currentStatus.mlc_cup = mlcPrice;
+        currentStatus.divisa_edited_at = newTime;
+        renderStatusPanel(currentStatus, admin);
+
+        await supabase.from('status_data').update({
+            dollar_cup: usdPrice,
+            euro_cup: eurPrice,
+            mlc_cup: mlcPrice,
+            divisa_edited_at: newTime
+        }).eq('id', 1);
+
+        console.log(`✅ Tasas guardadas: USD=${usdPrice} EUR=${eurPrice} MLC=${mlcPrice}`);
     } catch (error) {
-        console.error("⚠️ Error en fetchElToqueRates:", error.message);
+        console.error("⚠️ Error actualizando tasas:", error.message);
     }
 }
 
