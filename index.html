@@ -2,807 +2,202 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Consulado La Habana 🇪🇸🇨🇺</title>
-<link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
-
+<title>🔍 Test El Toque – Tasas de cambio</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --white:     #ffffff;
-  --bg:        #f5f3ef;
-  --surface:   #eeece8;
-  --surface2:  #e6e3dc;
-  --border:    rgba(0,0,0,0.09);
-  --ink:       #1c1916;
-  --ink2:      #4a4540;
-  --ink3:      #8c857c;
-  --ink4:      #bdb5ac;
-  --red:       #bf3a1a;
-  --blue:      #1a5fb0;
-  --green:     #1a7248;
-  --gold:      #b8860b;
-
-  --r-sm: 8px;
-  --r:    14px;
-  --r-lg: 20px;
-  --sh-sm: 0 1px 4px rgba(0,0,0,.07);
-  --sh:    0 4px 18px rgba(0,0,0,.09), 0 1px 3px rgba(0,0,0,.05);
-
-  --hdr:    54px;
-  --stat:   62px;
-  --tick:   36px;
-  --bar:    70px;
-  --safe:   env(safe-area-inset-bottom,0px);
-
-  --f-disp: 'DM Serif Display', Georgia, serif;
-  --f-body: 'DM Sans', system-ui, sans-serif;
-}
-
-html, body { height: 100%; overflow: hidden; background: var(--bg); }
-
-body {
-  font-family: var(--f-body);
-  color: var(--ink);
-  max-width: 480px;
-  margin: 0 auto;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ═══════════════════ HEADER ═══════════════════ */
-#hdr {
-  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; z-index: 300;
-  height: var(--hdr);
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--sh-sm);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px;
-}
-.hdr-brand { display: flex; align-items: center; gap: 10px; }
-.hdr-flags { font-size: 1.2rem; }
-.hdr-name {
-  font-family: var(--f-disp);
-  font-size: 1.05rem;
-  color: var(--ink);
-  letter-spacing: -.015em;
-  line-height: 1.1;
-}
-.hdr-sub { font-size: .57rem; font-weight: 400; color: var(--ink3); margin-top: 1px; }
-#vc {
-  font-size: .63rem; font-weight: 600; color: var(--ink3);
-  background: var(--surface); border: 1px solid var(--border);
-  padding: 3px 10px; border-radius: 20px;
-}
-
-/* ═══════════════════ STATUS BAR ═══════════════════ */
-#stat-bar {
-  position: fixed;
-  top: var(--hdr); left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; z-index: 290;
-  height: var(--stat);
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  padding: 0 14px; gap: 10px;
-}
-.live-pill {
-  display: flex; align-items: center; gap: 5px;
-  background: #fdf1ee; border: 1px solid #f0c4b8;
-  border-radius: 20px; padding: 4px 10px; flex-shrink: 0;
-}
-.live-dot {
-  width: 6px; height: 6px;
-  background: var(--red); border-radius: 50%;
-  animation: pulse 1.6s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.6)} }
-.live-txt { font-size: .5rem; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: .1em; }
-
-.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; }
-.chips::-webkit-scrollbar { display: none; }
-.chip {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-sm); padding: 5px 10px; flex-shrink: 0;
-}
-.chip .cl { font-size: .57rem; font-weight: 500; color: var(--ink3); }
-.chip .cv { font-size: .72rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
-.chip.df .cv { color: var(--red); }
-.chip.us .cv { color: var(--green); }
-.chip.eu .cv { color: var(--blue); }
-.chip.ml .cv { color: var(--gold); }
-
-/* ═══════════════════ TICKER ═══════════════════ */
-#ticker {
-  position: fixed;
-  top: calc(var(--hdr) + var(--stat)); left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; z-index: 280;
-  height: var(--tick);
-  background: var(--ink);
-  display: flex; align-items: center; overflow: hidden;
-}
-.tick-lbl {
-  background: var(--red); color: #fff;
-  font-size: .5rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-  padding: 0 12px; height: 100%; display: flex; align-items: center; gap: 5px;
-  flex-shrink: 0; white-space: nowrap;
-}
-.tick-wrap { flex: 1; overflow: hidden; height: 100%; display: flex; align-items: center; }
-#tc {
-  display: flex; align-items: center; white-space: nowrap;
-  font-size: .68rem; font-weight: 400; color: rgba(255,255,255,.8);
-  will-change: transform;
-}
-.ti { padding: 0 18px; }
-.ts { color: var(--red); opacity: .8; }
-
-/* ═══════════════════ MAIN SCROLL ═══════════════════ */
-#scr {
-  position: fixed;
-  top: calc(var(--hdr) + var(--stat) + var(--tick));
-  bottom: calc(var(--bar) + var(--safe));
-  left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  overflow-y: auto; overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  background: var(--bg);
-}
-#scr::-webkit-scrollbar { display: none; }
-
-/* ═══════════════════ VIEWS ═══════════════════ */
-.view { display: none; padding: 16px 14px 22px; }
-.view.active { display: block; }
-
-.sec-lbl {
-  font-size: .57rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .12em; color: var(--ink3);
-  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
-}
-.sec-lbl::after { content:''; flex:1; height:1px; background: var(--border); }
-
-/* ═══════════════════ ADMIN STRIP ═══════════════════ */
-.adm-strip {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px;
-  margin-bottom: 16px; box-shadow: var(--sh-sm);
-  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
-}
-.adm-strip p { font-size: .71rem; color: var(--ink3); }
-#adminExtras { display: none; flex-wrap: wrap; gap: 6px; }
-
-/* ═══════════════════ CARDS ═══════════════════ */
-.grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
-
-.card {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 12px 12px;
-  cursor: pointer; position: relative; overflow: hidden;
-  display: flex; flex-direction: column; min-height: 118px;
-  box-shadow: var(--sh-sm);
-  transition: box-shadow .2s, transform .15s;
-}
-.card::after {
-  content:''; position:absolute; bottom:0; left:0; right:0;
-  height:3px; background: var(--ca,var(--surface2)); border-radius:0 0 var(--r) var(--r);
-}
-.card:active { transform: scale(.98); box-shadow: none; }
-
-.card .emo { font-size:1.45rem; line-height:1; margin-bottom:7px; display:block; }
-.card h3 {
-  font-size: .69rem; font-weight: 700; color: var(--ink);
-  text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; line-height:1.3;
-}
-.card .cc p {
-  font-size: .67rem; color: var(--ink2); line-height:1.45; white-space:pre-wrap;
-}
-.card-badge {
-  position:absolute; top:9px; right:9px;
-  font-size:.44rem; font-weight:800; padding:2px 6px; border-radius:20px;
-  background:#fdf1ee; color:var(--red); border:1px solid #f0c4b8;
-  display:none; text-transform:uppercase; letter-spacing:.06em;
-}
-.card-recent .card-badge { display:block; }
-.card-tp {
-  font-size:.57rem; font-weight:500; color:var(--ink4);
-  margin-top:8px; padding-top:8px; border-top:1px solid var(--border); display:none;
-}
-.card.show-tp .card-tp { display:block; }
-
-/* edit mode inputs */
-.card .ee, .card .et {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
-  color:var(--ink); width:100%; padding:5px 8px; font-family:inherit; font-size:.8rem; margin-bottom:4px;
-}
-.card .ec {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
-  color:var(--ink); width:100%; padding:6px 8px; font-family:inherit; font-size:.68rem;
-  min-height:55px; resize:vertical;
-}
-
-/* ═══════════════════ NEWS ═══════════════════ */
-.news-list { display:flex; flex-direction:column; gap:10px; }
-.news-item {
-  background:var(--white); border:1px solid var(--border); border-radius:var(--r);
-  overflow:hidden; box-shadow:var(--sh-sm); animation: fu .3s ease;
-}
-@keyframes fu { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.news-body {
-  padding:14px 16px;
-  border-left:3px solid var(--red);
-}
-.news-body h4 {
-  font-family:var(--f-disp); font-size:.9rem; color:var(--ink); line-height:1.3; margin-bottom:5px;
-}
-.news-body p { font-size:.69rem; color:var(--ink2); line-height:1.55; white-space:pre-wrap; }
-.news-body p a { color:var(--blue); }
-.news-foot {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:8px 16px 10px; background:var(--surface); border-top:1px solid var(--border);
-}
-.news-foot span { font-size:.57rem; font-weight:500; color:var(--ink3); }
-.news-del { background:none; border:none; font-size:.57rem; font-weight:700; color:var(--red); cursor:pointer; font-family:inherit; display:none; }
-body.admin-mode .news-del { display:block; }
-
-/* ═══════════════════ CHAT ═══════════════════ */
-.compose {
-  background:var(--white); border:1px solid var(--border); border-radius:var(--r);
-  padding:14px; margin-bottom:16px; box-shadow:var(--sh-sm);
-}
-.compose h4 {
-  font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:10px;
-}
-.compose input, .compose textarea {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
-  color:var(--ink); padding:9px 12px; font-family:inherit; font-size:.74rem;
-  width:100%; outline:none; transition:border-color .15s;
-}
-.compose input:focus, .compose textarea:focus { border-color:var(--blue); }
-.compose input { margin-bottom:8px; }
-.compose textarea { resize:none; }
-.compose-foot { display:flex; justify-content:flex-end; margin-top:8px; }
-
-.cmts { display:flex; flex-direction:column; gap:10px; }
-.cmt {
-  background:var(--white); border:1px solid var(--border); border-radius:var(--r);
-  padding:13px 14px; box-shadow:var(--sh-sm); animation:fu .25s ease;
-}
-.cmt-main { display:flex; gap:10px; align-items:flex-start; }
-.cmt-av {
-  width:34px; height:34px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:.82rem; font-weight:700; color:#fff; flex-shrink:0;
-  font-family:var(--f-disp);
-}
-.cmt-b { flex:1; min-width:0; }
-.cmt-hd { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
-.cmt-name { font-size:.73rem; font-weight:700; color:var(--ink); }
-.cmt-date { font-size:.56rem; font-weight:400; color:var(--ink4); }
-.cmt-txt  { font-size:.71rem; font-weight:400; color:var(--ink2); line-height:1.5; }
-.cmt-acts { display:flex; align-items:center; gap:10px; margin-top:8px; }
-
-.like-btn {
-  display:flex; align-items:center; gap:4px;
-  background:var(--surface); border:1px solid var(--border); border-radius:20px;
-  padding:4px 10px; font-size:.64rem; font-weight:600; color:var(--ink3);
-  cursor:pointer; font-family:inherit; transition:all .15s;
-}
-.like-btn:active, .like-btn.liked { background:#fdf1ee; border-color:#f0c4b8; color:var(--red); }
-.rep-tgl { font-size:.64rem; font-weight:600; color:var(--blue); cursor:pointer; background:none; border:none; font-family:inherit; }
-
-.rep-form {
-  display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--border);
-}
-.rep-form input, .rep-form textarea {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
-  color:var(--ink); padding:8px 10px; font-family:inherit; font-size:.7rem;
-  width:100%; margin-bottom:6px; outline:none; resize:none;
-}
-.rep-form input:focus, .rep-form textarea:focus { border-color:var(--blue); }
-.rep-wrap { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:7px; }
-.rep-item { background:var(--surface); border-radius:var(--r-sm); padding:10px 12px; display:flex; gap:8px; align-items:flex-start; }
-.rep-av { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.63rem; font-weight:700; color:#fff; flex-shrink:0; }
-.rep-b { flex:1; }
-.rep-name { font-size:.64rem; font-weight:700; color:var(--ink); }
-.rep-date { font-size:.54rem; color:var(--ink4); margin-left:5px; }
-.rep-txt  { font-size:.67rem; color:var(--ink2); margin-top:2px; line-height:1.4; }
-
-/* ═══════════════════ BUTTONS ═══════════════════ */
-.btn {
-  display:inline-flex; align-items:center; justify-content:center; gap:5px;
-  padding:9px 18px; border:none; border-radius:50px;
-  font-family:inherit; font-weight:700; font-size:.74rem;
-  cursor:pointer; transition:all .15s; white-space:nowrap;
-}
-.btn:active { transform:scale(.97); filter:brightness(.92); }
-.btn-dark  { background:var(--ink); color:#fff; }
-.btn-red   { background:var(--red); color:#fff; }
-.btn-blue  { background:var(--blue); color:#fff; }
-.btn-green { background:var(--green); color:#fff; }
-.btn-ghost { background:var(--surface); border:1px solid var(--border); color:var(--ink2); }
-.btn-sm    { padding:6px 13px; font-size:.67rem; }
-.btn-full  { width:100%; }
-
-/* ═══════════════════ BOTTOM NAV ═══════════════════ */
-#nav {
-  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:480px; z-index:300;
-  background:var(--white); border-top:1px solid var(--border);
-  box-shadow:0 -4px 24px rgba(0,0,0,.08);
-  padding-bottom:var(--safe);
-}
-.nav-row { display:flex; height:var(--bar); }
-.nb {
-  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-  background:none; border:none; cursor:pointer; padding:0;
-  -webkit-tap-highlight-color:transparent; position:relative; transition:.15s;
-}
-.ni { font-size:1.2rem; line-height:1; transition:transform .2s; }
-.nl {
-  font-size:.53rem; font-weight:600; color:var(--ink3);
-  letter-spacing:.04em; text-transform:uppercase; font-family:inherit; transition:color .15s;
-}
-.nb.active .nl { color:var(--red); }
-.nb.active .ni { transform:scale(1.1); }
-.nb.active::before {
-  content:''; position:absolute; top:0; left:22%; right:22%;
-  height:2px; background:var(--red); border-radius:0 0 3px 3px;
-}
-.nav-credit {
-  text-align:center; padding:3px 0 4px;
-  font-size:.52rem; font-weight:400; color:var(--ink4);
-  border-top:1px solid var(--border);
-}
-.nav-credit a { color:var(--blue); text-decoration:none; font-weight:600; }
-.nbdg {
-  position:absolute; top:9px; right:calc(50% - 19px);
-  background:var(--red); color:#fff; font-size:.42rem; font-weight:800;
-  border-radius:20px; padding:1px 5px; display:none;
-}
-
-/* loader */
-.loader { text-align:center; color:var(--ink3); font-size:.73rem; padding:30px 0; }
+  body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
+  h1 { color: #58a6ff; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .ok  { color: #3fb950; }
+  .err { color: #f85149; }
+  .warn { color: #d29922; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #30363d; padding: 8px 12px; text-align: left; }
+  th { color: #58a6ff; }
+  .highlight { background: #1f2937; font-weight: bold; }
+  pre { overflow-x: auto; background: #0d1117; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 300px; overflow-y: auto; }
+  button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 4px; }
+  button:hover { background: #2ea043; }
+  #log { color: #8b949e; font-size: 12px; }
 </style>
 </head>
 <body>
+<h1>🔍 Diagnóstico – Tasas de cambio El Toque</h1>
+<p>Este test compara <strong>avg vs median</strong> para EUR/ECU, y muestra los valores crudos del JSON de El Toque.</p>
 
-<!-- HEADER -->
-<header id="hdr">
-  <div class="hdr-brand">
-    <span class="hdr-flags">🇪🇸🇨🇺</span>
-    <div>
-      <div class="hdr-name">Consulado La Habana</div>
-      <div class="hdr-sub">Información no oficial · Comunidad de Descendientes</div>
-    </div>
-  </div>
-  <div id="vc">👀 –</div>
-</header>
+<button onclick="runTest()">▶ Ejecutar test ahora</button>
+<button onclick="clearLog()">🗑 Limpiar log</button>
 
-<!-- STATUS -->
-<div id="stat-bar">
-  <div class="live-pill">
-    <span class="live-dot"></span>
-    <span class="live-txt">Vivo</span>
-  </div>
-  <div class="chips">
-    <div class="chip df"><span class="cl">⚡ Déficit</span><span class="cv" id="sd">···</span></div>
-    <div class="chip us"><span class="cl">💵 USD</span>   <span class="cv" id="su">···</span></div>
-    <div class="chip eu"><span class="cl">💶 EUR</span>   <span class="cv" id="se">···</span></div>
-    <div class="chip ml"><span class="cl">💳 MLC</span>   <span class="cv" id="sm">···</span></div>
-  </div>
+<div class="card" id="resultado">
+  <em>Haz clic en "Ejecutar test" para comenzar…</em>
 </div>
 
-<!-- TICKER -->
-<div id="ticker">
-  <div class="tick-lbl">📡 Noticias</div>
-  <div class="tick-wrap"><div id="tc"><span class="ti">Cargando...</span></div></div>
+<div class="card">
+  <strong>📋 Log detallado:</strong>
+  <pre id="log"></pre>
 </div>
 
-<!-- MAIN SCROLL -->
-<main id="scr">
+<div class="card" id="raw-stats" style="display:none">
+  <strong>📦 statistics RAW (del __NEXT_DATA__):</strong>
+  <pre id="raw-json"></pre>
+</div>
 
-  <!-- CALENDARIO -->
-  <section class="view active" id="view-calendario">
-    <div class="adm-strip">
-      <p id="admMsg">Activa el modo edición para actualizar información</p>
-      <button id="admBtn" class="btn btn-dark">🛡 Modo Edición</button>
-      <div id="adminExtras">
-        <button id="saveBtn"    class="btn btn-green btn-sm">💾 Guardar</button>
-        <button id="addNewsBtn" class="btn btn-ghost  btn-sm">✅ Añadir Noticia</button>
-        <button id="delNewsBtn" class="btn btn-red    btn-sm">⛔ Borrar Noticia</button>
-      </div>
-    </div>
-    <p class="sec-lbl">Trámites Consulares</p>
-    <div class="grid" id="cards">
-      <div class="loader" style="grid-column:1/-1">Cargando trámites...</div>
-    </div>
-  </section>
+<script>
+const proxies = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
 
-  <!-- NOTICIAS -->
-  <section class="view" id="view-noticias">
-    <p class="sec-lbl">Noticias Destacadas</p>
-    <div class="news-list" id="news-list">
-      <div class="loader">Cargando noticias...</div>
-    </div>
-  </section>
+const TARGET = "https://eltoque.com/tasas-de-cambio-cuba";
 
-  <!-- CHAT -->
-  <section class="view" id="view-chat">
-    <div class="compose">
-      <h4>💬 Nuevo comentario</h4>
-      <input type="text" id="cName" placeholder="Tu nombre" maxlength="30">
-      <textarea id="cText" placeholder="¿Qué piensas? (máx. 250 caracteres)" maxlength="250" rows="3"></textarea>
-      <div class="compose-foot">
-        <button id="pubBtn" class="btn btn-red">Publicar →</button>
-      </div>
-    </div>
-    <p class="sec-lbl">Conversación</p>
-    <div class="cmts" id="cmts">
-      <div class="loader">Cargando comentarios...</div>
-    </div>
-  </section>
-
-</main>
-
-<!-- BOTTOM NAV -->
-<nav id="nav">
-  <div class="nav-row">
-    <button class="nb active" onclick="sv('calendario',this)">
-      <span class="ni">📅</span><span class="nl">Calendario</span>
-    </button>
-    <button class="nb" onclick="sv('noticias',this)">
-      <span class="ni">📰</span><span class="nl">Noticias</span>
-    </button>
-    <button class="nb" onclick="sv('chat',this)">
-      <span class="ni">💬</span><span class="nl">Chat</span>
-      <span class="nbdg" id="bdg">!</span>
-    </button>
-  </div>
-  <div class="nav-credit">Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a></div>
-</nav>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const SB_URL = "https://mkvpjsvqjqeuniabjjwr.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg";
-const sb = createClient(SB_URL, SB_KEY);
-
-const ACCENTS=['#bf3a1a','#1a5fb0','#1a7248','#b8860b','#7b1fa2','#c2185b','#0097a7','#e64a19'];
-function ac(id){ let h=0,s=String(id); for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h); return ACCENTS[Math.abs(h)%ACCENTS.length]; }
-function nc(s){ let h=0; for(let i=0;i<s.length;i++) h=s.charCodeAt(i)+((h<<5)-h); return `hsl(${Math.abs(h)%360},52%,40%)`; }
-
-const DAY=86400000, CACHE=10*60*1000;
-let admin=false, data=[], news=[], status={deficit_mw:'···',dollar_cup:'···',euro_cup:'···',mlc_cup:'···'};
-let uid=localStorage.getItem('uid');
-if(!uid){uid=crypto.randomUUID();localStorage.setItem('uid',uid);}
-
-function ago(ts){
-  if(!ts) return 'sin fecha';
-  const d=Date.now()-new Date(ts).getTime();
-  if(d<0) return 'ahora';
-  const m=Math.floor(d/60000),h=Math.floor(m/60),dy=Math.floor(h/24);
-  if(dy>=30) return `hace ${Math.floor(dy/30)} meses`;
-  if(dy>=7)  return `hace ${Math.floor(dy/7)} sem.`;
-  if(dy>=2)  return `hace ${dy} días`;
-  if(dy===1) return 'hace 1 día';
-  if(h>=2)   return `hace ${h} h.`;
-  if(h===1)  return 'hace 1 hora';
-  if(m>=1)   return `hace ${m} min.`;
-  return 'ahora mismo';
-}
-function fd(ts){
-  const d=new Date(ts),n=new Date();
-  return d.toDateString()===n.toDateString()
-    ?'Hoy '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})
-    :d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-}
-function lf(t){ return t.replace(/(\b(https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig,u=>`<a href="${u.startsWith('http')?u:'http://'+u}" target="_blank">${u}</a>`); }
-
-/* status */
-function rs(s){
-  document.getElementById('sd').textContent=s.deficit_mw||'···';
-  document.getElementById('su').textContent=s.dollar_cup||'···';
-  document.getElementById('se').textContent=s.euro_cup  ||'···';
-  document.getElementById('sm').textContent=s.mlc_cup   ||'···';
+function log(msg, cls='') {
+  const pre = document.getElementById('log');
+  const ts = new Date().toLocaleTimeString('es-ES');
+  pre.innerHTML += `<span class="${cls}">[${ts}] ${msg}</span>\n`;
+  pre.scrollTop = pre.scrollHeight;
 }
 
-/* ticker */
-function rt(items){
-  const tc=document.getElementById('tc');
-  if(!items.length){
-    tc.innerHTML='<span class="ti">Sin noticias recientes</span><span class="ts"> · </span><span class="ti">Sin noticias recientes</span>';
-    injectAnim(`@keyframes tf{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`);
-    tc.style.animation='tf 15s linear infinite'; return;
-  }
-  const h=items.map(n=>`<span class="ti">${lf(n.text)} <span style="opacity:.45;font-size:.6rem">(${ago(n.timestamp)})</span></span><span class="ts"> · </span>`).join('');
-  tc.innerHTML=h+h;
-  requestAnimationFrame(()=>{
-    const w=tc.scrollWidth/2, dur=w/55;
-    injectAnim(`@keyframes td{0%{transform:translateX(0)}100%{transform:translateX(-${w}px)}}`);
-    tc.style.animation=`td ${dur}s linear infinite`;
-  });
-}
-function injectAnim(css){ document.getElementById('dyn')?.remove(); const s=document.createElement('style'); s.id='dyn'; s.textContent=css; document.head.appendChild(s); }
-
-/* cards */
-function mkCard(item,idx){
-  const a=ac(item.id);
-  const isNew=item.last_edited_timestamp&&(Date.now()-new Date(item.last_edited_timestamp).getTime())<DAY;
-  return `<div class="card ${isNew?'card-recent':''}" data-idx="${idx}" data-id="${item.id}" style="--ca:${a}">
-    <div class="card-badge">Reciente</div>
-    <span class="emo">${item.emoji||'📋'}</span>
-    <h3>${item.titulo||'Trámite'}</h3>
-    <div class="cc"><p>${item.contenido||''}</p></div>
-    <div class="card-tp">🕓 ${ago(item.last_edited_timestamp)}</div>
-  </div>`;
+function clearLog() {
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('resultado').innerHTML = '<em>Log limpiado.</em>';
+  document.getElementById('raw-stats').style.display = 'none';
 }
 
-async function loadCards(){
-  const {data:d}=await sb.from('items').select('*').order('id');
-  if(!d) return;
-  data=d;
-  const c=document.getElementById('cards');
-  c.innerHTML=d.map((x,i)=>mkCard(x,i)).join('');
-  c.querySelectorAll('.card').forEach(card=>{
-    card.addEventListener('click',()=>{
-      if(admin) return;
-      const o=card.classList.contains('show-tp');
-      document.querySelectorAll('.card.show-tp').forEach(x=>x.classList.remove('show-tp'));
-      if(!o){card.classList.add('show-tp');setTimeout(()=>card.classList.remove('show-tp'),2600);}
-    });
-  });
+async function fetchViaProxy(targetUrl, proxyFn) {
+  const proxyUrl = proxyFn(targetUrl);
+  const shortProxy = proxyUrl.slice(0, 45);
+  log(`⏳ Intentando proxy: ${shortProxy}...`);
+  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.text();
 }
 
-/* news banners */
-async function loadBanners(){
-  const {data:d}=await sb.from('banners').select('*').order('created_at',{ascending:false});
-  const c=document.getElementById('news-list');
-  if(!d||!d.length){c.innerHTML='<div class="loader">Sin noticias destacadas aún.</div>';return;}
-  c.innerHTML=d.map(b=>`<div class="news-item" data-id="${b.id}">
-    <div class="news-body"><h4>${b.titulo||b.title||''}</h4><p>${lf(b.contenido||b.content||'')}</p></div>
-    <div class="news-foot"><span>🕓 ${ago(b.created_at)}</span><button class="news-del" onclick="delB(${b.id})">✕ Borrar</button></div>
-  </div>`).join('');
-}
-window.delB=async id=>{
-  if(!admin||!confirm('¿Borrar esta noticia?')) return;
-  await sb.from('banners').delete().eq('id',id); await loadBanners();
-};
-
-/* quick news */
-async function loadNews(){
-  const {data:d}=await sb.from('noticias').select('id,text,timestamp').order('timestamp',{ascending:false});
-  if(!d) return;
-  const cut=Date.now()-DAY, valid=[];
-  for(const n of d){ if(new Date(n.timestamp).getTime()>cut) valid.push(n); else sb.from('noticias').delete().eq('id',n.id); }
-  news=valid; rt(valid);
+function extractStats(html) {
+  const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+  if (!match) throw new Error("__NEXT_DATA__ no encontrado en el HTML");
+  const json = JSON.parse(match[1]);
+  const stats = json?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
+  if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
+  return stats;
 }
 
-/* status data */
-async function loadStatus(){
-  const {data:d}=await sb.from('status_data').select('*').eq('id',1).single();
-  if(d){status={...status,...d};rs(status);}
-  fetchRates(); fetchDef();
+async function fetchFromYadio() {
+  log("⏳ Consultando Yadio.io como fallback...", "warn");
+  const res = await fetch("https://api.yadio.io/exrates/CUP", { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`Yadio HTTP ${res.status}`);
+  const j = await res.json();
+  return {
+    usd: j.CUP?.USD ? Math.round(1 / j.CUP.USD) : null,
+    eur: j.CUP?.EUR ? Math.round(1 / j.CUP.EUR) : null,
+    mlc: null,
+    source: "Yadio.io"
+  };
 }
 
-const RV={usd:{min:200,max:700},eur:{min:200,max:800},mlc:{min:150,max:700}};
-function vr(c,v){const n=parseInt(v);if(isNaN(n))return false;const{min,max}=RV[c]||{};return n>=min&&n<=max;}
+async function runTest() {
+  document.getElementById('resultado').innerHTML = '<em>⏳ Ejecutando…</em>';
+  document.getElementById('raw-stats').style.display = 'none';
+  log("═══════════════════════════════════════");
+  log("🚀 Iniciando test de tasas El Toque");
 
-async function prx(url,ms=12000){
-  const ps=[`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`];
-  for(const p of ps){
-    try{const r=await Promise.race([fetch(p),new Promise((_,rej)=>setTimeout(rej,ms))]);if(!r.ok)throw 0;const t=await r.text();if(t.length<500)throw 0;return t;}catch{}
-  }
-  throw 0;
-}
+  let html = null;
+  let proxyUsed = null;
 
-async function fetchRates(){
-  try{
-    if(Date.now()-new Date(status.divisa_edited_at||0).getTime()<CACHE) return;
-    let r={usd:null,eur:null,mlc:null};
-    try{
-      const h=await prx('https://eltoque.com/tasas-de-cambio-cuba');
-      const m=h.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-      if(m){const s=JSON.parse(m[1])?.props?.pageProps?.trmiExchange?.data?.api?.statistics;if(s){r.usd=s.USD?.median?String(Math.round(s.USD.median)):null;r.eur=s.ECU?.avg?String(Math.round(s.ECU.avg)):null;r.mlc=s.MLC?.median?String(Math.round(s.MLC.median)):null;}}
-    }catch{try{const x=await fetch('https://api.yadio.io/exrates/CUP');const j=await x.json();r.usd=j.CUP?.USD?String(Math.round(1/j.CUP.USD)):null;r.eur=j.CUP?.EUR?String(Math.round(1/j.CUP.EUR)):null;}catch{}}
-    if(!vr('usd',r.usd)) return;
-    const t=new Date().toISOString();
-    status.dollar_cup=r.usd;status.euro_cup=vr('eur',r.eur)?r.eur:(status.euro_cup||'---');status.mlc_cup=vr('mlc',r.mlc)?r.mlc:(status.mlc_cup||'---');status.divisa_edited_at=t;
-    rs(status);
-    await sb.from('status_data').update({dollar_cup:r.usd,euro_cup:status.euro_cup,mlc_cup:status.mlc_cup,divisa_edited_at:t}).eq('id',1);
-  }catch{}
-}
-
-async function fetchDef(){
-  try{
-    if(Date.now()-new Date(status.deficit_edited_at||0).getTime()<CACHE) return;
-    const xml=await prx('http://www.cubadebate.cu/feed/');
-    const tl=[...xml.matchAll(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/gi)].map(m=>m[1].trim()).filter(t=>t.length>5).slice(1);
-    const KW=['déficit','deficit','afectación','afectacion','unión eléctrica','une pronostica','une prevé'];
-    for(const t of tl){
-      if(!KW.some(k=>t.toLowerCase().includes(k))) continue;
-      const mm=t.match(/(\d[\d\s\.]{0,6}\d|\d{3,4})\s*mw/i);if(!mm) continue;
-      const n=parseInt(mm[1].replace(/[\s\.]/g,''));if(n<100||n>5000) continue;
-      const val=`${n} MW`,ts=new Date().toISOString();
-      status.deficit_mw=val;status.deficit_edited_at=ts;rs(status);
-      await sb.from('status_data').update({deficit_mw:val,deficit_edited_at:ts}).eq('id',1);break;
+  for (let i = 0; i < proxies.length; i++) {
+    try {
+      html = await fetchViaProxy(TARGET, proxies[i]);
+      proxyUsed = i === 0 ? "allorigins.win" : "codetabs.com";
+      log(`✅ Proxy ${i+1} OK (${proxyUsed}), HTML: ${html.length} chars`, "ok");
+      break;
+    } catch(e) {
+      log(`❌ Proxy ${i+1} falló: ${e.message}`, "err");
     }
-  }catch{}
-}
+  }
 
-/* comments */
-function mkCmt(c,liked){
-  const clr=nc(c.name||'?');
-  return `<div class="cmt" data-cid="${c.id}">
-    <div class="cmt-main">
-      <div class="cmt-av" style="background:${clr}">${(c.name||'?').charAt(0).toUpperCase()}</div>
-      <div class="cmt-b">
-        <div class="cmt-hd"><span class="cmt-name">${c.name}</span><span class="cmt-date">${fd(c.timestamp)}</span></div>
-        <div class="cmt-txt">${c.text}</div>
-        <div class="cmt-acts">
-          <button class="like-btn ${liked?'liked':''}" data-id="${c.id}"><span>♥</span><span class="lc">${c.likes_count||0}</span></button>
-          ${!c.parent_id?`<button class="rep-tgl" data-id="${c.id}">Responder</button>`:''}
-        </div>
-      </div>
-    </div>
-    ${!c.parent_id?`
-    <div class="rep-form" data-to="${c.id}">
-      <input class="rn" placeholder="Tu nombre" maxlength="30">
-      <textarea class="rt" placeholder="Responder..." maxlength="250" rows="2"></textarea>
-      <button class="btn btn-blue btn-sm pub-rep" data-pid="${c.id}">Enviar</button>
-    </div>
-    <div class="rep-wrap" data-pw="${c.id}"></div>`:''}
-  </div>`;
-}
-function mkRep(r){ const clr=nc(r.name||'?'); return `<div class="rep-item"><div class="rep-av" style="background:${clr}">${(r.name||'?').charAt(0).toUpperCase()}</div><div class="rep-b"><span class="rep-name">${r.name}</span><span class="rep-date">${fd(r.timestamp)}</span><div class="rep-txt">${r.text}</div></div></div>`; }
-
-async function loadCmts(){
-  const [cr,lr]=await Promise.all([sb.from('comentarios').select('*').order('timestamp',{ascending:false}),sb.from('likes').select('comment_id').eq('user_web_id',uid)]);
-  const c=document.getElementById('cmts');
-  if(cr.error){c.innerHTML='<div class="loader">❌ Error al cargar</div>';return;}
-  const all=cr.data||[], lm=new Map((lr.data||[]).map(l=>[l.comment_id,true]));
-  const roots=all.filter(x=>!x.parent_id);
-  const rm=all.reduce((m,x)=>{if(x.parent_id){const a=m.get(x.parent_id)||[];a.push(x);m.set(x.parent_id,a);}return m;},new Map());
-  if(!roots.length){c.innerHTML='<div class="loader">Sé el primero en comentar 👆</div>';return;}
-  c.innerHTML=roots.map(x=>mkCmt(x,lm.get(x.id))).join('');
-  roots.forEach(r=>{
-    const reps=rm.get(r.id)||[];
-    if(reps.length){const w=c.querySelector(`.rep-wrap[data-pw="${r.id}"]`);if(w) w.innerHTML=reps.sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)).map(x=>mkRep(x)).join('');}
-  });
-  const bdg=document.getElementById('bdg');
-  bdg.textContent=roots.length;bdg.style.display=roots.length?'block':'none';
-
-  c.querySelectorAll('.rep-tgl').forEach(b=>b.addEventListener('click',e=>{
-    const id=e.target.dataset.id,f=c.querySelector(`.rep-form[data-to="${id}"]`);
-    c.querySelectorAll('.rep-form').forEach(x=>{if(x!==f)x.style.display='none';});
-    f.style.display=f.style.display==='block'?'none':'block';
-    if(f.style.display==='block') f.querySelector('.rn').focus();
-  }));
-  c.querySelectorAll('.pub-rep').forEach(b=>b.addEventListener('click',async e=>{
-    const pid=e.target.dataset.pid,f=c.querySelector(`.rep-form[data-to="${pid}"]`);
-    const name=f.querySelector('.rn').value.trim(),text=f.querySelector('.rt').value.trim();
-    if(name.length<2||text.length<2) return alert('Datos insuficientes');
-    e.target.disabled=true;
-    await sb.from('comentarios').insert([{name,text,parent_id:pid,likes_count:0}]);
-    f.style.display='none';await loadCmts();e.target.disabled=false;
-  }));
-  c.querySelectorAll('.like-btn').forEach(b=>b.addEventListener('click',async e=>{
-    const btn=e.currentTarget,id=btn.dataset.id,liked=btn.classList.contains('liked');
-    const ctr=btn.querySelector('.lc');btn.disabled=true;
-    if(liked){
-      await sb.from('likes').delete().eq('comment_id',id).eq('user_web_id',uid);
-      const n=Math.max(0,parseInt(ctr.textContent)-1);
-      await sb.from('comentarios').update({likes_count:n}).eq('id',id);
-      btn.classList.remove('liked');ctr.textContent=n;
-    }else{
-      const{error}=await sb.from('likes').insert([{comment_id:id,user_web_id:uid}]);
-      if(!error||error.code==='23505'){if(!error){const n=parseInt(ctr.textContent)+1;await sb.from('comentarios').update({likes_count:n}).eq('id',id);ctr.textContent=n;}btn.classList.add('liked');}
+  if (!html) {
+    log("⚠️ Todos los proxies fallaron, usando Yadio como fallback...", "warn");
+    try {
+      const y = await fetchFromYadio();
+      showResult(y, "⚠️ Fallback Yadio.io (sin MLC)", null);
+    } catch(e) {
+      log(`❌ Yadio también falló: ${e.message}`, "err");
+      document.getElementById('resultado').innerHTML = '<span class="err">❌ Todos los métodos fallaron. Revisa la consola del navegador (F12).</span>';
     }
-    btn.disabled=false;
-  }));
-}
+    return;
+  }
 
-async function pubCmt(){
-  const name=document.getElementById('cName').value.trim(),text=document.getElementById('cText').value.trim();
-  if(name.length<2||text.length<2) return alert('Por favor escribe tu nombre y comentario');
-  const btn=document.getElementById('pubBtn');btn.disabled=true;btn.textContent='Publicando...';
-  const{error}=await sb.from('comentarios').insert([{name,text,likes_count:0}]);
-  if(!error){document.getElementById('cName').value='';document.getElementById('cText').value='';await loadCmts();}
-  else alert('❌ Error al publicar');
-  btn.disabled=false;btn.textContent='Publicar →';
-}
+  let stats;
+  try {
+    stats = extractStats(html);
+    log("✅ __NEXT_DATA__ extraído correctamente", "ok");
+  } catch(e) {
+    log(`❌ Error parseando datos: ${e.message}`, "err");
+    document.getElementById('resultado').innerHTML = `<span class="err">❌ ${e.message}</span>`;
+    return;
+  }
 
-/* admin */
-function setAdmin(on){
-  admin=on;document.body.classList.toggle('admin-mode',on);
-  const ext=document.getElementById('adminExtras'),msg=document.getElementById('admMsg'),btn=document.getElementById('admBtn');
-  ext.style.display=on?'flex':'none';
-  if(on){msg.textContent='🔴 EDITA CON RESPONSABILIDAD';msg.style.color='var(--red)';btn.textContent='🛑 Salir';btn.className='btn btn-red';enableEd();}
-  else{msg.textContent='Activa el modo edición para actualizar información';msg.style.color='';btn.textContent='🛡 Modo Edición';btn.className='btn btn-dark';disableEd();}
-}
-function enableEd(){
-  document.querySelectorAll('.card').forEach(card=>{
-    const idx=card.dataset.idx,item=data[idx];
-    card.querySelector('.emo')?.remove();card.querySelector('h3')?.remove();card.querySelector('.cc p')?.remove();
-    const ie=document.createElement('input');ie.className='ee';ie.value=item.emoji||'📋';ie.maxLength=2;
-    const it=document.createElement('input');it.className='et';it.value=item.titulo||'';
-    const ic=document.createElement('textarea');ic.className='ec';ic.value=item.contenido||'';
-    card.querySelector('.card-tp').style.display='none';
-    card.insertBefore(it,card.firstChild);card.insertBefore(ie,card.firstChild);
-    card.querySelector('.cc').appendChild(ic);
-  });
-}
-function disableEd(){
-  document.querySelectorAll('.card').forEach(card=>{
-    const idx=card.dataset.idx,item=data[idx];
-    const ee=card.querySelector('.ee');if(!ee) return;
-    ee.remove();card.querySelector('.et').remove();card.querySelector('.ec').remove();
-    const a=ac(item.id);
-    const ne=document.createElement('span');ne.className='emo';ne.textContent=item.emoji||'📋';
-    const nh=document.createElement('h3');nh.textContent=item.titulo||'';
-    const np=document.createElement('p');np.textContent=item.contenido||'';
-    card.insertBefore(nh,card.firstChild);card.insertBefore(ne,card.firstChild);
-    card.querySelector('.cc').appendChild(np);
-    card.querySelector('.card-tp').style.display='';
-    card.style.setProperty('--ca',a);
-  });
-}
-async function save(){
-  const ups=[];
-  document.querySelectorAll('.card').forEach(card=>{
-    const ee=card.querySelector('.ee');if(!ee) return;
-    const emoji=ee.value,titulo=card.querySelector('.et').value,contenido=card.querySelector('.ec').value;
-    const idx=card.dataset.idx,id=card.dataset.id;
-    if(contenido!==data[idx].contenido||titulo!==data[idx].titulo||emoji!==data[idx].emoji)
-      ups.push(sb.from('items').update({emoji,titulo,contenido,last_edited_timestamp:new Date().toISOString()}).eq('id',id));
-  });
-  if(ups.length){await Promise.all(ups);alert('✅ Cambios guardados');location.reload();}else alert('Sin cambios que guardar');
-}
-async function addN(){ const t=prompt('✍️ Escribe la noticia:');if(!t) return;if(confirm('¿Publicar?')){await sb.from('noticias').insert([{text:t.trim()}]);await loadNews();} }
-async function delN(){
-  if(!news.length) return alert('No hay noticias en el ticker');
-  const list=news.map((n,i)=>`${i+1}. ${n.text}`).join('\n');
-  const idx=parseInt(prompt(`Eliminar número:\n${list}`))-1;
-  if(news[idx]&&confirm('¿Eliminar?')){await sb.from('noticias').delete().eq('id',news[idx].id);await loadNews();}
-}
+  // Mostrar JSON crudo de las monedas relevantes
+  const relevantStats = { USD: stats.USD, ECU: stats.ECU, MLC: stats.MLC };
+  document.getElementById('raw-json').textContent = JSON.stringify(relevantStats, null, 2);
+  document.getElementById('raw-stats').style.display = 'block';
 
-/* views */
-async function regV(){
-  const l=localStorage.getItem('lv');if(l&&Date.now()-parseInt(l)<DAY) return;
-  const{error}=await sb.from('page_views').insert({});if(!error) localStorage.setItem('lv',Date.now());
+  // Comparar avg vs median para cada moneda
+  const currencies = [
+    { key: 'USD', label: '💵 USD', symbol: 'USD' },
+    { key: 'ECU', label: '💶 EUR (ECU)', symbol: 'EUR' },
+    { key: 'MLC', label: '💳 MLC', symbol: 'MLC' },
+  ];
+
+  log("─── Comparación avg vs median ───");
+  let tableRows = '';
+  for (const cur of currencies) {
+    const s = stats[cur.key];
+    if (!s) {
+      log(`⚠️ ${cur.key}: no encontrado en statistics`, "warn");
+      tableRows += `<tr><td>${cur.label}</td><td colspan="4" class="err">No disponible</td></tr>`;
+      continue;
+    }
+    const avg    = s.avg    != null ? s.avg.toFixed(2)    : 'N/A';
+    const median = s.median != null ? s.median.toFixed(2) : 'N/A';
+    const q1     = s.q1     != null ? s.q1.toFixed(2)     : 'N/A';
+    const q3     = s.q3     != null ? s.q3.toFixed(2)     : 'N/A';
+
+    const diff = s.avg != null && s.median != null ? (s.avg - s.median).toFixed(2) : 'N/A';
+    const diffCls = Math.abs(parseFloat(diff)) > 5 ? 'err' : 'ok';
+
+    log(`${cur.key}: avg=${avg} | median=${median} | diff=${diff}`, diffCls);
+
+    tableRows += `
+      <tr>
+        <td>${cur.label}</td>
+        <td class="warn">${avg}</td>
+        <td class="ok highlight">${median}</td>
+        <td>${q1} – ${q3}</td>
+        <td class="${diffCls}">${diff}</td>
+      </tr>`;
+  }
+
+  const usd = stats.USD?.median != null ? Math.round(stats.USD.median) : '?';
+  const eur_avg    = stats.ECU?.avg    != null ? Math.round(stats.ECU.avg)    : '?';
+  const eur_median = stats.ECU?.median != null ? Math.round(stats.ECU.median) : '?';
+  const mlc = stats.MLC?.median != null ? Math.round(stats.MLC.median) : '?';
+
+  document.getElementById('resultado').innerHTML = `
+    <h2>✅ Resultado (proxy: ${proxyUsed})</h2>
+    <table>
+      <tr><th>Moneda</th><th>avg (❌ antes)</th><th>median (✅ correcto)</th><th>Rango (q1–q3)</th><th>Diferencia</th></tr>
+      ${tableRows}
+    </table>
+    <br>
+    <div class="ok">
+      ✅ <strong>Valores correctos a mostrar en la web:</strong><br>
+      💵 USD: <strong>${usd}</strong> CUP<br>
+      💶 EUR: <strong>${eur_median}</strong> CUP &nbsp;(con avg serían ${eur_avg} — ese era el bug)<br>
+      💳 MLC: <strong>${mlc}</strong> CUP
+    </div>
+  `;
+  log("✅ Test completado", "ok");
 }
-async function getV(){
-  const el=document.getElementById('vc');
-  const y=new Date();y.setDate(y.getDate()-1);
-  const{count}=await sb.from('page_views').select('*',{count:'exact',head:true}).gt('created_at',y.toISOString());
-  el.textContent=`👀 ${(count||0).toLocaleString('es-ES')}`;
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('admBtn').addEventListener('click',()=>{
-    if(!admin){setAdmin(true);alert('¡🔴 EDITA CON RESPONSABILIDAD!');}
-    else{if(!confirm('¿Salir del modo edición?')) return;setAdmin(false);loadCards();loadStatus();}
-  });
-  document.getElementById('saveBtn').addEventListener('click', save);
-  document.getElementById('addNewsBtn').addEventListener('click', addN);
-  document.getElementById('delNewsBtn').addEventListener('click', delN);
-  document.getElementById('pubBtn').addEventListener('click', pubCmt);
-
-  regV();getV();loadCards();loadNews();loadCmts();loadStatus();loadBanners();
-  setInterval(fetchRates,CACHE);setInterval(fetchDef,CACHE);
-});
-
-window.sv=(name,btn)=>{
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));
-  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('active',b===btn));
-  if(name==='chat') document.getElementById('bdg').style.display='none';
-  document.getElementById('scr').scrollTop=0;
-};
 </script>
 </body>
 </html>
+
