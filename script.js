@@ -42,6 +42,7 @@ let currentData = [];
 let currentNews = []; 
 let currentStatus = {
     deficit_mw: 'Cargando...', dollar_cup: '...', euro_cup: '...', mlc_cup: '...',
+    cad_cup: '...', mxn_cup: '...', brl_cup: '...', cla_cup: '...',
     deficit_edited_at: null, divisa_edited_at: null
 }; 
 
@@ -136,15 +137,31 @@ async function fetchViaProxy(targetUrl, timeoutMs = 12000) {
 }
 
 // Extrae tasas del __NEXT_DATA__ de El Toque
+// Lógica exacta de El Toque:
+// Si count_values > 10 → median (suficientes reportes del día)
+// Si count_values <= 10 → ema_value (media móvil histórica, más estable)
+function elToqueVal(s, decimals = 0) {
+    if (!s) return null;
+    const v = (s.count_values ?? 0) > 10 && s.median != null
+        ? s.median
+        : (s.ema_value ?? s.median);
+    if (v == null) return null;
+    return decimals === 0 ? String(Math.round(v)) : String(+(v.toFixed(decimals)));
+}
+
 function extractRatesFromNextData(html) {
     const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
     if (!match) throw new Error("__NEXT_DATA__ no encontrado");
     const stats = JSON.parse(match[1])?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
     if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
     return {
-        usd: stats.USD?.median != null ? String(Math.round(stats.USD.median)) : null,
-        eur: stats.ECU?.median != null ? String(Math.round(stats.ECU.median)) : null,
-        mlc: stats.MLC?.median != null ? String(Math.round(stats.MLC.median)) : null,
+        usd: elToqueVal(stats.USD),       // siempre median (muchas muestras)
+        eur: elToqueVal(stats.ECU),       // siempre median
+        mlc: elToqueVal(stats.MLC),       // siempre median
+        cad: elToqueVal(stats.CAD),       // siempre median
+        mxn: elToqueVal(stats.MXN, 2),   // ema_value cuando pocas muestras
+        brl: elToqueVal(stats.BRL, 2),   // casi siempre ema_value
+        cla: elToqueVal(stats.CLA, 2),   // casi siempre ema_value
     };
 }
 
@@ -172,13 +189,13 @@ async function fetchElToqueRates() {
         }
         console.log("🔄 Actualizando tasas...");
 
-        let rates = { usd: null, eur: null, mlc: null };
+        let rates = { usd: null, eur: null, mlc: null, cad: null, mxn: null, brl: null, cla: null };
 
         // Fuente primaria: El Toque HTML (tiene USD + EUR + MLC exactos)
         try {
             const html = await fetchViaProxy("https://eltoque.com/tasas-de-cambio-cuba");
             rates = extractRatesFromNextData(html);
-            console.log(`✅ El Toque: USD=${rates.usd} EUR=${rates.eur} MLC=${rates.mlc}`);
+            console.log(`✅ El Toque: USD=${rates.usd} EUR=${rates.eur} MLC=${rates.mlc} CAD=${rates.cad} MXN=${rates.mxn} BRL=${rates.brl} CLA=${rates.cla}`);
         } catch (e) {
             // Fallback: Yadio (USD + EUR, sin MLC)
             console.warn("⚠️ El Toque falló, usando Yadio:", e.message);
@@ -201,20 +218,30 @@ async function fetchElToqueRates() {
         const usdPrice = rates.usd;
         const eurPrice = isValidRate('eur', rates.eur) ? rates.eur : (currentStatus.euro_cup || '---');
         const mlcPrice = isValidRate('mlc', rates.mlc) ? rates.mlc : (currentStatus.mlc_cup || '---');
+        const cadPrice = rates.cad || currentStatus.cad_cup || '---';
+        const mxnPrice = rates.mxn || currentStatus.mxn_cup || '---';
+        const brlPrice = rates.brl || currentStatus.brl_cup || '---';
+        const claPrice = rates.cla || currentStatus.cla_cup || '---';
         const newTime  = new Date().toISOString();
 
         currentStatus.dollar_cup       = usdPrice;
         currentStatus.euro_cup         = eurPrice;
         currentStatus.mlc_cup          = mlcPrice;
+        currentStatus.cad_cup          = cadPrice;
+        currentStatus.mxn_cup          = mxnPrice;
+        currentStatus.brl_cup          = brlPrice;
+        currentStatus.cla_cup          = claPrice;
         currentStatus.divisa_edited_at = newTime;
         renderStatusPanel(currentStatus);
 
         await supabase.from('status_data').update({
             dollar_cup: usdPrice, euro_cup: eurPrice,
-            mlc_cup: mlcPrice, divisa_edited_at: newTime
+            mlc_cup: mlcPrice, cad_cup: cadPrice,
+            mxn_cup: mxnPrice, brl_cup: brlPrice,
+            cla_cup: claPrice, divisa_edited_at: newTime
         }).eq('id', 1);
 
-        console.log(`✅ Tasas guardadas: USD=${usdPrice} EUR=${eurPrice} MLC=${mlcPrice}`);
+        console.log(`✅ Tasas guardadas: USD=${usdPrice} EUR=${eurPrice} MLC=${mlcPrice} CAD=${cadPrice} MXN=${mxnPrice} BRL=${brlPrice} CLA=${claPrice}`);
     } catch (err) {
         console.error("⚠️ fetchElToqueRates:", err.message);
     }
@@ -673,10 +700,18 @@ async function getAndDisplayViewCount() {
 }
 function renderStatusPanel(status) {
     DOMElements.statusDataContainer.innerHTML = `
-        <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
-        <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
-        <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
-        <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>`;
+        <div class="status-panel-row">
+            <div class="status-item deficit"><span class="label">🔌 Déficit</span><span class="value">${status.deficit_mw || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💵 USD</span><span class="value">${status.dollar_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💶 EUR</span><span class="value">${status.euro_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💳 MLC</span><span class="value">${status.mlc_cup || '---'}</span></div>
+        </div>
+        <div class="status-panel-row">
+            <div class="status-item divisa"><span class="label">🇨🇦 CAD</span><span class="value">${status.cad_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">🇲🇽 MXN</span><span class="value">${status.mxn_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">🇧🇷 BRL</span><span class="value">${status.brl_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💎 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
+        </div>`;
 }
 
 async function loadStatusData() {
@@ -717,3 +752,4 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
+
