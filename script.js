@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ----------------------------------------------------
 // Fuente primaria: Yadio.io (API abierta, sin token)
 // Fuente secundaria: El Toque HTML (para MLC)
-const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 horas
+const CACHE_DURATION = 0; // 2 horas
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -543,7 +543,7 @@ function renderStatusPanel(status, isAdminMode) {
 // El RSS de Cubadebate es XML puro, sin JavaScript.
 // La UNE publica un artículo diario con el déficit en el título.
 // Patrones: "pronostica X MW de déficit" | "afectación de X MW"
-const DEFICIT_CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 horas
+const DEFICIT_CACHE_DURATION = 0; // 2 horas
 
 async function fetchDeficitFromCubadebate() {
     try {
