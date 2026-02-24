@@ -96,46 +96,18 @@ function timeAgo(timestamp) {
 }
 
 // ----------------------------------------------------
-// 💰 SISTEMA UNIFICADO DE TASAS — El Toque + Yadio fallback
+// 💰 TASAS DE CAMBIO — El Toque + Yadio fallback
 // ----------------------------------------------------
-// Todas las divisas usan exactamente la misma lógica:
-//   1. Se obtienen de El Toque (fuente primaria)
-//   2. Se validan con isValidRate()
-//   3. Se guardan en Supabase
-//   4. Se leen de Supabase al cargar la página
-//
-// Lógica de El Toque para elegir el valor a mostrar:
-//   count_values > 10 → median  (suficientes reportes del día)
-//   count_values <= 10 → ema_value (media móvil, más estable)
-//
-// Mapa completo de divisas: clave interna → columna Supabase
-const DIVISAS = [
-    { key: 'USD', stat: 'USD',  col: 'dollar_cup', dec: 0, min: 200, max: 700 },
-    { key: 'EUR', stat: 'ECU',  col: 'euro_cup',   dec: 0, min: 200, max: 800 },
-    { key: 'MLC', stat: 'MLC',  col: 'mlc_cup',    dec: 0, min: 150, max: 700 },
-    { key: 'CAD', stat: 'CAD',  col: 'cad_cup',    dec: 0, min: 100, max: 600 },
-    { key: 'MXN', stat: 'MXN',  col: 'mxn_cup',    dec: 2, min: 5,   max: 100 },
-    { key: 'BRL', stat: 'BRL',  col: 'brl_cup',    dec: 2, min: 20,  max: 200 },
-    { key: 'CLA', stat: 'CLA',  col: 'cla_cup',    dec: 2, min: 200, max: 800 },
-];
+// Misma lógica del test v4 que funcionó correctamente.
+// Umbral: count_values >= 11 → median | < 11 → ema_value
 
-// Extrae el valor correcto de una entrada de statistics de El Toque
-function elToqueVal(s, dec = 0) {
+// Replica exactamente cómo El Toque elige el valor a mostrar
+function elToqueVal(s) {
     if (!s) return null;
-    const v = (s.count_values ?? 0) > 10 && s.median != null
+    const v = (s.count_values ?? 0) >= 11 && s.median != null
         ? s.median
         : (s.ema_value ?? s.median);
-    if (v == null) return null;
-    return dec === 0 ? String(Math.round(v)) : String(+(v.toFixed(dec)));
-}
-
-// Valida que un valor esté dentro del rango esperado para su divisa
-function isValidRate(divisa, value) {
-    const n = parseFloat(value);
-    if (isNaN(n)) return false;
-    const d = DIVISAS.find(d => d.col === divisa || d.key === divisa);
-    const min = d?.min ?? 0, max = d?.max ?? 99999;
-    return n >= min && n <= max;
+    return v != null ? String(Math.round(v * 100) / 100) : null;
 }
 
 // Fetch con timeout, intenta dos proxies en orden
@@ -161,20 +133,25 @@ async function fetchViaProxy(targetUrl, timeoutMs = 12000) {
     throw new Error("Todos los proxies fallaron");
 }
 
-// Extrae TODAS las divisas del __NEXT_DATA__ de El Toque
+// Extrae las 7 divisas del __NEXT_DATA__ de El Toque
+// Exactamente igual que el test v4
 function extractRatesFromNextData(html) {
     const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
     if (!match) throw new Error("__NEXT_DATA__ no encontrado");
     const stats = JSON.parse(match[1])?.props?.pageProps?.trmiExchange?.data?.api?.statistics;
     if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
-    const rates = {};
-    for (const d of DIVISAS) {
-        rates[d.key] = elToqueVal(stats[d.stat], d.dec);
-    }
-    return rates;
+    return {
+        usd: elToqueVal(stats.USD),
+        eur: elToqueVal(stats.ECU),
+        mlc: elToqueVal(stats.MLC),
+        cad: elToqueVal(stats.CAD),
+        mxn: elToqueVal(stats.MXN),
+        brl: elToqueVal(stats.BRL),
+        cla: elToqueVal(stats.CLA),
+    };
 }
 
-// Fallback: Yadio.io — solo tiene USD y EUR
+// Fallback Yadio — solo USD y EUR
 async function fetchFromYadio() {
     const res = await Promise.race([
         fetch("https://api.yadio.io/exrates/CUP"),
@@ -183,62 +160,85 @@ async function fetchFromYadio() {
     if (!res.ok) throw new Error(`Yadio HTTP ${res.status}`);
     const j = await res.json();
     return {
-        USD: j.CUP?.USD ? String(Math.round(1 / j.CUP.USD)) : null,
-        EUR: j.CUP?.EUR ? String(Math.round(1 / j.CUP.EUR)) : null,
+        usd: j.CUP?.USD ? String(Math.round(1 / j.CUP.USD)) : null,
+        eur: j.CUP?.EUR ? String(Math.round(1 / j.CUP.EUR)) : null,
     };
 }
 
 async function fetchElToqueRates() {
     try {
         const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
-        const hayDivisasVacias = DIVISAS.some(d => !currentStatus[d.col] || currentStatus[d.col] === '...' || currentStatus[d.col] === '---' || currentStatus[d.col] === null);
-        if ((Date.now() - lastUpdate) < CACHE_DURATION && !hayDivisasVacias) {
+        if ((Date.now() - lastUpdate) < CACHE_DURATION) {
             console.log("💾 Tasas en caché.");
             return;
         }
-        if (hayDivisasVacias) console.log("⚠️ Hay divisas vacías, forzando actualización...");
-        console.log("🔄 Actualizando tasas...");
+        console.log("🔄 Actualizando tasas desde El Toque...");
 
-        // Intentar El Toque primero
-        let rawRates = {};
+        // ── Obtener tasas ──────────────────────────────────────────────────
+        let r = { usd:null, eur:null, mlc:null, cad:null, mxn:null, brl:null, cla:null };
+
         try {
             const html = await fetchViaProxy("https://eltoque.com/tasas-de-cambio-cuba");
-            rawRates = extractRatesFromNextData(html);
-            console.log("✅ El Toque OK:", JSON.stringify(rawRates));
+            r = extractRatesFromNextData(html);
+            console.log(`✅ El Toque: USD=${r.usd} EUR=${r.eur} MLC=${r.mlc} CAD=${r.cad} MXN=${r.mxn} BRL=${r.brl} CLA=${r.cla}`);
         } catch (e) {
             console.warn("⚠️ El Toque falló, usando Yadio:", e.message);
             try {
                 const y = await fetchFromYadio();
-                rawRates = { USD: y.USD, EUR: y.EUR };
-                console.log(`✅ Yadio: USD=${rawRates.USD} EUR=${rawRates.EUR}`);
+                r.usd = y.usd;
+                r.eur = y.eur;
+                // conservar últimos valores conocidos para el resto
+                r.mlc = currentStatus.mlc_cup || null;
+                r.cad = currentStatus.cad_cup || null;
+                r.mxn = currentStatus.mxn_cup || null;
+                r.brl = currentStatus.brl_cup || null;
+                r.cla = currentStatus.cla_cup || null;
+                console.log(`✅ Yadio fallback: USD=${r.usd} EUR=${r.eur}`);
             } catch (e2) {
                 console.error("⚠️ Yadio también falló:", e2.message);
             }
         }
 
-        // Validar USD — si no hay USD válido, no actualizar nada
-        if (!isValidRate('USD', rawRates.USD)) {
-            console.warn("⚠️ USD fuera de rango, sin actualizar.");
+        // ── Validar USD mínimo (guardián de todo el sistema) ──────────────
+        const usdN = parseFloat(r.usd);
+        if (isNaN(usdN) || usdN < 200 || usdN > 700) {
+            console.warn("⚠️ USD inválido, abortando actualización.");
             return;
         }
 
-        // Para cada divisa: usar nuevo valor si es válido, si no conservar el último de Supabase
-        const update = { divisa_edited_at: new Date().toISOString() };
-        for (const d of DIVISAS) {
-            const fresh = rawRates[d.key];
-            const prev  = currentStatus[d.col] || null;
-            const final = isValidRate(d.key, fresh) ? fresh : (prev || '---');
-            currentStatus[d.col] = final;
-            update[d.col]        = final;
-        }
+        // ── Guardar en currentStatus y Supabase ───────────────────────────
+        const newTime = new Date().toISOString();
+
+        currentStatus.dollar_cup       = r.usd;
+        currentStatus.euro_cup         = r.eur  || currentStatus.euro_cup  || '---';
+        currentStatus.mlc_cup          = r.mlc  || currentStatus.mlc_cup   || '---';
+        currentStatus.cad_cup          = r.cad  || currentStatus.cad_cup   || '---';
+        currentStatus.mxn_cup          = r.mxn  || currentStatus.mxn_cup   || '---';
+        currentStatus.brl_cup          = r.brl  || currentStatus.brl_cup   || '---';
+        currentStatus.cla_cup          = r.cla  || currentStatus.cla_cup   || '---';
+        currentStatus.divisa_edited_at = newTime;
 
         renderStatusPanel(currentStatus);
 
-        await supabase.from('status_data').update(update).eq('id', 1);
+        const { error } = await supabase.from('status_data').update({
+            dollar_cup:       currentStatus.dollar_cup,
+            euro_cup:         currentStatus.euro_cup,
+            mlc_cup:          currentStatus.mlc_cup,
+            cad_cup:          currentStatus.cad_cup,
+            mxn_cup:          currentStatus.mxn_cup,
+            brl_cup:          currentStatus.brl_cup,
+            cla_cup:          currentStatus.cla_cup,
+            divisa_edited_at: newTime,
+        }).eq('id', 1);
 
-        console.log("✅ Tasas guardadas:", DIVISAS.map(d => `${d.key}=${currentStatus[d.col]}`).join(' '));
+        if (error) {
+            console.error("❌ Supabase error:", error.message);
+        } else {
+            console.log(`✅ Guardado en Supabase: USD=${currentStatus.dollar_cup} EUR=${currentStatus.euro_cup} MLC=${currentStatus.mlc_cup} CAD=${currentStatus.cad_cup} MXN=${currentStatus.mxn_cup} BRL=${currentStatus.brl_cup} CLA=${currentStatus.cla_cup}`);
+        }
+
     } catch (err) {
-        console.error("⚠️ fetchElToqueRates:", err.message);
+        console.error("⚠️ fetchElToqueRates error:", err.message);
     }
 }
 
@@ -747,3 +747,6 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
+
+
+
