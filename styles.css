@@ -428,3 +428,4 @@ footer {
     .status-panel-container.admin-mode .status-panel-data { flex-direction: row; flex-wrap: wrap; gap: 3px; }
     .status-panel-container.admin-mode .status-item { flex-direction: column; width: 48%; }
 }
+
