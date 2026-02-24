@@ -4,6 +4,18 @@
 const SUPABASE_URL = "https://mkvpjsvqjqeuniabjjwr.supabase.co"; 
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnBqc3ZxanFldW5pYWJqandyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTI0MzU0OCwiZXhwIjoyMDgwODE5NTQ4fQ.No4ZOo0sawF6KYJnIrSD2CVQd1lHzNlLSplQgfuHBcg"; 
 
+// ----------------------------------------------------
+// 💰 CONFIGURACIÓN SCRAPER ELTOQUE (Caché Inteligente 24h)
+// ----------------------------------------------------
+// ✅ Ya no se usa la API de El Toque (bloqueada).
+// ✅ Sistema de caché inteligente:
+//    - Se lee Supabase primero (todos los usuarios).
+//    - Si los datos tienen más de 24h, el PRIMER usuario
+//      del día raspa eltoque.com y actualiza Supabase.
+//    - Los usuarios siguientes leen directo de la BD. 🎯
+
+const ELTOQUE_SCRAPE_URL = "https://eltoque.com/tasas-de-cambio-de-moneda-en-cuba-hoy";
+const CACHE_DURATION_24H = 24 * 60 * 60 * 1000; // 24 horas en ms
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -35,7 +47,10 @@ const TIME_PANEL_AUTOHIDE_MS = 3000;
 
 let currentData = [];
 let currentNews = []; 
-
+let currentStatus = {
+    deficit_mw: 'Cargando...', dollar_cup: '...', euro_cup: '...', mlc_cup: '...',
+    deficit_edited_at: null, divisa_edited_at: null
+}; 
 
 let userWebId = localStorage.getItem('userWebId');
 if (!userWebId) {
@@ -59,7 +74,9 @@ const DOMElements = {
     saveBtn: document.getElementById('saveBtn'),
     addNewsBtn: document.getElementById('addNewsBtn'),
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
-    dynamicTickerStyles: document.getElementById('dynamicTickerStyles')
+    dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
+    statusPanel: document.getElementById('statusPanel'),
+    statusDataContainer: document.getElementById('statusDataContainer')
 };
 
 function timeAgo(timestamp) {
@@ -82,6 +99,130 @@ function timeAgo(timestamp) {
     else if (MINUTES >= 1) { text = `hace ${MINUTES} min.`; } 
     else { text = 'hace unos momentos'; }
     return { text, diff, date: new Date(timestamp) };
+}
+
+// ----------------------------------------------------
+// 💰 LÓGICA SCRAPER ELTOQUE (Caché Inteligente 24h)
+// ----------------------------------------------------
+
+/**
+ * Raspa eltoque.com para obtener USD, EUR y MLC en CUP.
+ * Usa un proxy CORS público para poder hacer fetch desde el navegador.
+ * Devuelve { usdPrice, eurPrice, mlcPrice } o null si falla.
+ */
+async function scrapeElToqueRates() {
+    // Lista de proxies CORS públicos como fallback
+    const proxies = [
+        "https://corsproxy.io/?",
+        "https://api.allorigins.win/raw?url=",
+        "https://cors-anywhere.herokuapp.com/"
+    ];
+
+    const targetUrl = ELTOQUE_SCRAPE_URL;
+
+    for (const proxy of proxies) {
+        try {
+            const response = await fetch(proxy + encodeURIComponent(targetUrl), {
+                method: 'GET',
+                headers: { 'Accept': 'text/html' }
+            });
+            if (!response.ok) continue;
+
+            const html = await response.text();
+
+            // ── Estrategia de extracción ──────────────────────────────────────
+            // El sitio eltoque.com muestra las tasas como texto con el patrón:
+            //   "USD ... 380 CUP" o en tablas/spans con las divisas.
+            // Usamos regex flexible para capturar el número que acompaña a cada moneda.
+
+            const extractRate = (currencyCode) => {
+                // Busca el código de moneda seguido de dígitos (con posible separador)
+                // Ejemplo: "USD</td><td>380" o "USD: 380" o "USD 380 CUP"
+                const patterns = [
+                    new RegExp(`${currencyCode}[^\\d]{1,30}?(\\d{2,4})(?:[,.]\\d+)?\\s*(?:CUP|cup)?`, 'i'),
+                    new RegExp(`"${currencyCode}"[^\\d]{1,30}?(\\d{2,4})`, 'i'),
+                    new RegExp(`>${currencyCode}<[^>]*>[^<]*(\\d{2,4})`, 'i'),
+                ];
+                for (const pattern of patterns) {
+                    const match = html.match(pattern);
+                    if (match && match[1]) {
+                        const val = parseInt(match[1], 10);
+                        // Validación de rango razonable (Cuba: entre 100 y 9999 CUP por USD)
+                        if (val >= 100 && val <= 9999) return String(val);
+                    }
+                }
+                return null;
+            };
+
+            const usdPrice = extractRate('USD');
+            const eurPrice = extractRate('EUR') || extractRate('ECU');
+            const mlcPrice = extractRate('MLC');
+
+            if (usdPrice) {
+                console.log(`✅ Scraping exitoso via ${proxy} → USD:${usdPrice} EUR:${eurPrice} MLC:${mlcPrice}`);
+                return {
+                    usdPrice: usdPrice || '---',
+                    eurPrice: eurPrice || '---',
+                    mlcPrice: mlcPrice || '---'
+                };
+            }
+        } catch (err) {
+            console.warn(`⚠️ Proxy falló (${proxy}):`, err.message);
+        }
+    }
+    return null; // Todos los proxies fallaron
+}
+
+/**
+ * Caché inteligente de 24 horas:
+ * - Lee de Supabase primero (rápido para todos los usuarios).
+ * - Si los datos tienen > 24h, hace scraping y actualiza Supabase.
+ * - El PRIMER usuario del día hace el trabajo; los demás leen la BD. 🎯
+ */
+async function fetchElToqueRates() {
+    try {
+        const lastUpdate = new Date(currentStatus.divisa_edited_at || 0).getTime();
+        const now = Date.now();
+        const datosActualizados = (now - lastUpdate) < CACHE_DURATION_24H;
+
+        if (datosActualizados) {
+            // ✅ Los datos son frescos (< 24h). No hay que hacer nada.
+            console.log(`💾 Tasas en caché. Próxima actualización en ${Math.ceil((CACHE_DURATION_24H - (now - lastUpdate)) / 3600000)}h`);
+            return;
+        }
+
+        // 🔄 Los datos son viejos. Este usuario hace el scraping (trabajo sucio).
+        console.log("🔍 Caché expirado. Iniciando scraping de eltoque.com...");
+        const rates = await scrapeElToqueRates();
+
+        if (rates && rates.usdPrice !== '---') {
+            const newTime = new Date().toISOString();
+            currentStatus.dollar_cup = rates.usdPrice;
+            currentStatus.euro_cup  = rates.eurPrice;
+            currentStatus.mlc_cup   = rates.mlcPrice;
+            currentStatus.divisa_edited_at = newTime;
+
+            // Actualizar UI inmediatamente para este usuario
+            renderStatusPanel(currentStatus, admin);
+
+            // Guardar en Supabase para que los próximos usuarios lean de ahí
+            const { error } = await supabase.from('status_data').update({
+                dollar_cup: rates.usdPrice,
+                euro_cup:   rates.eurPrice,
+                mlc_cup:    rates.mlcPrice,
+                divisa_edited_at: newTime
+            }).eq('id', 1);
+
+            if (error) console.error("⚠️ Error al guardar en Supabase:", error.message);
+            else console.log("✅ Tasas guardadas en Supabase. Los próximos usuarios leerán de la BD.");
+
+        } else {
+            console.warn("⚠️ Scraping falló. Se mantendrán los valores anteriores de Supabase.");
+        }
+
+    } catch (error) {
+        console.error("⚠️ Error en fetchElToqueRates:", error.message);
+    }
 }
 
 // ----------------------------------------------------
@@ -108,7 +249,8 @@ function updateAdminUI(isAdmin) {
         DOMElements.toggleAdminBtn.classList.add('btn-primary');
         disableEditing(); 
     }
-    renderData(currentData, isAdmin);
+    DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
+    renderStatusPanel(currentStatus, isAdmin); 
 }
 
 function toggleAdminMode() {
@@ -116,7 +258,7 @@ function toggleAdminMode() {
         updateAdminUI(true); alert("¡🔴 EDITA CON RESPONSABILIDAD!");
     } else {
         if (!confirm("✅️ ¿Terminar la edición?")) return;
-        updateAdminUI(false); loadData(); 
+        updateAdminUI(false); loadData(); loadStatusData(); 
     }
 }
 
@@ -390,8 +532,30 @@ async function getAndDisplayViewCount() {
     const { count } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).gt('created_at', yesterday.toISOString());
     el.textContent = `👀 ${count ? count.toLocaleString('es-ES') : '0'} `;
 }
+function renderStatusPanel(status, isAdminMode) {
+    if (isAdminMode) {
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item"><span class="label">Deficit (MW):</span><input type="text" id="editDeficit" value="${status.deficit_mw || ''}"></div>
+            <div class="status-item"><span class="label">USD (Auto):</span><input type="text" value="${status.dollar_cup}" disabled></div>
+            <div class="status-item"><span class="label">EUR (Auto):</span><input type="text" value="${status.euro_cup}" disabled></div>
+            <div class="status-item"><span class="label">MLC (Auto):</span><input type="text" value="${status.mlc_cup}" disabled></div>`;
+    } else {
+        DOMElements.statusDataContainer.innerHTML = `
+            <div class="status-item deficit"><span class="label">🔌 Déficit:</span><span class="value">${status.deficit_mw || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💵 USD:</span><span class="value">${status.dollar_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💶 EUR:</span><span class="value">${status.euro_cup || '---'}</span></div>
+            <div class="status-item divisa"><span class="label">💳 MLC:</span><span class="value">${status.mlc_cup || '---'}</span></div>`;
+    }
+}
+async function loadStatusData() {
+    const { data } = await supabase.from('status_data').select('*').eq('id', 1).single();
+    if (data) currentStatus = { ...currentStatus, ...data };
+    renderStatusPanel(currentStatus, admin); fetchElToqueRates(); 
+}
 async function saveChanges() {
     if (!admin) return;
+    const editDeficit = document.getElementById('editDeficit');
+    const newDeficit = editDeficit ? editDeficit.value : currentStatus.deficit_mw;
     const updates = [];
     document.querySelectorAll(".card").forEach(card => {
         const emoji = card.querySelector('.editable-emoji').value;
@@ -402,6 +566,9 @@ async function saveChanges() {
              updates.push(supabase.from('items').update({ emoji, titulo, contenido, last_edited_timestamp: new Date().toISOString() }).eq('id', id));
         }
     });
+    if (newDeficit !== currentStatus.deficit_mw) {
+        updates.push(supabase.from('status_data').update({ deficit_mw: newDeficit, deficit_edited_at: new Date().toISOString() }).eq('id', 1));
+    }
     if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else { alert("No hay cambios."); }
 }
 document.addEventListener('DOMContentLoaded', () => {
@@ -411,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
     DOMElements.deleteNewsBtn.addEventListener('click', deleteNews);
     DOMElements.publishCommentBtn.addEventListener('click', publishComment);
     document.getElementById('fecha-actualizacion').textContent = new Date().toLocaleDateString();
-    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments();
+    registerPageView(); getAndDisplayViewCount(); loadData(); loadNews(); loadComments(); loadStatusData(); 
 });
 async function loadData() {
     const { data } = await supabase.from('items').select('*').order('id');
@@ -420,3 +587,4 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
         }
+
