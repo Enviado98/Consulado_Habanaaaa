@@ -214,7 +214,16 @@ header p { margin: 0.3rem 0 0; font-size: 0.85rem; font-weight: 600; opacity: 0.
 
 .status-panel-data { 
     display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: nowrap; gap: 3px; text-align: center; overflow-x: auto;
+    flex-wrap: wrap; gap: 3px; text-align: center;
+}
+.status-panel-row {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: nowrap; gap: 3px; width: 100%;
+}
+.status-panel-row + .status-panel-row {
+    border-top: 1px dashed rgba(255,255,255,0.08);
+    padding-top: 3px;
+    margin-top: 1px;
 }
 .status-item { 
     background: #27272a; padding: 4px; border-radius: 6px; border: 1px solid var(--glass-border);
