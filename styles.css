@@ -19,8 +19,8 @@
   --glass2:   rgba(255,255,255,0.09);
 
   --t1: #f2f2f7;
-  --t2: #8e8ea0;
-  --t3: #48485a;
+  --t2: #b0b0c8;  /* era #8e8ea0 — ratio ~5.8:1 ✓ WCAG AA */
+  --t3: #787890;  /* era #48485a — ratio ~4.0:1 ✓ WCAG AA */
 
   --green:  #30d158;
   --red:    #ff453a;
@@ -93,7 +93,7 @@ header {
   flex-shrink: 0;
 }
 .flag-es, .flag-cu {
-  font-size: 0.55rem;
+  font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   padding: 3px 6px;
@@ -126,7 +126,7 @@ header {
   text-overflow: ellipsis;
 }
 .header-text p {
-  font-size: 0.62rem;
+  font-size: 0.90rem;
   color: var(--t3);
   font-weight: 400;
   white-space: nowrap;
@@ -143,7 +143,7 @@ header {
 
 .header-badge {
   flex-shrink: 0;
-  font-size: 0.62rem;
+  font-size: 0.90rem;
   font-weight: 600;
   color: var(--green);
   background: rgba(48,209,88,0.1);
@@ -176,7 +176,7 @@ header {
 }
 
 .sp-title {
-  font-size: 0.6rem;
+  font-size: 0.69rem;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -187,7 +187,7 @@ header {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.56rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--red);
@@ -220,9 +220,9 @@ header {
   transition: border-color .2s;
 }
 .status-item:hover { border-color: var(--border2); }
-.status-item .label { font-size: 0.54rem; font-weight: 500; color: var(--t3); white-space: nowrap; }
+.status-item .label { font-size: 0.78rem; font-weight: 500; color: var(--t3); white-space: nowrap; }
 .status-item .value {
-  font-size: 0.92rem; font-weight: 700;
+  font-size: 1.06rem; font-weight: 700;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   width: 100%; text-align: center; letter-spacing: -0.02em;
 }
@@ -263,15 +263,15 @@ body.admin-mode .news-ticker-container {
   z-index: 200;
 }
 .news-ticker-fixed-label {
-  font-size: 0.58rem; font-weight: 800; letter-spacing: 0.12em;
+  font-size: 0.90rem; font-weight: 800; letter-spacing: 0.12em;
   padding: 0 8px; background: rgba(0,0,0,0.25); border-radius: 4px;
   margin-left: 6px; flex-shrink: 0; line-height: 1.7;
 }
 .news-ticker-wrap    { overflow: hidden; flex-grow: 1; }
-.news-ticker-content { white-space: nowrap; font-size: 0.72rem; font-weight: 500; display: inline-block; }
+.news-ticker-content { white-space: nowrap; font-size: 0.90rem; font-weight: 500; display: inline-block; }
 @keyframes ticker-move-static { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 .news-item           { padding: 0 14px; display: inline-block; }
-.news-item small     { font-size: 0.6rem; color: rgba(255,255,255,0.65); margin-left: 4px; }
+.news-item small     { font-size: 0.69rem; color: rgba(255,255,255,0.65); margin-left: 4px; }
 .news-item a         { color: #ffe066; text-decoration: underline; font-weight: 700; }
 
 /* ═══ TAB VIEWS ═════════════════════════════════════════════════ */
@@ -291,7 +291,7 @@ body.admin-mode .news-ticker-container {
   margin-bottom: 14px; max-width: 1000px; margin-left: auto; margin-right: auto;
 }
 .login-message {
-  font-size: 0.77rem; color: var(--t2); font-weight: 400; text-align: center;
+  font-size: 0.89rem; color: var(--t2); font-weight: 400; text-align: center;
 }
 #adminControlsPanel {
   display: none; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%;
@@ -332,18 +332,18 @@ body.admin-mode .news-ticker-container {
 .card span.emoji { font-size: 1.8rem; line-height: 1; display: block; transition: transform .22s ease; }
 .card:hover span.emoji { transform: scale(1.12); }
 .card h3 {
-  font-size: 0.72rem; font-weight: 700;
+  font-size: 0.90rem; font-weight: 700;
   color: var(--card-neon, var(--t1));
   text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.3;
 }
 .card-content p {
-  font-size: 0.72rem; font-weight: 400; color: var(--t2);
+  font-size: 0.90rem; font-weight: 400; color: var(--t2);
   line-height: 1.5; white-space: pre-wrap; text-align: center;
 }
 .card-time-panel {
   position: absolute; bottom:0; left:0; right:0;
-  background: rgba(11,11,16,0.95); padding: 7px;
-  font-size: 0.66rem; font-weight: 500; color: var(--t2);
+  background: rgba(11,11,16,0.95); padding: 8px;
+  font-size: 0.71rem; font-weight: 500; color: var(--t2);
   transform: translateY(100%); transition: transform .23s ease;
   border-top: 1px solid var(--border);
   border-radius: 0 0 var(--r2) var(--r2);
@@ -351,7 +351,7 @@ body.admin-mode .news-ticker-container {
 .card.show-time-panel .card-time-panel { transform: translateY(0); }
 .card-label {
   position: absolute; top: 8px; right: 8px;
-  font-size: 0.5rem; font-weight: 700; padding: 2px 7px;
+  font-size: 0.58rem; font-weight: 700; padding: 2px 7px;
   border-radius: 20px; letter-spacing: .05em; text-transform: uppercase;
   background: var(--bg); border: 1px solid var(--border); color: var(--t2);
   z-index: 5; display: none;
@@ -361,14 +361,14 @@ body.admin-mode .news-ticker-container {
 
 /* edición */
 .card .editable-title,
-.card .editable-emoji { background: var(--bg); border: 1px dashed var(--bg4); color: var(--t1); border-radius: 8px; width: 100%; padding: 4px 8px; font-family: var(--f); margin-bottom: 4px; font-size: 0.82rem; }
-.card .editable-content { background: var(--bg); border: 1px dashed var(--bg4); color: var(--t1); border-radius: 8px; width: 100%; padding: 8px; font-family: var(--f); margin-bottom: 4px; font-size: 0.82rem; min-height: 150px; resize: vertical; }
+.card .editable-emoji { background: var(--bg); border: 1px dashed var(--bg4); color: var(--t1); border-radius: 8px; width: 100%; padding: 4px 8px; font-family: var(--f); margin-bottom: 4px; font-size: 0.94rem; }
+.card .editable-content { background: var(--bg); border: 1px dashed var(--bg4); color: var(--t1); border-radius: 8px; width: 100%; padding: 8px; font-family: var(--f); margin-bottom: 4px; font-size: 0.94rem; min-height: 150px; resize: vertical; }
 
 /* ═══ BOTONES ═══════════════════════════════════════════════════ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   padding: 10px 20px; border: none; border-radius: 50px;
-  font-family: var(--f); font-weight: 600; font-size: 0.83rem;
+  font-family: var(--f); font-weight: 600; font-size: 0.95rem;
   cursor: pointer; text-decoration: none; color: #fff;
   transition: opacity .15s, transform .15s;
 }
@@ -379,7 +379,7 @@ body.admin-mode .news-ticker-container {
 .btn-success   { background: var(--green); color: #000; }
 .btn-danger    { background: var(--red); }
 .btn-secondary { background: var(--bg4); border: 1px solid var(--border2); }
-.btn-sm        { padding: 6px 13px; font-size: 0.72rem; }
+.btn-sm        { padding: 6px 13px; font-size: 0.83rem; }
 .btn-sm svg    { width: 13px; height: 13px; }
 
 /* ═══ TAB 2 — NOTICIAS ══════════════════════════════════════════ */
@@ -409,7 +409,7 @@ body.admin-mode .news-ticker-container {
   border-radius: 50px;
   color: var(--t1);
   font-family: var(--f);
-  font-size: 0.78rem;
+  font-size: 0.90rem;
   font-weight: 600;
   cursor: pointer;
   transition: background .2s, border-color .2s, transform .15s;
@@ -436,9 +436,9 @@ body.admin-mode .news-ticker-container {
   animation: viewIn .25s ease; transition: background .15s;
 }
 .noticia-card:hover  { background: var(--bg3); }
-.noticia-card .noticia-texto { font-size: 0.83rem; font-weight: 400; color: var(--t1); line-height: 1.55; word-break: break-word; }
+.noticia-card .noticia-texto { font-size: 0.95rem; font-weight: 400; color: var(--t1); line-height: 1.55; word-break: break-word; }
 .noticia-card .noticia-texto a { color: var(--cyan); text-decoration: underline; }
-.noticia-card .noticia-meta { margin-top: 6px; font-size: 0.62rem; color: var(--t3); display: flex; align-items: center; gap: 5px; }
+.noticia-card .noticia-meta { margin-top: 6px; font-size: 0.90rem; color: var(--t3); display: flex; align-items: center; gap: 5px; }
 .noticia-card .noticia-meta::before { content:''; width:4px; height:4px; border-radius:50%; background: var(--red); flex-shrink:0; }
 .noticias-empty { text-align:center; color:var(--t3); padding:40px 20px; font-size:0.82rem; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r2); }
 
@@ -481,26 +481,26 @@ body.admin-mode .news-ticker-container {
 .modal-close:hover { background: var(--bg5); }
 .modal-close svg { width: 14px; height: 14px; stroke: var(--t2); }
 
-.modal-subtitle { font-size: 0.73rem; color: var(--t3); margin-bottom: 14px; line-height: 1.4; }
+.modal-subtitle { font-size: 0.84rem; color: var(--t3); margin-bottom: 14px; line-height: 1.4; }
 
 .modal-textarea {
   width: 100%; min-height: 90px; resize: none;
   background: var(--bg3); border: 1px solid var(--border2);
   border-radius: var(--r); color: var(--t1);
-  font-family: var(--f); font-size: 0.87rem; padding: 12px;
+  font-family: var(--f); font-size: 1.00rem; padding: 12px;
   line-height: 1.5; transition: border-color .2s;
 }
 .modal-textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(10,132,255,0.15); }
 
 .modal-meta { display: flex; justify-content: flex-end; margin: 6px 0 14px; }
-.modal-char { font-size: 0.65rem; color: var(--t3); }
+.modal-char { font-size: 0.75rem; color: var(--t3); }
 
 .modal-submit-btn {
   width: 100%; padding: 13px;
   background: var(--blue);
   border: none; border-radius: 50px;
   color: #fff; font-family: var(--f);
-  font-size: 0.9rem; font-weight: 600;
+  font-size: 1.04rem; font-weight: 600;
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: opacity .15s, transform .15s;
 }
@@ -543,14 +543,14 @@ body.admin-mode .news-ticker-container {
   padding: 10px;
 }
 
-.loading-msg { text-align:center; color:var(--t3); padding: 20px; font-size: .82rem; }
+.loading-msg { text-align:center; color:var(--t3); padding: 20px; font-size: 0.94rem; }
 
 /* Comentarios */
 .comment-item { margin-bottom: 12px; animation: viewIn .3s ease; }
 .comment-main-row { display: flex; gap: 9px; align-items: flex-start; }
 .comment-avatar {
   width: 30px; height: 30px; border-radius: 50%;
-  font-weight: 700; font-size: 0.82rem;
+  font-weight: 700; font-size: 0.94rem;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; color: #fff; text-transform: uppercase; user-select: none;
 }
@@ -560,20 +560,20 @@ body.admin-mode .news-ticker-container {
 }
 .comment-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; }
 .comment-name   { color:var(--t1); font-weight:600; font-size:.78rem; }
-.comment-date   { font-size:.59rem; color:var(--t3); }
+.comment-date   { font-size:.68rem; color:var(--t3); }
 .comment-content { color:var(--t2); font-size:.79rem; line-height:1.45; word-wrap:break-word; }
 .comment-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:5px; padding-top:5px; border-top:1px solid var(--border); }
-.like-button { background:transparent; border:none; cursor:pointer; font-size:.88rem; color:var(--t3); transition:color .15s, transform .15s; display:flex; align-items:center; gap:3px; padding:0; }
+.like-button { background:transparent; border:none; cursor:pointer; font-size:1.01rem; color:var(--t3); transition:color .15s, transform .15s; display:flex; align-items:center; gap:3px; padding:0; }
 .like-button:hover { color:var(--red); transform:scale(1.15); }
 .like-button.liked { color:var(--red); }
-.like-count { font-size:.68rem; color:var(--t3); font-weight:600; }
-.reply-form-toggle { font-size:.61rem; color:var(--blue); font-weight:600; cursor:pointer; text-transform:uppercase; padding:2px 6px; border-radius:4px; letter-spacing:.04em; transition:background .15s; }
+.like-count { font-size:.85rem; color:var(--t3); font-weight:600; }
+.reply-form-toggle { font-size:.88rem; color:var(--blue); font-weight:600; cursor:pointer; text-transform:uppercase; padding:2px 6px; border-radius:4px; letter-spacing:.04em; transition:background .15s; }
 .reply-form-toggle:hover { background:rgba(10,132,255,0.12); }
 .replies-container { margin-top:6px; padding-left:9px; margin-left:15px; border-left:2px solid rgba(191,90,242,0.18); width:calc(100% - 15px); }
 .comment-item.reply-style { margin-bottom:7px; }
-.comment-item.reply-style .comment-avatar { width:24px; height:24px; font-size:.7rem; }
+.comment-item.reply-style .comment-avatar { width:24px; height:24px; font-size:.81rem; }
 .comment-item.reply-style .comment-bubble { background:var(--bg4); padding:7px 10px; border-radius:0 var(--r) var(--r) var(--r); }
-.comment-item.reply-style .comment-content { font-size:.76rem; }
+.comment-item.reply-style .comment-content { font-size:.88rem; }
 .reply-form {
   display:none; margin-top:8px; background:var(--bg2); border:1px solid var(--border);
   border-radius:var(--r); padding:10px; margin-left:39px; width:calc(100% - 39px);
@@ -611,7 +611,7 @@ body.admin-mode .news-ticker-container {
   border-radius: 50px;
   color: var(--t1);
   font-family: var(--f);
-  font-size: 0.78rem;
+  font-size: 0.90rem;
   padding: 7px 14px;
   width: 100%;
   transition: border-color .2s;
@@ -631,7 +631,7 @@ body.admin-mode .news-ticker-container {
   border-radius: 50px;
   color: var(--t1);
   font-family: var(--f);
-  font-size: 0.82rem;
+  font-size: 0.94rem;
   padding: 8px 16px;
   transition: border-color .2s;
 }
@@ -659,8 +659,8 @@ footer {
   border-top: none;
   margin-top: 20px;
 }
-.footer-copy { font-size: .68rem; color: var(--t3); margin-bottom: 4px; }
-.dev-credit  { font-size: .65rem; color: var(--t3); }
+.footer-copy { font-size: .78rem; color: var(--t3); margin-bottom: 4px; }
+.dev-credit  { font-size: .75rem; color: var(--t3); }
 .dev-credit a { color: var(--t2); text-decoration: none; font-weight: 600; }
 .dev-credit a:hover { color: var(--t1); }
 
@@ -691,7 +691,7 @@ footer {
   text-align: center;
   padding: 3px 0 calc(5px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border);
-  font-size: 0.58rem;
+  font-size: 0.90rem;
   color: var(--t3);
 }
 .tab-bar-footer a { color: var(--t2); text-decoration: none; font-weight: 600; }
@@ -717,7 +717,7 @@ footer {
 .tab-btn:active { transform: scale(.94); opacity: .8; }
 
 .tab-label {
-  font-size: 0.56rem; font-weight: 700;
+  font-size: 0.67rem; font-weight: 700;
   letter-spacing: 0.04em; text-transform: uppercase;
 }
 
@@ -858,7 +858,7 @@ footer {
 
 /* ═══ CONTADOR VISITAS ══════════════════════════════════════════ */
 .view-counter {
-  font-size: .6rem;
+  font-size: .69rem;
   font-weight: 500;
   color: var(--t3);
   display: flex;
@@ -885,5 +885,4 @@ footer {
 
 /* Footer en vistas: oculto en chat (tiene tab-bar-footer global) */
 .chat-footer { display: none; }
-
 
