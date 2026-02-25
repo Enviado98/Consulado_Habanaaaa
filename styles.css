@@ -30,7 +30,7 @@
   --amber:  #ffd60a;
   --orange: #ff9f0a;
 
-  --tab-h:  58px;
+  --tab-h:  68px;
   --head-h: 58px;
   --r:      12px;
   --r2:     20px;
@@ -216,6 +216,24 @@ header {
 .status-item.deficit .value { color: var(--red); }
 .status-item.divisa  .value { color: var(--green); }
 .status-panel-container.admin-mode { display: none; }
+
+/* Ocultar status + ticker en modo chat con animación */
+#statusPanel, .news-ticker-container {
+  transition: opacity .3s ease, transform .3s ease, max-height .35s ease;
+  max-height: 200px;
+  overflow: hidden;
+}
+body.chat-active #statusPanel,
+body.chat-active .news-ticker-container {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+/* También ocultar en admin-mode */
+body.admin-mode .news-ticker-container {
+  display: none;
+}
 #lastEditedTime { display: none !important; }
 
 /* ═══ TICKER ════════════════════════════════════════════════════ */
@@ -481,13 +499,18 @@ header {
 .chat-view {
   display: none;
   flex-direction: column;
-  height: calc(100vh - var(--head-h) - var(--tab-h));
-  padding: 14px 12px 0;
+  /* status + ticker se ocultan en chat → altura completa */
+  height: calc(100vh - var(--head-h) - var(--tab-h) - 22px);
+  padding: 12px 12px 0;
   max-width: 900px;
   margin: 0 auto;
   overflow: hidden;
 }
 .chat-view.active { display: flex; }
+/* Cuando status y ticker se ocultan el chat gana espacio */
+body.chat-active .chat-view {
+  height: calc(100vh - var(--head-h) - var(--tab-h) - 22px);
+}
 
 .chat-view .tab-section-title { flex-shrink: 0; margin-bottom: 12px; }
 
@@ -628,44 +651,65 @@ footer {
   bottom: 0; left: 0; right: 0;
   height: var(--tab-h);
   z-index: 500;
-  background: rgba(11,11,16,0.96);
-  backdrop-filter: saturate(180%) blur(22px);
-  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  background: rgba(11,11,16,0.85);
+  backdrop-filter: saturate(200%) blur(28px);
+  -webkit-backdrop-filter: saturate(200%) blur(28px);
   border-top: 1px solid var(--border);
   display: flex;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 6px);
 }
+
+/* Footer render — justo encima de la tab bar */
+.tab-bar-footer {
+  position: fixed;
+  bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+  left: 0; right: 0;
+  z-index: 499;
+  text-align: center;
+  padding: 5px 0 4px;
+  background: rgba(11,11,16,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  font-size: 0.6rem;
+  color: var(--t3);
+}
+.tab-bar-footer a { color: var(--t2); text-decoration: none; font-weight: 600; }
+.tab-bar-footer a:hover { color: var(--t1); }
 
 .tab-btn {
   flex: 1;
+  max-width: 110px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; background: none; border: none; cursor: pointer;
+  gap: 5px;
+  background: var(--glass);
+  border: 1px solid var(--border2);
+  border-radius: 50px;
+  cursor: pointer;
   color: var(--t3); font-family: var(--f);
-  transition: color .15s; padding: 6px 4px 8px;
+  transition: color .2s, background .2s, border-color .2s, transform .15s;
+  padding: 10px 8px 9px;
   position: relative;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-.tab-btn:active { opacity: .7; }
+.tab-btn:hover  { background: var(--glass2); border-color: rgba(255,255,255,0.18); }
+.tab-btn:active { transform: scale(.94); opacity: .8; }
 
 .tab-label {
-  font-size: 0.58rem; font-weight: 600;
-  letter-spacing: 0.03em;
+  font-size: 0.56rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
 }
 
-/* Indicador de tab activo */
-.tab-btn::after {
-  content: ''; position: absolute;
-  top: 0; left: 50%; transform: translateX(-50%);
-  width: 0; height: 3px; border-radius: 0 0 3px 3px;
-  transition: width .25s cubic-bezier(.34,1.56,.64,1), background .15s;
-}
-.tab-btn.active::after { width: 26px; }
+.tab-btn::after { display: none; }
 
-.tab-btn:nth-child(1).active { color: var(--cyan); }
-.tab-btn:nth-child(1).active::after { background: var(--cyan); }
-.tab-btn:nth-child(2).active { color: var(--red); }
-.tab-btn:nth-child(2).active::after { background: var(--red); }
-.tab-btn:nth-child(3).active { color: var(--violet); }
-.tab-btn:nth-child(3).active::after { background: var(--violet); }
+/* Activo: fondo tintado + borde de color */
+.tab-btn:nth-child(1).active { color: var(--cyan);   background: rgba(50,173,230,0.12);  border-color: rgba(50,173,230,0.35); }
+.tab-btn:nth-child(2).active { color: var(--red);    background: rgba(255,69,58,0.12);   border-color: rgba(255,69,58,0.35); }
+.tab-btn:nth-child(3).active { color: var(--violet); background: rgba(191,90,242,0.12);  border-color: rgba(191,90,242,0.35); }
 
 /* ══════════════════════════════════════════════════════════════
    ICONOS CSS PUROS — Tab Bar
@@ -819,4 +863,7 @@ footer {
   .modal-glass { border-radius: var(--r2); max-width: 440px; border: 1px solid var(--border2); }
   @keyframes sheetUp { from { opacity:0; transform:scale(.95); } to { opacity:1; transform:scale(1); } }
 }
+
+/* Footer en vistas: oculto en chat (tiene tab-bar-footer global) */
+.chat-footer { display: none; }
 
