@@ -114,9 +114,9 @@ const DIVISAS = [
     { key: 'EUR', stat: 'ECU',  col: 'euro_cup',   dec: 0, min: 200, max: 800 },
     { key: 'MLC', stat: 'MLC',  col: 'mlc_cup',    dec: 0, min: 150, max: 700 },
     { key: 'CAD', stat: 'CAD',  col: 'cad_cup',    dec: 0, min: 100, max: 600 },
-    { key: 'MXN', stat: 'MXN',  col: 'mxn_cup',    dec: 2, min: 5,   max: 100 },
-    { key: 'BRL', stat: 'BRL',  col: 'brl_cup',    dec: 2, min: 20,  max: 200 },
-    { key: 'CLA', stat: 'CLA',  col: 'cla_cup',    dec: 2, min: 200, max: 800 },
+    { key: 'MXN', stat: 'MXN',  col: 'mxn_cup',    dec: 0, min: 5,   max: 100 },
+    { key: 'BRL', stat: 'BRL',  col: 'brl_cup',    dec: 0, min: 20,  max: 200 },
+    { key: 'CLA', stat: 'CLA',  col: 'cla_cup',    dec: 0, min: 200, max: 800 },
 ];
 
 // Extrae el valor correcto de una entrada de statistics de El Toque
