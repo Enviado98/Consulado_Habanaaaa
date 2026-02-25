@@ -2,55 +2,50 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Calendario Consular La Habana</title>
 <link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
-
-
-
-
-
 <link rel="stylesheet" href="styles.css">
-
-<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba. Actualizado por la comunidad.">
+<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
-<meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
+<meta property="og:title" content="Calendario Consular La Habana">
+<meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Actualizado en vivo.">
 <meta property="og:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
-<meta name="twitter:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Entra para ver actualizaciones en vivo.">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
-
 <style id="dynamicTickerStyles"></style>
 </head>
 <body>
 
-<!-- ── HEADER FIJO ──────────────────────────────────────────── -->
+<!-- HEADER -->
 <header>
-  <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
-  <p>Web NO OFICIAL · Comunidad de Descendientes · <span id="fecha-actualizacion">Cargando...</span></p>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-flags">
+        <span class="flag-es">ES</span>
+        <span class="flag-divider"></span>
+        <span class="flag-cu">CU</span>
+      </div>
+      <div class="header-text">
+        <h1>Trámites Consulares</h1>
+        <p>Habana · Web no oficial · Comunidad</p>
+      </div>
+    </div>
+    <div class="header-badge" id="fecha-actualizacion">···</div>
+  </div>
 </header>
 
-<!-- ── PANEL DE ESTADO (fijo bajo header) ───────────────────── -->
+<!-- PANEL ESTADO -->
 <div id="statusPanel" class="status-panel-container">
   <div class="status-panel-header">
-    <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
-    <div class="live-container">
-      <span class="live-dot"></span>EN VIVO
-    </div>
+    <span class="sp-title">Estado económico y energético</span>
+    <div class="live-container"><span class="live-dot"></span>EN VIVO</div>
     <span id="lastEditedTime" style="display:none;"></span>
   </div>
-  <div id="statusDataContainer" class="status-panel-data">
-    Cargando datos de estado...
-  </div>
+  <div id="statusDataContainer" class="status-panel-data">Cargando...</div>
 </div>
 
-<!-- ── TICKER DE NOTICIAS ────────────────────────────────────── -->
+<!-- TICKER -->
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
   <strong class="news-ticker-fixed-label">NOTICIAS</strong>
   <div class="news-ticker-wrap">
@@ -58,87 +53,154 @@
   </div>
 </div>
 
-<!-- ── VIEWS ─────────────────────────────────────────────────── -->
+<!-- ════════ VISTAS ════════ -->
 
 <!-- TAB 1: CALENDARIO -->
 <div id="view-calendario" class="tab-view active">
-
   <div class="login-controls">
-    <div id="statusMessage" class="login-message">Activa modo edición y actualiza la información</div>
-    <button id="toggleAdminBtn" class="btn btn-primary">🛡️ ACTIVAR MODO EDICIÓN</button>
+    <div id="statusMessage" class="login-message">Activa modo edición para actualizar información</div>
+    <button id="toggleAdminBtn" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/></svg>
+      Activar Modo Edición
+    </button>
     <div id="adminControlsPanel">
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%;">
-        <button id="saveBtn" class="btn btn-success">💾 Guardar Cambios</button>
-      </div>
+      <button id="saveBtn" class="btn btn-success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Guardar Cambios
+      </button>
     </div>
   </div>
 
   <div class="container" id="contenedor"></div>
 
   <footer>
-    <div style="opacity:0.6;font-size:0.78rem;margin-bottom:8px;">© 2026 – Información actualizada periódicamente.</div>
-    <div class="dev-credit">Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a></div>
+    <p class="footer-copy">© 2026 · Información actualizada por la comunidad</p>
+    <p class="dev-credit">Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a></p>
   </footer>
-
 </div>
 
 <!-- TAB 2: NOTICIAS -->
 <div id="view-noticias" class="tab-view">
+  <div class="tab-top-bar">
+    <h2 class="tab-section-title">Noticias</h2>
+    <button class="glass-add-btn" id="openNewsModalBtn">
+      <span class="glass-add-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+      <span>Añadir noticia</span>
+    </button>
+  </div>
 
-  <div class="noticias-header">
-    <h2>🔴 Noticias</h2>
-    <div class="noticias-admin-btns" id="noticiasAdminBtns">
-      <button id="addNewsBtn" class="btn btn-success btn-sm">✅ Añadir</button>
-      <button id="deleteNewsBtn" class="btn btn-danger btn-sm">⛔ Borrar</button>
+  <div class="noticias-admin-btns" id="noticiasAdminBtns">
+    <button id="deleteNewsBtn" class="btn btn-danger btn-sm">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      Eliminar noticia
+    </button>
+  </div>
+  <!-- addNewsBtn oculto: lo usa el script internamente como alias del modal -->
+  <button id="addNewsBtn" style="display:none"></button>
+
+  <div id="noticias-list"><div class="noticias-empty">Cargando noticias...</div></div>
+
+  <footer>
+    <p class="footer-copy">© 2026 · Información actualizada por la comunidad</p>
+    <p class="dev-credit">Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a></p>
+  </footer>
+</div>
+
+<!-- MODAL AÑADIR NOTICIA -->
+<div id="newsModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog">
+  <div class="modal-glass">
+    <div class="modal-header">
+      <span class="modal-title">Nueva Noticia</span>
+      <button class="modal-close" id="closeNewsModal" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
+    <p class="modal-subtitle">Tu noticia aparecerá en el ticker y en la lista. Cualquier persona puede publicar.</p>
+    <textarea id="newsModalText" class="modal-textarea" placeholder="Escribe aquí tu noticia..." maxlength="280"></textarea>
+    <div class="modal-meta">
+      <span class="modal-char"><span id="newsCharCount">0</span>/280</span>
+    </div>
+    <button class="modal-submit-btn" id="submitNewsBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Publicar
+    </button>
   </div>
-
-  <div id="noticias-list">
-    <div class="noticias-empty">Cargando noticias...</div>
-  </div>
-
 </div>
 
 <!-- TAB 3: CHAT -->
-<div id="view-chat" class="tab-view">
+<div id="view-chat" class="tab-view chat-view">
+  <h2 class="tab-section-title">Comunidad</h2>
 
-  <div class="chat-header">
-    <h2>🗣️ Comunidad</h2>
+  <div class="comments-display-wrap" id="commentsScroll">
+    <div id="commentsContainer">
+      <p class="loading-msg">Cargando comentarios...</p>
+    </div>
   </div>
 
-  <section class="comments-section">
-    <div class="comments-display-wrap">
-      <div id="commentsContainer" class="comments-list-container">
-        <p style="text-align:center;color:var(--text-secondary);margin:15px;">Cargando comentarios...</p>
+  <div class="chat-composer">
+    <div class="chat-composer-inner">
+      <input type="text" id="commenterName" class="chat-name-input" placeholder="Tu nombre" maxlength="30" autocomplete="off">
+      <div class="chat-msg-row">
+        <input type="text" id="commentText" class="chat-msg-input" placeholder="Escribe un comentario..." maxlength="250" autocomplete="off">
+        <button id="publishCommentBtn" class="chat-send-btn" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
       </div>
     </div>
-    <div class="comment-form-container">
-      <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
-      <textarea id="commentText" placeholder="Tu Comentario (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
-      <button id="publishCommentBtn" class="btn btn-success" style="width:100%;">Publicar Comentario</button>
-    </div>
-  </section>
+  </div>
 
+  <footer class="chat-footer">
+    <p class="footer-copy">© 2026 · Información actualizada por la comunidad</p>
+    <p class="dev-credit">Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a></p>
+  </footer>
 </div>
 
-<!-- ── BARRA DE NAVEGACIÓN INFERIOR ─────────────────────────── -->
+<!-- BARRA INFERIOR -->
 <nav class="tab-bar">
+
+  <!-- Icono Calendario: CSS puro -->
   <button class="tab-btn active" data-tab="view-calendario">
-    <span class="tab-icon">📅</span>
+    <span class="ti ti-cal">
+      <span class="ti-cal-cap"></span>
+      <span class="ti-cal-body">
+        <span class="ti-cal-row">
+          <i></i><i></i><i></i>
+        </span>
+        <span class="ti-cal-row">
+          <i></i><i></i><i></i>
+        </span>
+      </span>
+    </span>
     <span class="tab-label">Calendario</span>
   </button>
+
+  <!-- Icono Noticias: señal de radio CSS -->
   <button class="tab-btn" data-tab="view-noticias">
-    <span class="tab-icon">🔴</span>
+    <span class="ti ti-signal">
+      <span class="ti-sig-dot"></span>
+      <span class="ti-sig-arc a1"></span>
+      <span class="ti-sig-arc a2"></span>
+      <span class="ti-sig-arc a3"></span>
+    </span>
     <span class="tab-label">Noticias</span>
   </button>
+
+  <!-- Icono Chat: burbuja CSS -->
   <button class="tab-btn" data-tab="view-chat">
-    <span class="tab-icon">💬</span>
+    <span class="ti ti-bubble">
+      <span class="ti-bub-main">
+        <i></i><i></i><i></i>
+      </span>
+      <span class="ti-bub-tail"></span>
+    </span>
     <span class="tab-label">Chat</span>
   </button>
+
 </nav>
 
-<!-- CONTADOR DE VISITAS -->
-<div id="viewCounter" class="view-counter" aria-live="polite">Cargando...</div>
+<div id="viewCounter" class="view-counter">···</div>
 
 <script type="module" src="script.js"></script>
 </body>
