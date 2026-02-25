@@ -50,7 +50,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   padding-top: var(--head-h);
-  padding-bottom: calc(var(--tab-h) + 26px);
+  padding-bottom: calc(var(--wrap-h) + 16px);
   background-image:
     radial-gradient(ellipse 70% 45% at 15% -15%, rgba(10,132,255,0.07) 0%, transparent 65%),
     radial-gradient(ellipse 50% 40% at 90% 110%, rgba(191,90,242,0.06) 0%, transparent 60%);
