@@ -70,8 +70,24 @@ const DOMElements = {
     deleteNewsBtn: document.getElementById('deleteNewsBtn'),
     dynamicTickerStyles: document.getElementById('dynamicTickerStyles'),
     statusPanel: document.getElementById('statusPanel'),
-    statusDataContainer: document.getElementById('statusDataContainer')
+    statusDataContainer: document.getElementById('statusDataContainer'),
+    noticiasList: document.getElementById('noticias-list'),
+    noticiasAdminBtns: document.getElementById('noticiasAdminBtns'),
 };
+
+// ── NAVEGACIÓN POR TABS ───────────────────────────────────────
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+            tabBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+}
 
 function timeAgo(timestamp) {
     if (!timestamp) return { text: 'Sin fecha de edición.', diff: -1, date: null };
@@ -343,13 +359,14 @@ function updateAdminUI(isAdmin) {
         DOMElements.body.classList.remove('admin-mode');
         DOMElements.adminControlsPanel.style.display = "none";
         DOMElements.statusMessage.textContent = "Activa modo edición y actualiza la información"; 
-        DOMElements.statusMessage.style.color = "var(--color-texto-principal)"; 
+        DOMElements.statusMessage.style.color = "var(--text-secondary)"; 
         DOMElements.toggleAdminBtn.textContent = "🛡️ ACTIVAR EL MODO EDICIÓN"; 
         DOMElements.toggleAdminBtn.classList.remove('btn-danger');
         DOMElements.toggleAdminBtn.classList.add('btn-primary');
         disableEditing(); 
     }
     DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
+    if (DOMElements.noticiasAdminBtns) DOMElements.noticiasAdminBtns.classList.toggle('visible', isAdmin);
     renderStatusPanel(currentStatus); 
 }
 
@@ -436,6 +453,8 @@ async function loadNews() {
     const validNews = []; const cutoff = Date.now() - RECENT_THRESHOLD_MS;
     newsData.forEach(n => { if (new Date(n.timestamp).getTime() > cutoff) validNews.push(n); else supabase.from('noticias').delete().eq('id', n.id); });
     currentNews = validNews;
+
+    // ── TICKER (barra roja superior) ──────────────────────────
     if (validNews.length > 0) {
         const html = validNews.map(n => `<span class="news-item">${linkify(n.text)} <small>(${timeAgo(n.timestamp).text})</small></span>`).join('<span class="news-item"> | </span>');
         DOMElements.newsTickerContent.innerHTML = `${html}<span class="news-item"> | </span>${html}`;
@@ -448,6 +467,23 @@ async function loadNews() {
         DOMElements.newsTickerContent.innerHTML = `<span class="news-item">Sin Noticias recientes... || 🛡 Activa el modo edición para publicar</span>`.repeat(2);
         DOMElements.newsTickerContent.style.animation = `ticker-move-static 15s linear infinite`;
     }
+
+    // ── TAB DE NOTICIAS (lista de cards) ─────────────────────
+    renderNoticiasList(validNews);
+}
+
+function renderNoticiasList(news) {
+    if (!DOMElements.noticiasList) return;
+    if (!news || news.length === 0) {
+        DOMElements.noticiasList.innerHTML = `<div class="noticias-empty">😶 No hay noticias recientes.<br>Activa el modo edición para publicar.</div>`;
+        return;
+    }
+    DOMElements.noticiasList.innerHTML = news.map(n => `
+        <div class="noticia-card">
+            <div class="noticia-texto">${linkify(n.text)}</div>
+            <div class="noticia-meta">${timeAgo(n.timestamp).text}</div>
+        </div>
+    `).join('');
 }
 
 async function addQuickNews() {
@@ -736,6 +772,7 @@ async function saveChanges() {
     if (updates.length > 0) { await Promise.all(updates); alert("✅ Guardado."); location.reload(); } else { alert("No hay cambios."); }
 }
 document.addEventListener('DOMContentLoaded', () => {
+    initTabs();
     DOMElements.toggleAdminBtn.addEventListener('click', toggleAdminMode);
     DOMElements.saveBtn.addEventListener('click', saveChanges);
     DOMElements.addNewsBtn.addEventListener('click', addQuickNews);
