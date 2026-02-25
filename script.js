@@ -85,6 +85,8 @@ function initTabs() {
             document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(target).classList.add('active');
+            // Ocultar status+ticker en chat, mostrarlos en el resto
+            document.body.classList.toggle('chat-active', target === 'view-chat');
         });
     });
 }
@@ -366,6 +368,8 @@ function updateAdminUI(isAdmin) {
         disableEditing(); 
     }
     DOMElements.statusPanel.classList.toggle('admin-mode', isAdmin);
+    // Ocultar ticker también en modo edición
+    if (DOMElements.newsTicker) DOMElements.newsTicker.style.display = isAdmin ? 'none' : '';
     if (DOMElements.noticiasAdminBtns) DOMElements.noticiasAdminBtns.classList.toggle('visible', isAdmin);
     renderStatusPanel(currentStatus); 
 }
