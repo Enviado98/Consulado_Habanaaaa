@@ -30,7 +30,8 @@
   --amber:  #ffd60a;
   --orange: #ff9f0a;
 
-  --tab-h:  68px;
+  --tab-h:       68px;
+  --wrap-h:      92px;  /* tab-h + footer render */
   --head-h: 58px;
   --r:      12px;
   --r2:     20px;
@@ -498,31 +499,33 @@ body.admin-mode .news-ticker-container {
 /* ═══ TAB 3 — CHAT ══════════════════════════════════════════════ */
 .chat-view {
   display: none;
-  flex-direction: column;
-  /* status + ticker se ocultan en chat → altura completa */
-  height: calc(100vh - var(--head-h) - var(--tab-h) - 26px);
+}
+/* Layout WhatsApp: todo fijo, nada se escapa */
+.chat-view.active {
+  display: block;
+  position: fixed;
+  top: var(--head-h);
+  left: 0; right: 0;
+  bottom: var(--wrap-h);
+  overflow: hidden;
   padding: 12px 12px 0;
   max-width: 900px;
   margin: 0 auto;
-  overflow: hidden;
-}
-.chat-view.active { display: flex; }
-/* Cuando status y ticker se ocultan el chat gana espacio */
-body.chat-active .chat-view {
-  height: calc(100vh - var(--head-h) - var(--tab-h) - 26px);
 }
 
-.chat-view .tab-section-title { flex-shrink: 0; margin-bottom: 12px; }
+.chat-view .tab-section-title { margin-bottom: 10px; }
 
 .comments-display-wrap {
-  flex: 1;
+  /* Ocupa todo menos título + composer */
+  position: absolute;
+  top: 46px;   /* título */
+  left: 12px; right: 12px;
+  bottom: 92px; /* espacio para el composer */
   overflow-y: auto;
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--r2);
   padding: 10px;
-  margin-bottom: 10px;
-  min-height: 0;
 }
 
 .loading-msg { text-align:center; color:var(--t3); padding: 20px; font-size: .82rem; }
@@ -570,8 +573,9 @@ body.chat-active .chat-view {
 
 /* ─── Formulario chat fijo ───────────────────────────────────── */
 .chat-composer {
-  flex-shrink: 0;
-  padding-bottom: 10px;
+  position: absolute;
+  bottom: 8px;
+  left: 12px; right: 12px;
 }
 
 .chat-composer-inner {
