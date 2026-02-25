@@ -5,37 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calendario Consular La Habana 🇪🇸🇨🇺</title>
 
-<!-- 🟢 ICONOS (FAVICON) -->
 <link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
 
-<!-- Fuentes -->
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Estilos Principales -->
-<link rel="stylesheet" href="styles.css"> 
+<link rel="stylesheet" href="styles.css">
 
-<!-- 🎨 ESTILOS EXTRA (Créditos) -->
-<style>
-    .dev-credit {
-        margin-top: 18px;
-        padding-top: 14px;
-        border-top: 1px dashed rgba(255,255,255,0.08);
-        text-align: center;
-        font-size: 0.7rem;
-        color: rgba(255,255,255,0.3);
-        letter-spacing: 0.03em;
-    }
-    .dev-credit a {
-        color: rgba(255,255,255,0.45);
-        text-decoration: none;
-        font-weight: 700;
-        transition: color 0.2s;
-    }
-    .dev-credit a:hover { color: rgba(255,255,255,0.8); }
-</style>
-
-<!-- 🖼️ META ETIQUETAS PARA REDES SOCIALES -->
 <meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba. Actualizado por la comunidad.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Calendario Consular La Habana 🇪🇸🇨🇺">
@@ -49,100 +27,119 @@
 <meta name="twitter:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
 
 <style id="dynamicTickerStyles"></style>
-
 </head>
 <body>
 
+<!-- ── HEADER FIJO ──────────────────────────────────────────── -->
 <header>
   <h1>🇪🇸 Calendario de Trámites Consulares 🇨🇺</h1>
-  <p>Web NO OFICIAL - Actualizada por la comunidad de Descendientes <span id="fecha-actualizacion">Cargando...</span></p>
-  
-  <div class="header-action-container">
-    <a href="news.html" class="btn btn-news" role="button">
-        <span>🔴</span> NOTICIAS AQUÍ <span>👈🏻</span>
-    </a>
-  </div>
-  
-  <div id="viewCounter" class="view-counter" aria-live="polite">
-    Cargando...
-  </div>
-
+  <p>Web NO OFICIAL · Comunidad de Descendientes · <span id="fecha-actualizacion">Cargando...</span></p>
 </header>
 
+<!-- ── PANEL DE ESTADO (fijo bajo header) ───────────────────── -->
 <div id="statusPanel" class="status-panel-container">
-    <div class="status-panel-header">
-        <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
-        
-        <div class="live-container">
-            <span class="live-dot"></span>
-            EN VIVO
-        </div>
-        
-        <span id="lastEditedTime" style="display: none;"></span>
+  <div class="status-panel-header">
+    <span>ESTADO ECONÓMICO Y ENERGÉTICO 🚨</span>
+    <div class="live-container">
+      <span class="live-dot"></span>EN VIVO
     </div>
-    <div id="statusDataContainer" class="status-panel-data">
-        Cargando datos de estado...
-    </div>
+    <span id="lastEditedTime" style="display:none;"></span>
+  </div>
+  <div id="statusDataContainer" class="status-panel-data">
+    Cargando datos de estado...
+  </div>
 </div>
 
+<!-- ── TICKER DE NOTICIAS ────────────────────────────────────── -->
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
-    <strong class="news-ticker-fixed-label">NOTICIAS</strong>
-    <div class="news-ticker-wrap">
-        <div id="newsTickerContent" class="news-ticker-content">
-            </div>
-    </div>
-</div>
-
-<div class="login-controls">
-  <div id="statusMessage" class="login-message">
-            Activa modo edición y actualiza la información
-  </div>
-  
-  <button id="toggleAdminBtn" class="btn btn-primary">
-      🛡️ ACTIVAR EL MODO EDICIÓN
-  </button>
-
-  <div id="adminControlsPanel">
-    <div class="admin-group">
-        <button id="saveBtn" class="btn btn-success">💾 Guardar los Cambios</button>
-    </div>
-    <div class="admin-group">
-        <button id="addNewsBtn" class="btn btn-secondary">✅️ Añadir Noticia</button> 
-        <button id="deleteNewsBtn" class="btn btn-danger">⛔️ Borrar Noticia</button> 
-    </div>
+  <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+  <div class="news-ticker-wrap">
+    <div id="newsTickerContent" class="news-ticker-content"></div>
   </div>
 </div>
 
-<div class="container" id="contenedor">
+<!-- ── VIEWS ─────────────────────────────────────────────────── -->
+
+<!-- TAB 1: CALENDARIO -->
+<div id="view-calendario" class="tab-view active">
+
+  <div class="login-controls">
+    <div id="statusMessage" class="login-message">Activa modo edición y actualiza la información</div>
+    <button id="toggleAdminBtn" class="btn btn-primary">🛡️ ACTIVAR MODO EDICIÓN</button>
+    <div id="adminControlsPanel">
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%;">
+        <button id="saveBtn" class="btn btn-success">💾 Guardar Cambios</button>
+      </div>
+    </div>
   </div>
 
-<section class="comments-section">
-    <h2>🗣️ Comentarios de la Comunidad</h2>
-    
+  <div class="container" id="contenedor"></div>
+
+  <footer>
+    <div style="opacity:0.6;font-size:0.78rem;margin-bottom:8px;">© 2026 – Información actualizada periódicamente.</div>
+    <div class="dev-credit">Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a></div>
+  </footer>
+
+</div>
+
+<!-- TAB 2: NOTICIAS -->
+<div id="view-noticias" class="tab-view">
+
+  <div class="noticias-header">
+    <h2>🔴 Noticias</h2>
+    <div class="noticias-admin-btns" id="noticiasAdminBtns">
+      <button id="addNewsBtn" class="btn btn-success btn-sm">✅ Añadir</button>
+      <button id="deleteNewsBtn" class="btn btn-danger btn-sm">⛔ Borrar</button>
+    </div>
+  </div>
+
+  <div id="noticias-list">
+    <div class="noticias-empty">Cargando noticias...</div>
+  </div>
+
+</div>
+
+<!-- TAB 3: CHAT -->
+<div id="view-chat" class="tab-view">
+
+  <div class="chat-header">
+    <h2>🗣️ Comunidad</h2>
+  </div>
+
+  <section class="comments-section">
     <div class="comments-display-wrap">
-        <div id="commentsContainer" class="comments-list-container">
-            <p style="text-align: center; color: var(--color-texto-secundario); margin: 15px;">Cargando comentarios...</p>
-        </div>
+      <div id="commentsContainer" class="comments-list-container">
+        <p style="text-align:center;color:var(--text-secondary);margin:15px;">Cargando comentarios...</p>
+      </div>
     </div>
-
     <div class="comment-form-container">
-        <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
-        <textarea id="commentText" placeholder="Tu Comentario Principal (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
-        <button id="publishCommentBtn" class="btn btn-success">Publicar Comentario</button>
+      <input type="text" id="commenterName" placeholder="Tu Nombre" required maxlength="30" aria-label="Tu Nombre">
+      <textarea id="commentText" placeholder="Tu Comentario (máx. 250 caracteres)" required maxlength="250" aria-label="Tu Comentario"></textarea>
+      <button id="publishCommentBtn" class="btn btn-success" style="width:100%;">Publicar Comentario</button>
     </div>
-</section>
+  </section>
 
-<!-- FOOTER CON PERFIL DE CONTACTO -->
-<footer>
-  <div style="opacity: 0.7; font-size: 0.8rem; margin-bottom: 15px;">© 2026 – Información actualizada periódicamente.</div>
+</div>
 
-  <!-- Créditos -->
-  <div class="dev-credit">
-      Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a>
-  </div>
-</footer>
+<!-- ── BARRA DE NAVEGACIÓN INFERIOR ─────────────────────────── -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="view-calendario">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">Calendario</span>
+  </button>
+  <button class="tab-btn" data-tab="view-noticias">
+    <span class="tab-icon">🔴</span>
+    <span class="tab-label">Noticias</span>
+  </button>
+  <button class="tab-btn" data-tab="view-chat">
+    <span class="tab-icon">💬</span>
+    <span class="tab-label">Chat</span>
+  </button>
+</nav>
+
+<!-- CONTADOR DE VISITAS -->
+<div id="viewCounter" class="view-counter" aria-live="polite">Cargando...</div>
 
 <script type="module" src="script.js"></script>
-
 </body>
 </html>
