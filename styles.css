@@ -49,7 +49,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   padding-top: var(--head-h);
-  padding-bottom: calc(var(--tab-h) + 28px);
+  padding-bottom: calc(var(--tab-h) + 26px);
   background-image:
     radial-gradient(ellipse 70% 45% at 15% -15%, rgba(10,132,255,0.07) 0%, transparent 65%),
     radial-gradient(ellipse 50% 40% at 90% 110%, rgba(191,90,242,0.06) 0%, transparent 60%);
@@ -435,7 +435,7 @@ body.admin-mode .news-ticker-container {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex; align-items: flex-end; justify-content: center;
-  padding: 0 0 calc(var(--tab-h) + 34px);
+  padding: 0 0 calc(var(--tab-h) + 38px);
   animation: overlayIn .2s ease;
 }
 @keyframes overlayIn { from { opacity:0; } to { opacity:1; } }
@@ -500,7 +500,7 @@ body.admin-mode .news-ticker-container {
   display: none;
   flex-direction: column;
   /* status + ticker se ocultan en chat → altura completa */
-  height: calc(100vh - var(--head-h) - var(--tab-h) - 22px);
+  height: calc(100vh - var(--head-h) - var(--tab-h) - 26px);
   padding: 12px 12px 0;
   max-width: 900px;
   margin: 0 auto;
@@ -509,7 +509,7 @@ body.admin-mode .news-ticker-container {
 .chat-view.active { display: flex; }
 /* Cuando status y ticker se ocultan el chat gana espacio */
 body.chat-active .chat-view {
-  height: calc(100vh - var(--head-h) - var(--tab-h) - 22px);
+  height: calc(100vh - var(--head-h) - var(--tab-h) - 26px);
 }
 
 .chat-view .tab-section-title { flex-shrink: 0; margin-bottom: 12px; }
@@ -646,35 +646,33 @@ footer {
 .dev-credit a:hover { color: var(--t1); }
 
 /* ═══ BARRA INFERIOR ════════════════════════════════════════════ */
-.tab-bar {
+/* Contenedor fijo inferior: botones + footer render */
+.tab-bar-wrap {
   position: fixed;
-  bottom: 24px; left: 0; right: 0;
-  height: var(--tab-h);
+  bottom: 0; left: 0; right: 0;
   z-index: 500;
-  background: rgba(11,11,16,0.85);
+  background: rgba(11,11,16,0.92);
   backdrop-filter: saturate(200%) blur(28px);
   -webkit-backdrop-filter: saturate(200%) blur(28px);
-  border-top: none;
+  border-top: 1px solid var(--border);
+}
+
+.tab-bar {
+  position: static;
+  height: var(--tab-h);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 6px);
+  padding: 6px 16px 4px;
 }
 
-/* Footer render — justo encima de la tab bar */
+/* Footer render — dentro del wrap, debajo de los botones */
 .tab-bar-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0; right: 0;
-  z-index: 499;
   text-align: center;
-  padding: 5px 0 4px;
-  background: rgba(11,11,16,0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-top: none;
-  font-size: 0.6rem;
+  padding: 3px 0 calc(5px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+  font-size: 0.58rem;
   color: var(--t3);
 }
 .tab-bar-footer a { color: var(--t2); text-decoration: none; font-weight: 600; }
@@ -842,7 +840,7 @@ footer {
 /* ═══ CONTADOR VISITAS ══════════════════════════════════════════ */
 .view-counter {
   position: fixed;
-  bottom: calc(var(--tab-h) + 30px); left: 10px;
+  bottom: calc(var(--tab-h) + 34px); left: 10px;
   z-index: 490;
   background: var(--bg3); border: 1px solid var(--border);
   color: var(--t3); padding: 3px 10px;
@@ -852,11 +850,12 @@ footer {
 
 /* ═══ RESPONSIVE ════════════════════════════════════════════════ */
 @media (min-width: 768px) {
-  .tab-bar {
+  .tab-bar-wrap {
     max-width: 540px; left: 50%; right: auto;
     transform: translateX(-50%);
     border-radius: var(--r2) var(--r2) 0 0;
     border: 1px solid var(--border); border-bottom: none;
+    border-top: 1px solid var(--border);
   }
   .view-counter { left: calc(50% - 262px); }
   .modal-overlay { align-items: center; padding: 0; }
