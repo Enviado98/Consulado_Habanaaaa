@@ -655,3 +655,4 @@ body.admin-mode .news-ticker-container { display:none; }
 footer { display:none; }
 input::placeholder, textarea::placeholder { color:var(--t4); }
 *:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+
