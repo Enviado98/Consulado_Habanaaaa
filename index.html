@@ -13,6 +13,7 @@
 <meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Actualizado en vivo.">
 <meta property="og:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f5f5f7">
 <style id="dynamicTickerStyles"></style>
 </head>
 <body>
@@ -75,7 +76,6 @@
   </div>
 
   <div class="container" id="contenedor"></div>
-
 </div>
 
 <!-- TAB 2: NOTICIAS -->
@@ -96,11 +96,9 @@
       Eliminar noticia
     </button>
   </div>
-  <!-- addNewsBtn oculto: lo usa el script internamente como alias del modal -->
   <button id="addNewsBtn" style="display:none"></button>
 
   <div id="noticias-list"><div class="noticias-empty">Cargando noticias...</div></div>
-
 </div>
 
 <!-- MODAL AÑADIR NOTICIA -->
@@ -145,30 +143,23 @@
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- BARRA INFERIOR + FOOTER RENDER -->
+<!-- BARRA INFERIOR + FOOTER -->
 <div class="tab-bar-wrap">
 <nav class="tab-bar">
 
-  <!-- Icono Calendario: CSS puro -->
   <button class="tab-btn active" data-tab="view-calendario">
     <span class="ti ti-cal">
       <span class="ti-cal-cap"></span>
       <span class="ti-cal-body">
-        <span class="ti-cal-row">
-          <i></i><i></i><i></i>
-        </span>
-        <span class="ti-cal-row">
-          <i></i><i></i><i></i>
-        </span>
+        <span class="ti-cal-row"><i></i><i></i><i></i></span>
+        <span class="ti-cal-row"><i></i><i></i><i></i></span>
       </span>
     </span>
     <span class="tab-label">Calendario</span>
   </button>
 
-  <!-- Icono Noticias: señal de radio CSS -->
   <button class="tab-btn" data-tab="view-noticias">
     <span class="ti ti-signal">
       <span class="ti-sig-dot"></span>
@@ -179,12 +170,9 @@
     <span class="tab-label">Noticias</span>
   </button>
 
-  <!-- Icono Chat: burbuja CSS -->
   <button class="tab-btn" data-tab="view-chat">
     <span class="ti ti-bubble">
-      <span class="ti-bub-main">
-        <i></i><i></i><i></i>
-      </span>
+      <span class="ti-bub-main"><i></i><i></i><i></i></span>
       <span class="ti-bub-tail"></span>
     </span>
     <span class="tab-label">Chat</span>
@@ -196,7 +184,6 @@
   &nbsp;·&nbsp; © 2026
 </div>
 </div>
-
 
 <script type="module" src="script.js"></script>
 </body>
