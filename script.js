@@ -943,7 +943,7 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   });
 }
 
-function pwaTriggerInstall() {
+window.pwaTriggerInstall = function pwaTriggerInstall() {
   if (deferredPrompt) {
     // Tenemos el prompt nativo — dispararlo
     deferredPrompt.prompt();
@@ -968,11 +968,11 @@ function pwaTriggerInstall() {
       msg = '📱 Para instalar la app:\n1. Abre el menú del navegador (⋮ o ···)\n2. Busca "Instalar aplicación" o\n   "Añadir a pantalla de inicio"';
     }
     // Mostrar modal personalizado en lugar de alert
-    showPwaGuide(msg);
+    window.showPwaGuide(msg);
   }
 }
 
-function showPwaGuide(msg) {
+window.showPwaGuide = function showPwaGuide(msg) {
   // Crear modal de guía
   let overlay = document.getElementById('pwa-guide-overlay');
   if (!overlay) {
@@ -998,4 +998,3 @@ function showPwaGuide(msg) {
   overlay.querySelector('#pwa-guide-msg').textContent = msg;
   overlay.style.display = 'flex';
 }
-
