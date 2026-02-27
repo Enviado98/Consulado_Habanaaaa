@@ -909,29 +909,46 @@ async function loadData() {
 // ===== PWA Install Logic =====
 let deferredPrompt = null;
 
+// Registrar Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW error:', err));
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registrado:', reg.scope))
+      .catch(err => console.warn('SW error:', err));
   });
 }
 
+// Capturar el evento de instalación cuando Chrome lo dispare
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  const wrap = document.getElementById('pwa-install-wrap');
-  if (wrap) wrap.style.display = 'block';
+  console.log('✅ beforeinstallprompt capturado — botón listo');
+  // Cambiar texto del botón para indicar que está listo
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.classList.add('pwa-ready');
 });
 
+// Ocultar si ya está instalada
 window.addEventListener('appinstalled', () => {
   const wrap = document.getElementById('pwa-install-wrap');
   if (wrap) wrap.style.display = 'none';
   deferredPrompt = null;
 });
 
+// Ocultar si ya está en modo standalone (ya instalada)
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrap = document.getElementById('pwa-install-wrap');
+    if (wrap) wrap.style.display = 'none';
+  });
+}
+
 function pwaTriggerInstall() {
   if (deferredPrompt) {
+    // Tenemos el prompt nativo — dispararlo
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(choice => {
+      console.log('Usuario eligió:', choice.outcome);
       deferredPrompt = null;
       if (choice.outcome === 'accepted') {
         const wrap = document.getElementById('pwa-install-wrap');
@@ -939,7 +956,46 @@ function pwaTriggerInstall() {
       }
     });
   } else {
-    alert('Para instalar: usa el menú del navegador → "Añadir a pantalla de inicio" o "Instalar aplicación"');
+    // Sin prompt nativo — mostrar modal con instrucciones según navegador
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isSamsung = /samsungbrowser/i.test(navigator.userAgent);
+    let msg = '';
+    if (isIOS) {
+      msg = '📱 En iPhone/iPad:\n1. Pulsa el botón compartir (□↑)\n2. Selecciona "Añadir a pantalla de inicio"';
+    } else if (isSamsung) {
+      msg = '📱 En Samsung Internet:\n1. Pulsa el menú (☰)\n2. Selecciona "Añadir página a" → "Pantalla de inicio"';
+    } else {
+      msg = '📱 Para instalar la app:\n1. Abre el menú del navegador (⋮ o ···)\n2. Busca "Instalar aplicación" o\n   "Añadir a pantalla de inicio"';
+    }
+    // Mostrar modal personalizado en lugar de alert
+    showPwaGuide(msg);
   }
+}
+
+function showPwaGuide(msg) {
+  // Crear modal de guía
+  let overlay = document.getElementById('pwa-guide-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pwa-guide-overlay';
+    overlay.innerHTML = `
+      <div id="pwa-guide-box">
+        <div id="pwa-guide-icon">📲</div>
+        <div id="pwa-guide-title">Instalar Consulado Habana</div>
+        <div id="pwa-guide-msg"></div>
+        <button id="pwa-guide-close" onclick="document.getElementById('pwa-guide-overlay').style.display='none'">Entendido</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    // Estilos inline para el modal
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)';
+    const box = overlay.querySelector('#pwa-guide-box');
+    box.style.cssText = 'background:#1a1d2e;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:28px 24px;max-width:320px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)';
+    overlay.querySelector('#pwa-guide-icon').style.cssText = 'font-size:2.5rem;margin-bottom:10px';
+    overlay.querySelector('#pwa-guide-title').style.cssText = 'color:#fff;font-weight:700;font-size:1.1rem;margin-bottom:14px';
+    overlay.querySelector('#pwa-guide-msg').style.cssText = 'color:rgba(255,255,255,0.75);font-size:0.9rem;white-space:pre-line;line-height:1.7;margin-bottom:20px';
+    overlay.querySelector('#pwa-guide-close').style.cssText = 'background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;border:none;border-radius:50px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:0.95rem';
+  }
+  overlay.querySelector('#pwa-guide-msg').textContent = msg;
+  overlay.style.display = 'flex';
 }
 
