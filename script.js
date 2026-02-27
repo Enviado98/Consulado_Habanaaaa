@@ -123,8 +123,9 @@ function timeAgo(timestamp) {
 //   4. Se leen de Supabase al cargar la página
 //
 // Lógica de El Toque para elegir el valor a mostrar:
-//   count_values > 10 → median  (suficientes reportes del día)
-//   count_values <= 10 → ema_value (media móvil, más estable)
+//   MXN, BRL, CLA → siempre ema_value (media móvil)
+//   Resto: count_values > 10 → median  (suficientes reportes del día)
+//          count_values <= 10 → ema_value (media móvil, más estable)
 //
 // Mapa completo de divisas: clave interna → columna Supabase
 const DIVISAS = [
@@ -137,18 +138,26 @@ const DIVISAS = [
     { key: 'CLA', stat: 'CLA',  col: 'cla_cup',    dec: 0, min: 200, max: 800 },
 ];
 
+// Divisas que siempre usan ema_value (independientemente del count_values)
+const ALWAYS_EMA = new Set(['MXN', 'BRL', 'CLA']);
+
 // Extrae el valor correcto de una entrada de statistics de El Toque
 // dec: número de decimales a conservar (0 para USD/EUR/MLC/CAD, 2 para MXN/BRL/CLA)
-function elToqueVal(s, dec = 0) {
+function elToqueVal(s, dec = 0, key = '') {
     if (!s) return null;
-    const count = s.count_values ?? 0;
     let v;
-    if (count >= 11 && s.median != null) {
-        v = s.median;           // suficientes muestras → median
-    } else if (s.ema_value != null) {
-        v = s.ema_value;        // pocas muestras → ema_value
+    if (ALWAYS_EMA.has(key)) {
+        // MXN, BRL y CLA siempre usan ema_value
+        v = s.ema_value ?? s.median;
     } else {
-        v = s.median;           // fallback
+        const count = s.count_values ?? 0;
+        if (count >= 11 && s.median != null) {
+            v = s.median;           // suficientes muestras → median
+        } else if (s.ema_value != null) {
+            v = s.ema_value;        // pocas muestras → ema_value
+        } else {
+            v = s.median;           // fallback
+        }
     }
     if (v == null) return null;
     return dec === 0
@@ -196,7 +205,7 @@ function extractRatesFromNextData(html) {
     if (!stats) throw new Error("trmiExchange.data.api.statistics no encontrado");
     const rates = {};
     for (const d of DIVISAS) {
-        rates[d.key] = elToqueVal(stats[d.stat], d.dec);  // ✅ respeta decimales por divisa
+        rates[d.key] = elToqueVal(stats[d.stat], d.dec, d.key);  // ✅ respeta decimales por divisa
     }
     return rates;
 }
@@ -476,18 +485,75 @@ async function loadNews() {
     renderNoticiasList(validNews);
 }
 
-function renderNoticiasList(news) {
+// ── MODO BORRAR NOTICIAS ─────────────────────────────────────
+let selectedNewsIds = new Set();
+
+function renderNoticiasList(news, deleteMode = false) {
     if (!DOMElements.noticiasList) return;
+
+    // Limpiar barra de acciones previa
+    const oldBar = document.getElementById('noticias-delete-bar');
+    if (oldBar) oldBar.remove();
+
     if (!news || news.length === 0) {
-        DOMElements.noticiasList.innerHTML = `<div class="noticias-empty">😶 No hay noticias recientes.<br>Activa el modo edición para publicar.</div>`;
+        DOMElements.noticiasList.innerHTML = '<div class="noticias-empty">😶 No hay noticias recientes.<br>Activa el modo edición para publicar.</div>';
         return;
     }
-    DOMElements.noticiasList.innerHTML = news.map(n => `
-        <div class="noticia-card">
+
+    DOMElements.noticiasList.innerHTML = news.map(n => {
+        const sel = selectedNewsIds.has(String(n.id));
+        return `<div class="noticia-card${deleteMode ? ' selectable' + (sel ? ' selected' : '') : ''}"
+                     ${deleteMode ? `data-news-id="${n.id}"` : ''}>
+            ${deleteMode ? `<div class="noticia-checkbox">${sel ? '✓' : ''}</div>` : ''}
             <div class="noticia-texto">${linkify(n.text)}</div>
             <div class="noticia-meta">${timeAgo(n.timestamp).text}</div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
+
+    // Click en cada card (solo en modo borrar)
+    if (deleteMode) {
+        DOMElements.noticiasList.querySelectorAll('.noticia-card.selectable').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = String(card.dataset.newsId);
+                if (selectedNewsIds.has(id)) selectedNewsIds.delete(id);
+                else selectedNewsIds.add(id);
+                renderNoticiasList(currentNews, true);
+            });
+        });
+
+        // Barra inferior confirmar/cancelar
+        const bar = document.createElement('div');
+        bar.id = 'noticias-delete-bar';
+        bar.className = 'noticias-delete-bar';
+
+        const btnCancel = document.createElement('button');
+        btnCancel.className = 'btn-cancelar';
+        btnCancel.textContent = 'Cancelar';
+        btnCancel.addEventListener('click', cancelDeleteMode);
+
+        const btnConfirm = document.createElement('button');
+        const n = selectedNewsIds.size;
+        btnConfirm.className = 'btn-confirmar' + (n > 0 ? ' activo' : '');
+        btnConfirm.textContent = n > 0 ? `🗑 Eliminar (${n})` : '🗑 Eliminar';
+        btnConfirm.addEventListener('click', confirmDeleteNews);
+
+        bar.appendChild(btnCancel);
+        bar.appendChild(btnConfirm);
+        DOMElements.noticiasList.after(bar);
+    }
+}
+
+function cancelDeleteMode() {
+    selectedNewsIds.clear();
+    renderNoticiasList(currentNews, false);
+}
+
+async function confirmDeleteNews() {
+    if (selectedNewsIds.size === 0) return;
+    const ids = [...selectedNewsIds];
+    await Promise.all(ids.map(id => supabase.from('noticias').delete().eq('id', id)));
+    selectedNewsIds.clear();
+    loadNews();
 }
 
 async function addQuickNews() {
@@ -496,10 +562,16 @@ async function addQuickNews() {
     if (text && confirm("¿Publicar?")) { await supabase.from('noticias').insert([{ text: text.trim() }]); loadNews(); }
 }
 async function deleteNews() {
-    if (!admin || currentNews.length === 0) return alert("No hay noticias.");
-    const list = currentNews.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
-    const idx = parseInt(prompt(`Eliminar número:\n${list}`)) - 1;
-    if (currentNews[idx] && confirm("¿Eliminar?")) { await supabase.from('noticias').delete().eq('id', currentNews[idx].id); loadNews(); }
+    // Si currentNews está vacío, recargar desde Supabase
+    if (currentNews.length === 0) {
+        const { data, error } = await supabase.from('noticias').select('id, text, timestamp').order('timestamp', { ascending: false });
+        if (error || !data || data.length === 0) return alert("No hay noticias para borrar.");
+        currentNews = data;
+    }
+
+    // Entrar en modo selección visual
+    selectedNewsIds.clear();
+    renderNoticiasList(currentNews, true);
 }
 
 // ----------------------------------------------------
@@ -834,6 +906,40 @@ async function loadData() {
             }
 
 
+// ===== PWA Install Logic =====
+let deferredPrompt = null;
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW error:', err));
+  });
+}
 
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const wrap = document.getElementById('pwa-install-wrap');
+  if (wrap) wrap.style.display = 'block';
+});
+
+window.addEventListener('appinstalled', () => {
+  const wrap = document.getElementById('pwa-install-wrap');
+  if (wrap) wrap.style.display = 'none';
+  deferredPrompt = null;
+});
+
+function pwaTriggerInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      deferredPrompt = null;
+      if (choice.outcome === 'accepted') {
+        const wrap = document.getElementById('pwa-install-wrap');
+        if (wrap) wrap.style.display = 'none';
+      }
+    });
+  } else {
+    alert('Para instalar: usa el menú del navegador → "Añadir a pantalla de inicio" o "Instalar aplicación"');
+  }
+}
 
