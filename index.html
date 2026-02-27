@@ -7,7 +7,12 @@
 <link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
 <link rel="stylesheet" href="styles.css">
-<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba.">
+<link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a1d2e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Calendario Consular La Habana">
 <meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Actualizado en vivo.">
@@ -47,11 +52,24 @@
     <span id="lastEditedTime" style="display:none;"></span>
   </div>
   <div id="statusDataContainer" class="status-panel-data">Cargando...</div>
+
+  <!-- Botón instalar PWA -->
+  <div id="pwa-install-wrap" style="display:none; text-align:center; padding: 10px 0 4px;">
+    <button id="pwa-install-btn" onclick="pwaTriggerInstall()">
+      <span class="pwa-android-icon">
+        <svg viewBox="0 0 24 24" fill="white" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.23l-1.88 3.24A10.27 10.27 0 0 0 12 8c-1.53 0-2.98.35-4.47.92L5.65 5.68c-.19-.29-.55-.38-.84-.23-.3.16-.42.54-.26.85L6.4 9.48C3.3 11.25 1.28 14.44 1 18h22c-.28-3.56-2.3-6.75-5.4-8.52zM7 15.25c-.69 0-1.25-.56-1.25-1.25S6.31 12.75 7 12.75s1.25.56 1.25 1.25S7.69 15.25 7 15.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/>
+        </svg>
+      </span>
+      <span>Instalar App</span>
+      <span class="pwa-arrow">↓</span>
+    </button>
+  </div>
 </div>
 
 <!-- TICKER -->
 <div id="newsTicker" class="news-ticker-container" style="display:none;">
-  <strong class="news-ticker-fixed-label">NOTICIAS</strong>
+  <strong class="news-ticker-fixed-label">Reportes</strong>
   <div class="news-ticker-wrap">
     <div id="newsTickerContent" class="news-ticker-content"></div>
   </div>
@@ -81,13 +99,13 @@
 <!-- TAB 2: NOTICIAS -->
 <div id="view-noticias" class="tab-view">
   <div class="tab-top-bar">
-    <h2 class="tab-section-title">Noticias</h2>
+    <h2 class="tab-section-title">Reportes</h2>
     <div class="tab-top-actions">
       <button class="glass-add-btn" id="openNewsModalBtn">
         <span class="glass-add-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </span>
-        <span>Añadir</span>
+        <span>Añadir Reporte</span>
       </button>
       <button class="glass-delete-btn" id="deleteNewsBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -105,15 +123,15 @@
 <div id="newsModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog">
   <div class="modal-glass">
     <div class="modal-header">
-      <span class="modal-title">Nueva Noticia</span>
+      <span class="modal-title">Nuevo Reporte</span>
       <button class="modal-close" id="closeNewsModal" aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <p class="modal-subtitle">Tu noticia aparecerá en el ticker y en la lista. Cualquier persona puede publicar.</p>
-    <textarea id="newsModalText" class="modal-textarea" placeholder="Escribe aquí tu noticia..." maxlength="75"></textarea>
+    <textarea id="newsModalText" class="modal-textarea" placeholder="Escribe aquí tu noticia..." maxlength="140"></textarea>
     <div class="modal-meta">
-      <span class="modal-char"><span id="newsCharCount">0</span>/75</span>
+      <span class="modal-char"><span id="newsCharCount">0</span>/140</span>
     </div>
     <button class="modal-submit-btn" id="submitNewsBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -167,7 +185,7 @@
       <span class="ti-sig-arc a2"></span>
       <span class="ti-sig-arc a3"></span>
     </span>
-    <span class="tab-label">Noticias</span>
+    <span class="tab-label">Reportes</span>
   </button>
 
   <button class="tab-btn" data-tab="view-chat">
