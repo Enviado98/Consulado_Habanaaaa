@@ -82,20 +82,20 @@
 <div id="view-noticias" class="tab-view">
   <div class="tab-top-bar">
     <h2 class="tab-section-title">Noticias</h2>
-    <button class="glass-add-btn" id="openNewsModalBtn">
-      <span class="glass-add-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </span>
-      <span>Añadir noticia</span>
-    </button>
+    <div class="tab-top-actions">
+      <button class="glass-add-btn" id="openNewsModalBtn">
+        <span class="glass-add-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </span>
+        <span>Añadir</span>
+      </button>
+      <button class="glass-delete-btn" id="deleteNewsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
+    </div>
   </div>
 
-  <div class="noticias-admin-btns" id="noticiasAdminBtns">
-    <button id="deleteNewsBtn" class="btn btn-danger btn-sm">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-      Eliminar noticia
-    </button>
-  </div>
+  <div class="noticias-admin-btns" id="noticiasAdminBtns" style="display:none!important;"></div>
   <button id="addNewsBtn" style="display:none"></button>
 
   <div id="noticias-list"><div class="noticias-empty">Cargando noticias...</div></div>
@@ -111,9 +111,9 @@
       </button>
     </div>
     <p class="modal-subtitle">Tu noticia aparecerá en el ticker y en la lista. Cualquier persona puede publicar.</p>
-    <textarea id="newsModalText" class="modal-textarea" placeholder="Escribe aquí tu noticia..." maxlength="280"></textarea>
+    <textarea id="newsModalText" class="modal-textarea" placeholder="Escribe aquí tu noticia..." maxlength="75"></textarea>
     <div class="modal-meta">
-      <span class="modal-char"><span id="newsCharCount">0</span>/280</span>
+      <span class="modal-char"><span id="newsCharCount">0</span>/75</span>
     </div>
     <button class="modal-submit-btn" id="submitNewsBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -188,4 +188,3 @@
 <script type="module" src="script.js"></script>
 </body>
 </html>
-
