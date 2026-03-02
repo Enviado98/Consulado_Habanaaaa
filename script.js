@@ -816,15 +816,15 @@ function renderStatusPanel(status) {
     DOMElements.statusDataContainer.innerHTML = `
         <div class="status-panel-row">
             <div class="status-item deficit"><span class="label">🔌 Déficit</span><span class="value">${status.deficit_mw || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💵 USD</span><span class="value">${status.dollar_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💶 EUR</span><span class="value">${status.euro_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💳 MLC</span><span class="value">${status.mlc_cup || '---'}</span></div>
+            <div class="status-item usd"><span class="label">💵 USD</span><span class="value">${status.dollar_cup || '---'}</span></div>
+            <div class="status-item eur"><span class="label">💶 EUR</span><span class="value">${status.euro_cup || '---'}</span></div>
+            <div class="status-item mlc"><span class="label">💳 MLC</span><span class="value">${status.mlc_cup || '---'}</span></div>
         </div>
         <div class="status-panel-row">
-            <div class="status-item divisa"><span class="label">🇨🇦 CAD</span><span class="value">${status.cad_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">🇲🇽 MXN</span><span class="value">${status.mxn_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">🇧🇷 BRL</span><span class="value">${status.brl_cup || '---'}</span></div>
-            <div class="status-item divisa"><span class="label">💎 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
+            <div class="status-item cad"><span class="label">🇨🇦 CAD</span><span class="value">${status.cad_cup || '---'}</span></div>
+            <div class="status-item mxn"><span class="label">🇲🇽 MXN</span><span class="value">${status.mxn_cup || '---'}</span></div>
+            <div class="status-item brl"><span class="label">🇧🇷 BRL</span><span class="value">${status.brl_cup || '---'}</span></div>
+            <div class="status-item cla"><span class="label">🪪 CLA</span><span class="value">${status.cla_cup || '---'}</span></div>
         </div>`;
 }
 
@@ -904,3 +904,4 @@ async function loadData() {
         document.querySelectorAll('.card').forEach(c => c.addEventListener('click', toggleTimePanel));
     }
             }
+
