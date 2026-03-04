@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Portal de revisión de expedientes LMD. Envía tu expediente y recibe un informe profesional de errores.">
+<meta name="theme-color" content="#e8e8ed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>LMD · Revisión de Expedientes</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235040b8'/><text y='.9em' font-size='70' x='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Georgia,serif' font-style='italic'>L</text></svg>">
+<link rel="stylesheet" href="lmd-styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- PANTALLA DE CARGA -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p id="loading-text">Un momento...</p>
+</div>
+
+<!-- CABECERA (solo visible tras login) -->
+<header class="app-header" id="app-header" style="display:none">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-badge">LMD</div>
+      <div>
+        <div class="header-title">Revisión de Expediente</div>
+        <div class="header-sub" id="header-sub">Portal del cliente</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-chip" id="header-user"></div>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════
+     BIENVENIDA / INTRO
+══════════════════════════════ -->
+<div class="view active" id="view-onboarding">
+  <div class="page" style="padding-top:0">
+    <div class="ob-wrap">
+
+      <div class="ob-logo">
+        <div class="logo-icon">L</div>
+        <h1>Revisión LMD</h1>
+        <p>Servicio de revisión de expedientes</p>
+        <div class="trust-badges">
+          <span class="trust-badge"><span class="ico ico-lock ico-sm ico-blue" style="vertical-align:middle"></span> Seguro</span>
+          <span class="trust-badge"><span class="ico ico-shield ico-sm ico-green" style="vertical-align:middle"></span> Profesional</span>
+          <span class="trust-badge"><span class="ico ico-bolt ico-sm ico-gold" style="vertical-align:middle"></span> Rápido</span>
+        </div>
+      </div>
+
+      <div class="step-dots">
+        <div class="step-dot active" id="sd0"></div>
+        <div class="step-dot" id="sd1"></div>
+      </div>
+
+      <!-- Paso 0: Bienvenida -->
+      <div class="step-block active" id="sb0">
+        <h2>Bienvenido al portal</h2>
+        <p>Envía tu expediente y recibe una revisión profesional con todos los errores detectados. Fácil y seguro.</p>
+        <button class="btn btn-primary btn-full" onclick="nextStep()">Comenzar <span class="ico ico-arrow-right ico-sm ico-white" style="vertical-align:middle"></span></button>
+      </div>
+
+      <!-- Paso 1: Cómo funciona -->
+      <div class="step-block" id="sb1">
+        <h2>¿Cómo funciona?</h2>
+        <div class="process-list">
+          <div class="process-item">
+            <div class="process-num">1</div>
+            <div><strong>Crea tu cuenta</strong><span>Solo necesitas un correo y contraseña.</span></div>
+          </div>
+          <div class="process-item">
+            <div class="process-num">2</div>
+            <div><strong>Sube tus archivos</strong><span>Cada archivo cuesta 250 CUP.</span></div>
+          </div>
+          <div class="process-item">
+            <div class="process-num">3</div>
+            <div><strong>Paga por Transfermóvil</strong><span>Sube la foto del comprobante.</span></div>
+          </div>
+          <div class="process-item">
+            <div class="process-num">4</div>
+            <div><strong>Recibe tu informe</strong><span>Te avisamos cuando la revisión esté lista.</span></div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="showAuth('register')">Crear mi cuenta <span class="ico ico-arrow-right ico-sm ico-white" style="vertical-align:middle"></span></button>
+        <span class="step-link" onclick="showAuth('login')">Ya tengo cuenta <span class="ico ico-arrow-right ico-sm" style="vertical-align:middle"></span> Entrar</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     LOGIN / REGISTRO
+══════════════════════════════ -->
+<div class="view" id="view-auth">
+  <div class="page" style="padding-top:0">
+    <div class="ob-wrap" style="max-width:420px">
+
+      <div class="ob-logo">
+        <div class="logo-icon">L</div>
+        <h1>Revisión LMD</h1>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-reg" onclick="switchTab('register')">Crear cuenta</button>
+        <button class="auth-tab" id="tab-log" onclick="switchTab('login')">Entrar</button>
+      </div>
+
+      <div id="alert-auth" class="alert"></div>
+
+      <!-- Registro -->
+      <div id="form-register">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="reg-email" class="form-input"
+            placeholder="tu@correo.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="reg-pass" class="form-input"
+            placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div class="remember-row">
+          <input type="checkbox" id="rem-reg" checked>
+          <label for="rem-reg">Recordar mis datos en este dispositivo</label>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="register()">Crear cuenta</button>
+      </div>
+
+      <!-- Login -->
+      <div id="form-login" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" id="login-email" class="form-input"
+            placeholder="tu@correo.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" id="login-pass" class="form-input"
+            placeholder="Tu contraseña" autocomplete="current-password">
+        </div>
+        <div class="remember-row">
+          <input type="checkbox" id="rem-log" checked>
+          <label for="rem-log">Recordar mis datos en este dispositivo</label>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar</button>
+      </div>
+
+      <span class="step-link" style="margin-top:20px" onclick="goOnboarding()"><span class="ico ico-arrow-left ico-sm" style="vertical-align:middle"></span> Volver al inicio</span>
+      <div class="auth-security-note"><span class="ico ico-lock ico-sm" style="vertical-align:middle;color:var(--t4)"></span> Conexión segura · Tus datos están protegidos</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DASHBOARD CLIENTE
+══════════════════════════════ -->
+<div class="view" id="view-dashboard">
+  <div class="page">
+    <div class="page-body">
+      <div id="dash-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PANEL ADMIN
+══════════════════════════════ -->
+<div class="view" id="view-admin">
+  <div class="page">
+    <div class="page-body wide">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num" id="s-total">0</span>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num gold" id="s-pago">0</span>
+          <div class="stat-label">Pago pendiente</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num blue" id="s-proc">0</span>
+          <div class="stat-label">En proceso</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num green" id="s-resp">0</span>
+          <div class="stat-label">Respondidos</div>
+        </div>
+      </div>
+
+      <!-- Tabs admin -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="atab-exp" onclick="switchAdminTab('expedientes')">Expedientes</button>
+        <button class="admin-tab" id="atab-chat" onclick="switchAdminTab('chat')">
+          Chats de soporte
+          <span class="admin-chat-badge" id="admin-chat-badge" style="display:none">0</span>
+        </button>
+      </div>
+
+      <!-- Tab expedientes -->
+      <div id="admin-tab-expedientes">
+      <div class="section-title">
+        Expedientes recibidos
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" onclick="loadAdmin()"><span class="ico ico-refresh ico-sm" style="vertical-align:middle"></span> Actualizar</button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal()"><span class="ico ico-close ico-sm ico-white" style="vertical-align:middle"></span> Eliminar</button>
+        </div>
+      </div>
+      <div class="casos-list" id="casos-list"></div>
+      </div>
+
+      <!-- Tab chats -->
+      <div id="admin-tab-chat" style="display:none">
+        <div class="section-title">
+          Conversaciones de soporte
+          <button class="btn btn-secondary btn-sm" onclick="loadAdminChats()"><span class="ico ico-refresh ico-sm" style="vertical-align:middle"></span> Actualizar</button>
+        </div>
+        <div class="admin-chat-list" id="admin-chat-list">
+          <div class="empty-state"><span class="empty-icon"><span class="ico ico-chat ico-2xl ico-muted"></span></span><p>Cargando conversaciones...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MODAL ADMIN
+══════════════════════════════ -->
+<div class="modal-overlay" id="modal-admin">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <h3>Gestionar expediente</h3>
+      <button class="modal-close-btn" onclick="closeModal()"><span class="ico ico-close ico-sm ico-muted"></span></button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MODAL RECORTE CAPTURA PAGO
+══════════════════════════════ -->
+<div class="modal-overlay" id="modal-crop">
+  <div class="modal-sheet crop-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <h3>Recortar imagen</h3>
+      <button class="modal-close-btn" onclick="closeCropModal()"><span class="ico ico-close ico-sm ico-muted"></span></button>
+    </div>
+    <p style="font-size:.85rem;color:var(--t3);margin-bottom:14px">Ajusta el recuadro y toca <strong>Confirmar</strong> para enviar.</p>
+    <div class="crop-container">
+      <div class="crop-canvas-inner">
+        <canvas id="crop-canvas"></canvas>
+        <div class="crop-overlay">
+          <div class="crop-box" id="crop-box">
+            <div class="crop-handle" data-dir="nw"></div>
+            <div class="crop-handle" data-dir="n"></div>
+            <div class="crop-handle" data-dir="ne"></div>
+            <div class="crop-handle" data-dir="w"></div>
+            <div class="crop-handle" data-dir="e"></div>
+            <div class="crop-handle" data-dir="sw"></div>
+            <div class="crop-handle" data-dir="s"></div>
+            <div class="crop-handle" data-dir="se"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="crop-preview-wrap">
+      <canvas id="crop-preview" width="180" height="120"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeCropModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2" onclick="confirmCrop()">
+        <span class="ico ico-check ico-sm ico-white"></span>&nbsp;Confirmar y enviar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MODAL BORRAR CASOS (ADMIN)
+══════════════════════════════ -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <h3>Eliminar expedientes</h3>
+      <button class="modal-close-btn" onclick="closeDeleteModal()"><span class="ico ico-close ico-sm ico-muted"></span></button>
+    </div>
+    <p style="font-size:.88rem;color:var(--t3);margin-bottom:16px">Selecciona los expedientes que quieres eliminar permanentemente.</p>
+    <div id="delete-list" class="casos-list" style="max-height:50vh;overflow-y:auto"></div>
+    <div id="alert-delete" class="alert" style="margin-top:12px"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn btn-danger" style="flex:2" id="btn-confirm-delete" onclick="confirmarBorrado()">
+        <span class="ico ico-close ico-sm ico-white"></span>&nbsp;Eliminar seleccionados
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MODAL CHAT ADMIN (responder a cliente)
+══════════════════════════════ -->
+<div class="modal-overlay" id="modal-admin-chat">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <h3 id="admin-chat-modal-title">Conversación</h3>
+      <button class="modal-close-btn" onclick="closeAdminChatModal()"><span class="ico ico-close ico-sm ico-muted"></span></button>
+    </div>
+    <div class="chat-messages admin-chat-messages" id="admin-chat-messages" style="height:340px;margin-bottom:14px"></div>
+    <div class="chat-input-row">
+      <input type="text" id="admin-chat-input" class="chat-input" placeholder="Escribe la respuesta..."
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdminChatMsg();}">
+      <button class="chat-send-btn" onclick="sendAdminChatMsg()">
+        <span class="ico ico-arrow-right ico-sm ico-white"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     BOTÓN FLOTANTE ATENCIÓN AL CLIENTE
+══════════════════════════════ -->
+<button class="chat-fab" id="chat-fab" onclick="toggleChat()" style="display:none" title="Atención al cliente">
+  <span class="ico ico-chat ico-xl ico-white chat-fab-ico"></span>
+  <span class="chat-fab-badge" id="chat-badge" style="display:none">0</span>
+</button>
+
+<!-- ══════════════════════════════
+     MODAL CHAT ATENCIÓN AL CLIENTE
+══════════════════════════════ -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-panel-head">
+    <div class="chat-panel-title">
+      <div class="chat-avatar-sm">
+        <span class="ico ico-shield ico-sm ico-white"></span>
+      </div>
+      <div>
+        <strong>Atención al cliente</strong>
+        <span class="chat-online-dot"></span><span class="chat-online-txt">LMD · Soporte</span>
+      </div>
+    </div>
+    <button class="modal-close-btn" onclick="toggleChat()"><span class="ico ico-close ico-sm ico-muted"></span></button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-welcome">
+      <div class="chat-welcome-icon"><span class="ico ico-chat" style="font-size:28px;color:var(--violet)"></span></div>
+      <p>¡Hola! Escríbenos tu consulta y te ayudaremos lo antes posible.</p>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chat-input" class="chat-input" placeholder="Escribe tu mensaje..." maxlength="500"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}">
+    <button class="chat-send-btn" onclick="sendChatMsg()">
+      <span class="ico ico-arrow-right ico-sm ico-white"></span>
+    </button>
+  </div>
+</div>
+
+
+<!-- INDICADOR DE SCROLL -->
+<div class="scroll-hint" id="scroll-hint">
+  <div class="scroll-hint-pill">
+    <svg class="scroll-hint-arrow" viewBox="0 0 24 24" fill="none" stroke="#5040b8" stroke-width="2.5">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+    Desliza hacia abajo
+  </div>
+</div>
+
+<script src="lmd-script.js"></script>
+</body>
+</html>
+
+
