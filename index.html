@@ -302,6 +302,9 @@ button{font-family:var(--FB);cursor:pointer}
 .cnt-card h4{font-family:var(--FB);font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dark);margin-bottom:.4rem}
 .cnt-card p,.cnt-card a{font-size:.92rem;color:var(--text);transition:color .3s}
 .cnt-card a:hover{color:var(--gold)}
+.cnt-map{margin-top:2.5rem;aspect-ratio:21/8;overflow:hidden;box-shadow:0 24px 72px rgba(35,31,32,.12);position:relative;z-index:1}
+.cnt-map iframe{width:100%;height:100%;border:none;display:block;filter:grayscale(20%) contrast(1.02)}
+@media(max-width:768px){.cnt-map{aspect-ratio:4/3}}
 
 /* ── FOOTER ──────────────────────────────────── */
 footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,143,84,.1)}
@@ -495,12 +498,23 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card open" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M40 15 C32 15, 26 21, 26 29 C26 37, 32 43, 40 43 C48 43, 54 37, 54 29 C54 21, 48 15, 40 15Z"/>
-              <path d="M30 43 L25 65 M50 43 L55 65"/>
-              <path d="M35 65 L45 65"/>
-              <ellipse cx="40" cy="29" rx="7" ry="4" opacity=".4"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Bottle body with rounded base -->
+  <path d="M30 40 C28 40 26 42 26 44 L26 68 C26 71 28 73 31 73 L49 73 C52 73 54 71 54 68 L54 44 C54 42 52 40 50 40 Z"/>
+  <!-- Shoulders -->
+  <path d="M30 40 Q28 36 34 34 L34 28 M50 40 Q52 36 46 34 L46 28"/>
+  <!-- Cap -->
+  <path d="M33 18 L33 28 L47 28 L47 18 Q47 14 40 14 Q33 14 33 18 Z"/>
+  <!-- Brush applicator -->
+  <line x1="40" y1="28" x2="40" y2="36" stroke-width="2.2"/>
+  <!-- Shine streak -->
+  <path d="M30.5 47 Q29.5 56 30.5 65" stroke-width=".9" opacity=".4"/>
+  <!-- Product level line -->
+  <path d="M26 57 Q40 54.5 54 57" stroke-dasharray="2.5 2" opacity=".38"/>
+  <!-- Label -->
+  <line x1="32" y1="64" x2="48" y2="64" stroke-width="1" opacity=".4"/>
+  <line x1="35" y1="68" x2="45" y2="68" stroke-width="1" opacity=".28"/>
+</svg>
           </div>
           <span class="svc-name">Manicura</span>
           <div class="svc-prices">
@@ -516,11 +530,21 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M40 12 C30 12, 22 20, 22 30 C22 40, 30 48, 40 48 C50 48, 58 40, 58 30 C58 20, 50 12, 40 12Z"/>
-              <path d="M28 48 C24 55, 22 62, 28 66 C34 70, 46 70, 52 66 C58 62, 56 55, 52 48"/>
-              <path d="M35 30 Q40 26 45 30" opacity=".5"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Foot profile -->
+  <path d="M22 65 C22 58 24 50 26 44 C28 38 30 32 34 28 C36 26 38 25 40 25 C44 25 46 28 46 32 C46 36 44 38 43 36"/>
+  <!-- Heel and arch -->
+  <path d="M22 65 C22 68 25 72 30 72 L52 72 C55 72 57 70 57 67 C57 63 54 60 51 60 C48 60 46 62 44 64"/>
+  <!-- Toes -->
+  <path d="M43 36 C43 34 42 32 40 32 C38 32 37 34 37 36 C37 37.5 38 38.5 40 38.5 C42 38.5 43 37.5 43 36 Z"/>
+  <path d="M37 38 C37 36 36 34.5 34 34.5 C32 34.5 31 36 31 37.5 C31 39 32 40 34 40 C36 40 37 39 37 38 Z"/>
+  <path d="M43 38 C43 36 44 34.5 46 35 C48 35.5 49 37 48.5 38.5 C48 40 46.5 40.5 45 40 C43.5 39.5 43 38 43 38 Z"/>
+  <!-- Nail on big toe -->
+  <ellipse cx="40" cy="30" rx="2.2" ry="1.5" opacity=".55"/>
+  <!-- Spa sparkles -->
+  <path d="M55 30 L56.5 27 L58 30 L55 30" fill="none" opacity=".5"/>
+  <path d="M60 40 L61 38 L62 40 L60 40" fill="none" opacity=".4"/>
+</svg>
           </div>
           <span class="svc-name">Pedicura</span>
           <div class="svc-prices">
@@ -534,13 +558,19 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="24" y="20" width="32" height="42" rx="5"/>
-              <path d="M32 20 L32 14 Q32 10, 36 10 L44 10 Q48 10, 48 14 L48 20"/>
-              <circle cx="40" cy="36" r="6"/>
-              <line x1="40" y1="30" x2="40" y2="22"/>
-              <line x1="40" y1="42" x2="40" y2="55"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Palm base -->
+  <path d="M24 70 L24 55 C24 53 26 52 28 52 L28 42 C28 40 30 39 32 40 L32 36 C32 34 34 33 36 34 L36 30 C36 28 38 27 40 28 L40 30 L44 30 C44 28 46 27 47 29 L47 42 C49 41 51 42 51 44 L51 55 C51 55 54 56 54 60 L54 70"/>
+  <!-- Long elegant nails -->
+  <path d="M28 40 C27 36 27 29 29 26 C30 24.5 31.5 24 32 26 L32 34"/>
+  <path d="M32 34 C31 30 31 23 33 20 C34 18.5 35.5 18 36 20 L36 30"/>
+  <path d="M36 28 C35.5 24 35.5 17 37.5 14 C38.5 12.5 39.5 12 40 14 L40 28"/>
+  <path d="M40 28 C40.5 24 41 17 43 14 C44 12.5 45 13 45 15 L44.5 28"/>
+  <path d="M44.5 28 C45 24 46 18 48 17 C49 16 50 17 49.5 19 L47 42"/>
+  <!-- Palm lines -->
+  <path d="M30 58 Q40 56 50 58" stroke-width="1" opacity=".4"/>
+  <path d="M28 64 Q40 62 52 64" stroke-width="1" opacity=".3"/>
+</svg>
           </div>
           <span class="svc-name">Extensiones de Uñas</span>
           <div class="svc-prices">
@@ -553,13 +583,21 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 60 L50 20"/>
-              <path d="M48 18 L62 18 L62 32"/>
-              <path d="M55 25 C60 30, 62 38, 58 46 C54 54, 44 58, 36 56"/>
-              <circle cx="30" cy="52" r="4" opacity=".5"/>
-              <path d="M22 38 Q28 30, 36 32" opacity=".6"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Wax strip being peeled -->
+  <path d="M16 52 C16 50 18 48 20 48 L58 44 C60 44 62 46 62 48 L62 58 C62 60 60 62 58 62 L20 66 C18 66 16 64 16 62 Z"/>
+  <!-- Peeled corner curling up -->
+  <path d="M16 52 C14 48 16 42 22 40 L30 38 C30 38 28 44 22 46"/>
+  <!-- Edge highlight -->
+  <path d="M20 52 L56 49" stroke-width=".9" opacity=".4"/>
+  <!-- Speed/smoothness lines -->
+  <path d="M8 35 L14 37" stroke-width="1.2" opacity=".5"/>
+  <path d="M7 40 L13 41" stroke-width="1.2" opacity=".38"/>
+  <path d="M8 45 L13 45" stroke-width="1.2" opacity=".28"/>
+  <!-- Stars / clean result -->
+  <path d="M65 35 L66.5 32 L68 35 L71 36.5 L68 38 L66.5 41 L65 38 L62 36.5 Z" stroke-width="1.1" opacity=".6"/>
+  <path d="M58 24 L59 22 L60 24 L62 25 L60 26 L59 28 L58 26 L56 25 Z" stroke-width="1" opacity=".45"/>
+</svg>
           </div>
           <span class="svc-name">Depilación</span>
           <div class="svc-prices">
@@ -575,13 +613,26 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="40" cy="32" rx="16" ry="18"/>
-              <path d="M28 46 C24 54, 26 64, 40 65 C54 64, 56 54, 52 46"/>
-              <path d="M32 25 Q36 22, 40 24 Q44 22, 48 25" opacity=".6"/>
-              <line x1="40" y1="14" x2="40" y2="8"/>
-              <path d="M34 9 Q40 12, 46 9" opacity=".5"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Lipstick tube body -->
+  <rect x="32" y="46" width="16" height="26" rx="2"/>
+  <!-- Sleeve / bullet holder -->
+  <rect x="30" y="34" width="20" height="14" rx="2"/>
+  <!-- Lipstick bullet -->
+  <path d="M34 34 L34 20 C34 17 37 14 40 14 C43 14 46 17 46 20 L46 34"/>
+  <!-- Bullet tip (angled cut) -->
+  <path d="M34 24 Q40 20 46 24"/>
+  <!-- Shine on bullet -->
+  <path d="M36 30 Q35.5 25 36.5 21" stroke-width=".9" opacity=".45"/>
+  <!-- Tube label -->
+  <line x1="32" y1="58" x2="48" y2="58" stroke-width="1" opacity=".4"/>
+  <!-- Decorative dots -->
+  <circle cx="56" cy="28" r="1.2" fill="var(--gold)" stroke="none" opacity=".5"/>
+  <circle cx="60" cy="35" r=".9" fill="var(--gold)" stroke="none" opacity=".4"/>
+  <circle cx="54" cy="22" r=".8" fill="var(--gold)" stroke="none" opacity=".35"/>
+  <!-- Sparkle -->
+  <path d="M58 44 L59.5 41 L61 44 L64 45.5 L61 47 L59.5 50 L58 47 L55 45.5 Z" stroke-width="1.1" opacity=".55"/>
+</svg>
           </div>
           <span class="svc-name">Maquillaje</span>
           <div class="svc-prices">
@@ -594,13 +645,20 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="40" cy="28" r="8"/>
-              <path d="M40 36 L40 52"/>
-              <circle cx="40" cy="58" r="8"/>
-              <path d="M32 58 Q24 54 22 46 Q20 38, 28 34"/>
-              <path d="M48 58 Q56 54 58 46 Q60 38, 52 34"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Ear silhouette -->
+  <path d="M32 18 C24 22 20 32 20 40 C20 52 26 60 32 62 C35 63 37 61 37 58 C37 54 34 51 33 48 C32 45 34 43 36 43 C40 43 42 46 42 50 C42 52 41 54 40 56"/>
+  <path d="M32 18 C38 14 45 18 47 26 C49 34 44 40 38 40"/>
+  <!-- Hoop earring hanging from lobe -->
+  <circle cx="50" cy="60" r="10" stroke-width="1.6"/>
+  <!-- Gem at bottom of hoop -->
+  <path d="M46 68 L50 73 L54 68 L50 65 Z" stroke-width="1.2"/>
+  <path d="M47 68 L53 68" stroke-width="1" opacity=".5"/>
+  <!-- Earring post -->
+  <line x1="50" y1="50" x2="50" y2="52" stroke-width="2"/>
+  <!-- Small shine on hoop -->
+  <path d="M42 57 Q40 60 42 63" stroke-width=".9" opacity=".4"/>
+</svg>
           </div>
           <span class="svc-name">Piercing</span>
           <div class="svc-prices">
@@ -612,12 +670,22 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 50 C20 38, 28 28, 40 28 C52 28, 60 38, 60 50"/>
-              <path d="M26 46 C28 38, 34 34, 40 34"/>
-              <path d="M30 60 C30 54, 34 50, 40 50 C46 50, 50 54, 50 60"/>
-              <path d="M18 52 L22 50 M58 50 L62 52"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Left hand -->
+  <path d="M14 55 C14 50 16 46 20 44 L20 34 C20 32 22 31 24 32 L24 28 C24 26 26 25 28 26 L28 30 C30 29 32 30 32 32 L32 28 C32 26 34 25 35 27 L35 44 C37 43 39 44 39 46 L39 56"/>
+  <!-- Left hand fingers curved -->
+  <path d="M20 44 C20 40 21 36 22 34"/>
+  <path d="M24 32 C24 29 25 26 26 28"/>
+  <!-- Right hand mirror -->
+  <path d="M66 55 C66 50 64 46 60 44 L60 34 C60 32 58 31 56 32 L56 28 C56 26 54 25 52 26 L52 30 C50 29 48 30 48 32 L48 28 C48 26 46 25 45 27 L45 44 C43 43 41 44 41 46 L41 56"/>
+  <path d="M60 44 C60 40 59 36 58 34"/>
+  <path d="M56 32 C56 29 55 26 54 28"/>
+  <!-- Cupped palm base -->
+  <path d="M14 55 C14 60 20 65 40 65 C60 65 66 60 66 55"/>
+  <!-- Energy / warmth waves -->
+  <path d="M32 20 Q40 17 48 20" stroke-dasharray="2.5 2" opacity=".5"/>
+  <path d="M35 14 Q40 11 45 14" stroke-dasharray="2 1.5" opacity=".38"/>
+</svg>
           </div>
           <span class="svc-name">Masaje</span>
           <div class="svc-prices">
@@ -628,13 +696,29 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 
         <div class="svc-card" onclick="tSvc(this)">
           <div class="svc-icon-wrap">
-            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="40" cy="32" rx="18" ry="20"/>
-              <path d="M22 32 C22 22, 30 14, 40 14"/>
-              <path d="M26 44 C22 52, 24 62, 40 64 C56 62, 58 52, 54 44"/>
-              <path d="M34 28 Q40 24, 46 28" opacity=".5"/>
-              <circle cx="40" cy="36" r="3" fill="rgba(175,143,84,.25)" stroke="none"/>
-            </svg>
+            <svg viewBox="0 0 80 80" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Face oval -->
+  <path d="M27 36 C27 22 33 14 40 14 C47 14 53 22 53 36 C53 48 48 56 40 58 C32 56 27 48 27 36 Z"/>
+  <!-- Chin/jaw line refinement -->
+  <path d="M32 52 Q40 60 48 52"/>
+  <!-- Eyes — elegant almond shape -->
+  <path d="M32 34 Q35 31 38 34 Q35 37 32 34 Z"/>
+  <path d="M42 34 Q45 31 48 34 Q45 37 42 34 Z"/>
+  <!-- Nose — delicate -->
+  <path d="M38 38 Q40 42 42 38"/>
+  <path d="M37 43 Q40 45 43 43"/>
+  <!-- Lips -->
+  <path d="M35 48 Q37 46 40 47 Q43 46 45 48 Q43 51 40 51 Q37 51 35 48 Z"/>
+  <!-- Cream drop / serum drop on forehead -->
+  <path d="M40 8 Q42 4 40 1 Q38 4 40 8 Z" stroke-width="1.2" opacity=".7"/>
+  <!-- Radiance sparkles -->
+  <path d="M19 26 L20.5 23 L22 26" opacity=".55"/>
+  <path d="M57 26 L58.5 23 L60 26" opacity=".55"/>
+  <circle cx="21" cy="26" r="1" fill="var(--gold)" stroke="none" opacity=".4"/>
+  <circle cx="59" cy="26" r="1" fill="var(--gold)" stroke="none" opacity=".4"/>
+  <!-- Glow dots -->
+  <circle cx="40" cy="8" r="1.2" fill="var(--gold)" stroke="none" opacity=".6"/>
+</svg>
           </div>
           <span class="svc-name">Tratamientos Faciales</span>
           <div class="svc-prices">
@@ -742,6 +826,14 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
         <h4>Email</h4>
         <a href="mailto:[email protected]">[email protected]</a>
       </div>
+    </div>
+    <!-- MAPA -->
+    <div class="cnt-map rv sc d5">
+      <iframe
+        src="https://maps.google.com/maps?q=Ζυγομάλη+20,+Ιωάννινα,+Greece&output=embed"
+        allowfullscreen loading="lazy"
+        title="Ubicación Mano Ioannina — Zygomali 20, Ioannina">
+      </iframe>
     </div>
   </div>
 </section>
