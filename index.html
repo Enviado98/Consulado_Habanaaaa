@@ -4,10 +4,569 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mano Ioannina | Salón de Belleza</title>
-  <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+/* ══════════════════════════════════════
+   MANO IOANNINA — Estilos embebidos
+   ══════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream:      #FAF6F0;
+  --cream-dark: #F0EAE0;
+  --charcoal:   #1C1714;
+  --charcoal-2: #3A332E;
+  --gold:       #B8935A;
+  --gold-light: #D4B483;
+  --rose:       #C9A9A0;
+  --white:      #FFFFFF;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Jost', system-ui, sans-serif;
+  --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --shadow: 0 20px 60px rgba(28,23,20,0.12);
+  --shadow-sm: 0 4px 20px rgba(28,23,20,0.08);
+  --radius: 2px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--charcoal);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+img { display: block; width: 100%; height: 100%; object-fit: cover; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+.container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ─── SCROLL REVEAL ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition-delay: var(--delay, 0s);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.delay-1 { --delay: 0.12s; }
+.delay-2 { --delay: 0.24s; }
+.delay-3 { --delay: 0.36s; }
+.delay-4 { --delay: 0.48s; }
+
+/* ─── TIPOGRAFÍA DE SECCIÓN ─── */
+.section-label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--charcoal);
+}
+.section-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 300;
+  color: var(--gold);
+  line-height: 1.1;
+  margin-top: 0.1em;
+}
+.section-header { text-align: center; margin-bottom: 3rem; }
+
+/* ─── HEADER ─── */
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+#header.scrolled {
+  background: rgba(250,246,240,0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(184,147,90,0.2), var(--shadow-sm);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 48px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.logo { display: flex; flex-direction: column; line-height: 1; gap: 1px; }
+.logo-main {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--charcoal);
+  text-transform: lowercase;
+  transition: color var(--transition);
+}
+.logo-sub {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 400;
+}
+.logo:hover .logo-main { color: var(--gold); }
+
+.nav-desktop ul { display: flex; gap: 2.2rem; align-items: center; }
+.nav-desktop a {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--charcoal-2);
+  position: relative;
+  padding-bottom: 2px;
+  transition: color var(--transition);
+}
+.nav-desktop a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 1px;
+  background: var(--gold);
+  transition: width var(--transition);
+}
+.nav-desktop a:hover { color: var(--gold); }
+.nav-desktop a:hover::after { width: 100%; }
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.hamburger span {
+  display: block;
+  width: 24px; height: 1.5px;
+  background: var(--charcoal);
+  transition: all var(--transition);
+  transform-origin: center;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.nav-mobile {
+  display: none;
+  background: rgba(250,246,240,0.98);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(184,147,90,0.15);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+}
+.nav-mobile.open { display: block; max-height: 400px; padding: 1.5rem 0; }
+.nav-mobile ul { display: flex; flex-direction: column; align-items: center; }
+.nav-mobile a {
+  display: block;
+  padding: 0.85rem 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--charcoal-2);
+  width: 100%;
+  text-align: center;
+  transition: color var(--transition);
+}
+.nav-mobile a:hover { color: var(--gold); }
+
+/* ─── HERO ─── */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 620px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #2A1F1A 0%, #1C1714 50%, #0E0B09 100%);
+}
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(184,147,90,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 20% 70%, rgba(201,169,160,0.12) 0%, transparent 50%);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+.hero-content { position: relative; z-index: 2; text-align: center; padding: 0 20px; }
+.hero-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin-bottom: 0.8rem;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 15vw, 12rem);
+  font-weight: 300;
+  line-height: 0.85;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+.hero-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.5rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gold-light);
+  margin-top: 0.6rem;
+  letter-spacing: 0.05em;
+}
+.btn-hero {
+  display: inline-block;
+  margin-top: 2.5rem;
+  padding: 0.9rem 2.4rem;
+  border: 1px solid rgba(184,147,90,0.6);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--cream);
+  position: relative;
+  overflow: hidden;
+  transition: color var(--transition), border-color var(--transition);
+}
+.btn-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: -1;
+}
+.btn-hero:hover { color: var(--charcoal); border-color: var(--gold); }
+.btn-hero:hover::before { transform: scaleX(1); }
+
+.hero-scroll {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+.hero-scroll span {
+  display: block;
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, transparent, rgba(184,147,90,0.6));
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.5); transform-origin: top; }
+  50% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+}
+
+/* ─── ABOUT ─── */
+.about { padding: 120px 0 0; background: var(--cream); }
+.about-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px; align-items: start; }
+.about-image-wrap { position: relative; }
+.about-image { aspect-ratio: 3/4; overflow: hidden; border-radius: var(--radius); box-shadow: var(--shadow); }
+.about-image img { transition: transform 0.8s ease; }
+.about-image:hover img { transform: scale(1.04); }
+.about-tag {
+  position: absolute;
+  bottom: -20px; right: -20px;
+  background: var(--charcoal);
+  color: var(--cream);
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.about-tag span { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); font-weight: 400; line-height: 1; }
+.about-tag strong { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; line-height: 1.1; }
+.about-text { padding-top: 2rem; }
+.about-name { font-family: var(--font-display); font-size: 2rem; font-weight: 400; font-style: italic; color: var(--gold); margin-bottom: 2rem; }
+.about-block { margin-bottom: 2rem; padding-left: 1.2rem; border-left: 2px solid var(--gold-light); }
+.about-block h4 { font-family: var(--font-body); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
+.about-block p { font-size: 0.95rem; color: var(--charcoal-2); line-height: 1.8; }
+
+.about-banner { margin-top: 100px; background: var(--charcoal); padding: 1.1rem 0; overflow: hidden; }
+.banner-inner {
+  display: flex; gap: 2rem; align-items: center;
+  white-space: nowrap;
+  animation: marquee 28s linear infinite;
+}
+.banner-inner p { font-family: var(--font-display); font-size: 1rem; font-weight: 300; font-style: italic; color: var(--cream); flex-shrink: 0; }
+.divider-dot { color: var(--gold); font-size: 1.2rem; flex-shrink: 0; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ─── SERVICES ─── */
+.services { padding: 120px 0; background: var(--cream); }
+.service-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 3rem; }
+.tab-btn {
+  background: none;
+  border: 1px solid rgba(184,147,90,0.3);
+  padding: 0.6rem 1.4rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--charcoal-2);
+  cursor: pointer; border-radius: 30px;
+  transition: all var(--transition);
+}
+.tab-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(184,147,90,0.05); }
+.tab-btn.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--cream); }
+.service-panels { max-width: 680px; margin: 0 auto; }
+.service-panel { display: none; animation: fadeUp 0.4s ease forwards; }
+.service-panel.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.panel-inner {
+  background: var(--white);
+  border-radius: 4px; padding: 2.5rem 3rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(184,147,90,0.1);
+}
+.panel-deco { color: var(--gold-light); font-size: 1.2rem; margin-bottom: 1rem; opacity: 0.6; }
+.panel-inner h3 { font-family: var(--font-display); font-size: 2rem; font-weight: 400; color: var(--charcoal); margin-bottom: 1.8rem; }
+.price-list li {
+  display: flex; align-items: baseline; gap: 0.4rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(184,147,90,0.12);
+  flex-wrap: wrap;
+}
+.price-list li:last-child { border-bottom: none; }
+.item-name { font-size: 0.9rem; color: var(--charcoal-2); flex-shrink: 0; }
+.dots { flex: 1; border-bottom: 1px dotted rgba(184,147,90,0.3); min-width: 20px; margin-bottom: 4px; }
+.item-price { font-family: var(--font-display); font-size: 1rem; font-weight: 500; color: var(--gold); flex-shrink: 0; }
+.item-note { width: 100%; font-size: 0.72rem; color: var(--rose); letter-spacing: 0.05em; font-weight: 500; text-transform: uppercase; }
+
+/* ─── SCHEDULE ─── */
+.schedule { position: relative; padding: 120px 0; background: var(--charcoal); overflow: hidden; }
+.schedule-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 80% 50%, rgba(184,147,90,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 10% 80%, rgba(201,169,160,0.06) 0%, transparent 50%);
+}
+.schedule .container { position: relative; z-index: 1; }
+.schedule-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 80px; align-items: center; margin-bottom: 3rem; }
+.schedule .section-label { color: var(--gold-light); }
+.schedule .section-title { color: var(--cream); }
+.schedule .section-subtitle { color: var(--gold); }
+.schedule-table { background: rgba(255,255,255,0.04); border: 1px solid rgba(184,147,90,0.15); border-radius: 4px; padding: 2rem 2.5rem; }
+.schedule-row { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid rgba(184,147,90,0.08); }
+.schedule-row:last-child { border-bottom: none; }
+.day { font-family: var(--font-body); font-size: 0.82rem; font-weight: 400; color: rgba(250,246,240,0.75); width: 100px; flex-shrink: 0; }
+.separator { flex: 1; height: 1px; background: rgba(184,147,90,0.15); }
+.time { font-family: var(--font-display); font-size: 1.1rem; font-weight: 400; color: var(--cream); flex-shrink: 0; }
+.schedule-row.closed .time { color: var(--rose); font-style: italic; }
+
+.btn-outline {
+  display: inline-block; padding: 1rem 2.6rem;
+  border: 1px solid rgba(184,147,90,0.5);
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--cream);
+  transition: all var(--transition);
+  position: relative; overflow: hidden;
+}
+.btn-outline::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--gold); transform: scaleX(0); transform-origin: left;
+  transition: transform 0.4s ease; z-index: -1;
+}
+.btn-outline:hover { color: var(--charcoal); border-color: var(--gold); }
+.btn-outline:hover::before { transform: scaleX(1); }
+
+/* ─── GALLERY ─── */
+.gallery { padding: 120px 0; background: var(--cream-dark); }
+.gallery .container { margin-bottom: 3rem; }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 260px;
+  gap: 12px;
+  padding: 0 40px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.gallery-item { position: relative; overflow: hidden; border-radius: var(--radius); cursor: pointer; }
+.gallery-item.tall { grid-row: span 2; }
+.gallery-item.wide { grid-column: span 2; }
+.gallery-item img { transition: transform 0.7s ease; }
+.gallery-item:hover img { transform: scale(1.06); }
+.gallery-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(28,23,20,0.7) 0%, transparent 50%);
+  display: flex; align-items: flex-end; padding: 1.5rem;
+  opacity: 0; transition: opacity var(--transition);
+}
+.gallery-item:hover .gallery-overlay { opacity: 1; }
+.gallery-overlay span { font-family: var(--font-display); font-size: 1.1rem; font-weight: 300; font-style: italic; color: var(--white); }
+
+/* ─── INSTAGRAM ─── */
+.instagram-section { padding: 100px 0; background: var(--charcoal); text-align: center; }
+.instagram-section .section-label { color: var(--gold-light); }
+.instagram-section .section-title { color: var(--cream); }
+.instagram-section .section-subtitle { color: var(--gold); margin-bottom: 2.5rem; }
+.instagram-btn {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  padding: 1rem 2.4rem;
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  color: var(--white); font-family: var(--font-body);
+  font-size: 0.82rem; font-weight: 500; letter-spacing: 0.12em;
+  border-radius: 30px;
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  box-shadow: 0 8px 30px rgba(253,29,29,0.3);
+}
+.instagram-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(253,29,29,0.4); opacity: 0.92; }
+
+/* ─── CONTACT ─── */
+.contact { padding: 120px 0; background: var(--cream); }
+.contact-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; margin-bottom: 4rem; align-items: start; }
+.contact-info { display: flex; flex-direction: column; gap: 1.5rem; }
+.contact-card {
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  padding: 1.5rem; background: var(--white);
+  border-radius: 4px; border: 1px solid rgba(184,147,90,0.12);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), transform var(--transition);
+}
+.contact-card:hover { border-color: rgba(184,147,90,0.35); transform: translateY(-2px); }
+.contact-icon { width: 42px; height: 42px; background: rgba(184,147,90,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.contact-icon svg { width: 18px; height: 18px; color: var(--gold); }
+.contact-card h4 { font-family: var(--font-body); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+.contact-card p, .contact-card a { font-size: 0.9rem; color: var(--charcoal-2); transition: color var(--transition); }
+.contact-card a:hover { color: var(--gold); }
+
+.contact-form { background: var(--white); padding: 2.5rem; border-radius: 4px; border: 1px solid rgba(184,147,90,0.1); box-shadow: var(--shadow-sm); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.2rem; }
+.form-group label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--charcoal-2); }
+.form-group input, .form-group select, .form-group textarea {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(184,147,90,0.2);
+  background: var(--cream);
+  font-family: var(--font-body); font-size: 0.9rem; color: var(--charcoal);
+  border-radius: 2px; outline: none;
+  transition: border-color var(--transition);
+  resize: vertical; -webkit-appearance: none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); background: var(--white); }
+.field-error { font-size: 0.72rem; color: #c0392b; min-height: 1rem; }
+.btn-submit {
+  width: 100%; padding: 1rem;
+  background: var(--charcoal); color: var(--cream);
+  border: none; font-family: var(--font-body); font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px;
+  transition: background var(--transition), transform var(--transition);
+}
+.btn-submit:hover { background: var(--gold); transform: translateY(-1px); }
+.form-success {
+  display: none; align-items: center; gap: 0.6rem;
+  margin-top: 1rem; padding: 0.9rem 1rem;
+  background: rgba(39,174,96,0.08); border: 1px solid rgba(39,174,96,0.3);
+  border-radius: 2px; font-size: 0.85rem; color: #27ae60;
+}
+.form-success svg { width: 18px; height: 18px; flex-shrink: 0; }
+.form-success.visible { display: flex; }
+
+.map-wrap { width: 100%; height: 350px; border-radius: 4px; overflow: hidden; box-shadow: var(--shadow); }
+.map-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+/* ─── FOOTER ─── */
+.footer { background: var(--charcoal); padding: 3rem 0; border-top: 1px solid rgba(184,147,90,0.15); }
+.footer-inner { max-width: 1160px; margin: 0 auto; padding: 0 40px; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: center; }
+.footer .logo-main { color: var(--cream); }
+.footer-nav { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
+.footer-nav a { font-size: 0.7rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(250,246,240,0.5); transition: color var(--transition); }
+.footer-nav a:hover { color: var(--gold); }
+.footer-copy { font-size: 0.75rem; color: rgba(250,246,240,0.3); letter-spacing: 0.05em; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) {
+  .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .about-image { aspect-ratio: 16/9; max-height: 380px; }
+  .about-tag { bottom: -15px; right: 10px; }
+  .schedule-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery-item.wide { grid-column: span 2; }
+}
+@media (max-width: 768px) {
+  .container { padding: 0 24px; }
+  .gallery-grid { padding: 0 24px; }
+  .header-inner { padding: 0 24px; }
+  .nav-desktop { display: none; }
+  .hamburger { display: flex; }
+  .hero-title { font-size: clamp(4rem, 18vw, 7rem); }
+  .panel-inner { padding: 1.8rem 1.5rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 180px; }
+  .gallery-item.wide { grid-column: span 2; }
+  .gallery-item.tall { grid-row: span 1; }
+  .schedule-table { padding: 1.5rem; }
+  .day { width: 80px; }
+  .footer-inner { padding: 0 24px; }
+}
+@media (max-width: 480px) {
+  .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 220px; }
+  .gallery-item.wide { grid-column: span 1; }
+  .service-tabs { gap: 0.4rem; }
+  .tab-btn { padding: 0.5rem 1rem; font-size: 0.65rem; }
+  .hero-title { font-size: 4.5rem; }
+  .about-grid { gap: 2rem; }
+}
+  </style>
 </head>
 <body>
 
@@ -18,7 +577,6 @@
         <span class="logo-main">mano</span>
         <span class="logo-sub">ioannina</span>
       </a>
-
       <nav class="nav-desktop">
         <ul>
           <li><a href="#perfil">Perfil</a></li>
@@ -29,13 +587,10 @@
           <li><a href="#contacto">Contacto</a></li>
         </ul>
       </nav>
-
       <button class="hamburger" id="hamburger" aria-label="Abrir menú">
         <span></span><span></span><span></span>
       </button>
     </div>
-
-    <!-- Mobile nav -->
     <nav class="nav-mobile" id="nav-mobile">
       <ul>
         <li><a href="#perfil" class="mobile-link">Perfil</a></li>
@@ -57,12 +612,10 @@
       <p class="hero-subtitle reveal delay-2">solo para ti</p>
       <a href="#servicios" class="btn-hero reveal delay-3">Descubrir</a>
     </div>
-    <div class="hero-scroll">
-      <span></span>
-    </div>
+    <div class="hero-scroll"><span></span></div>
   </section>
 
-  <!-- ─── PERFIL / ABOUT ─── -->
+  <!-- ─── PERFIL ─── -->
   <section id="perfil" class="about">
     <div class="container">
       <div class="about-grid">
@@ -75,17 +628,14 @@
             <strong>2020</strong>
           </div>
         </div>
-
         <div class="about-text">
           <p class="section-label reveal">Sobre nosotros</p>
           <h2 class="section-title reveal delay-1">About <em>mano</em></h2>
           <h3 class="about-name reveal delay-2">María Kakaidi</h3>
-
           <div class="about-block reveal delay-3">
             <h4>Filosofía Mano Ioannina</h4>
             <p>Mano Ioannina es para mí un espacio de inspiración. Quería crear un lugar de estética impecable que ofrezca servicios de primera calidad. Elementos esenciales para un espacio de belleza. Mi filosofía es una sola: resultado perfecto en todo lo que hacemos.</p>
           </div>
-
           <div class="about-block reveal delay-4">
             <h4>Mi sueño</h4>
             <p>Siempre creí que la belleza interior lo es todo. Sin embargo, para brillar un poco más necesitamos el cuidado y la atención de personas expertas. La belleza no es un lujo sino una necesidad personal. Por eso elegí dedicarme con pasión a este arte.</p>
@@ -93,23 +643,15 @@
         </div>
       </div>
     </div>
-
     <div class="about-banner">
       <div class="banner-inner">
-        <p>En el corazón de la ciudad</p>
-        <span class="divider-dot">·</span>
-        <p>Un espacio de elegancia</p>
-        <span class="divider-dot">·</span>
-        <p>¡Reserva tu cita con anticipación!</p>
-        <span class="divider-dot">·</span>
-        <p>We Love To See Your Smiles!</p>
-        <span class="divider-dot">·</span>
-        <p>En el corazón de la ciudad</p>
-        <span class="divider-dot">·</span>
-        <p>Un espacio de elegancia</p>
-        <span class="divider-dot">·</span>
-        <p>¡Reserva tu cita con anticipación!</p>
-        <span class="divider-dot">·</span>
+        <p>En el corazón de la ciudad</p><span class="divider-dot">·</span>
+        <p>Un espacio de elegancia</p><span class="divider-dot">·</span>
+        <p>¡Reserva tu cita con anticipación!</p><span class="divider-dot">·</span>
+        <p>We Love To See Your Smiles!</p><span class="divider-dot">·</span>
+        <p>En el corazón de la ciudad</p><span class="divider-dot">·</span>
+        <p>Un espacio de elegancia</p><span class="divider-dot">·</span>
+        <p>¡Reserva tu cita con anticipación!</p><span class="divider-dot">·</span>
         <p>We Love To See Your Smiles!</p>
       </div>
     </div>
@@ -123,8 +665,6 @@
         <h2 class="section-title reveal delay-1">Tu Belleza</h2>
         <h3 class="section-subtitle reveal delay-2"><em>empieza aquí</em></h3>
       </div>
-
-      <!-- Service Tabs -->
       <div class="service-tabs reveal delay-2">
         <button class="tab-btn active" data-tab="manicura">Manicura</button>
         <button class="tab-btn" data-tab="pedicura">Pedicura</button>
@@ -135,8 +675,6 @@
         <button class="tab-btn" data-tab="masaje">Masaje</button>
         <button class="tab-btn" data-tab="rostro">Rostro</button>
       </div>
-
-      <!-- Panels -->
       <div class="service-panels">
 
         <div class="service-panel active" id="tab-manicura">
@@ -214,7 +752,7 @@
               <li><span class="item-name">Maquillaje fuera de horario</span><span class="dots"></span><span class="item-price">consultar</span></li>
               <li>
                 <span class="item-name">Maquillaje nupcial</span><span class="dots"></span><span class="item-price">250 €</span>
-                <p class="item-note">+ 1 MAQUILLAJE DE REGALO</p>
+                <p class="item-note">+ 1 maquillaje de regalo</p>
               </li>
             </ul>
           </div>
@@ -225,15 +763,11 @@
             <div class="panel-deco">✦</div>
             <h3>Piercing</h3>
             <ul class="price-list">
-              <li>
-                <span class="item-name">Perforación infantil</span><span class="dots"></span><span class="item-price">consultar</span>
-              </li>
-              <li>
-                <span class="item-name">Oreja</span><span class="dots"></span><span class="item-price">consultar</span>
-              </li>
+              <li><span class="item-name">Perforación infantil</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Oreja</span><span class="dots"></span><span class="item-price">consultar</span></li>
               <li>
                 <span class="item-name">Ombligo</span><span class="dots"></span><span class="item-price">consultar</span>
-                <p class="item-note">PENDIENTE DE REGALO</p>
+                <p class="item-note">Pendiente de regalo</p>
               </li>
             </ul>
           </div>
@@ -261,9 +795,7 @@
             <div class="panel-deco">✦</div>
             <h3>Tratamientos Faciales</h3>
             <ul class="price-list">
-              <li>
-                <span class="item-name">Limpieza facial</span><span class="dots"></span><span class="item-price">consultar</span>
-              </li>
+              <li><span class="item-name">Limpieza facial</span><span class="dots"></span><span class="item-price">consultar</span></li>
               <li>
                 <span class="item-name">Tratamientos faciales</span><span class="dots"></span><span class="item-price">consultar</span>
                 <p class="item-note">Hidratación · Reafirmación</p>
@@ -276,7 +808,7 @@
           </div>
         </div>
 
-      </div><!-- /service-panels -->
+      </div>
     </div>
   </section>
 
@@ -290,46 +822,16 @@
           <h2 class="section-title reveal delay-1">Horario</h2>
           <h3 class="section-subtitle reveal delay-2"><em>de atención</em></h3>
         </div>
-
         <div class="schedule-table reveal delay-3">
-          <div class="schedule-row">
-            <span class="day">Lunes</span>
-            <span class="separator"></span>
-            <span class="time">9:00 – 17:00</span>
-          </div>
-          <div class="schedule-row">
-            <span class="day">Martes</span>
-            <span class="separator"></span>
-            <span class="time">11:00 – 19:00</span>
-          </div>
-          <div class="schedule-row">
-            <span class="day">Miércoles</span>
-            <span class="separator"></span>
-            <span class="time">9:00 – 17:00</span>
-          </div>
-          <div class="schedule-row">
-            <span class="day">Jueves</span>
-            <span class="separator"></span>
-            <span class="time">11:00 – 19:00</span>
-          </div>
-          <div class="schedule-row">
-            <span class="day">Viernes</span>
-            <span class="separator"></span>
-            <span class="time">11:00 – 19:00</span>
-          </div>
-          <div class="schedule-row">
-            <span class="day">Sábado</span>
-            <span class="separator"></span>
-            <span class="time">9:00 – 17:00</span>
-          </div>
-          <div class="schedule-row closed">
-            <span class="day">Domingo</span>
-            <span class="separator"></span>
-            <span class="time">Cerrado</span>
-          </div>
+          <div class="schedule-row"><span class="day">Lunes</span><span class="separator"></span><span class="time">9:00 – 17:00</span></div>
+          <div class="schedule-row"><span class="day">Martes</span><span class="separator"></span><span class="time">11:00 – 19:00</span></div>
+          <div class="schedule-row"><span class="day">Miércoles</span><span class="separator"></span><span class="time">9:00 – 17:00</span></div>
+          <div class="schedule-row"><span class="day">Jueves</span><span class="separator"></span><span class="time">11:00 – 19:00</span></div>
+          <div class="schedule-row"><span class="day">Viernes</span><span class="separator"></span><span class="time">11:00 – 19:00</span></div>
+          <div class="schedule-row"><span class="day">Sábado</span><span class="separator"></span><span class="time">9:00 – 17:00</span></div>
+          <div class="schedule-row closed"><span class="day">Domingo</span><span class="separator"></span><span class="time">Cerrado</span></div>
         </div>
       </div>
-
       <a href="#contacto" class="btn-outline reveal">Reservar cita</a>
     </div>
   </section>
@@ -341,32 +843,13 @@
       <h2 class="section-title reveal delay-1">Salón</h2>
       <h3 class="section-subtitle reveal delay-2"><em>fotografía</em></h3>
     </div>
-
     <div class="gallery-grid">
-      <div class="gallery-item reveal" style="--delay: 0s">
-        <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80" alt="Manicura">
-        <div class="gallery-overlay"><span>Manicura</span></div>
-      </div>
-      <div class="gallery-item reveal" style="--delay: 0.1s">
-        <img src="https://images.unsplash.com/photo-1604654894497-6e6fe0bf4ca5?w=500&q=80" alt="Pedicura">
-        <div class="gallery-overlay"><span>Pedicura</span></div>
-      </div>
-      <div class="gallery-item tall reveal" style="--delay: 0.2s">
-        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" alt="Maquillaje">
-        <div class="gallery-overlay"><span>Maquillaje</span></div>
-      </div>
-      <div class="gallery-item reveal" style="--delay: 0.3s">
-        <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&q=80" alt="Tratamiento facial">
-        <div class="gallery-overlay"><span>Tratamiento facial</span></div>
-      </div>
-      <div class="gallery-item wide reveal" style="--delay: 0.4s">
-        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80" alt="Salón">
-        <div class="gallery-overlay"><span>Nuestro salón</span></div>
-      </div>
-      <div class="gallery-item reveal" style="--delay: 0.5s">
-        <img src="https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=500&q=80" alt="Nail art">
-        <div class="gallery-overlay"><span>Nail Art</span></div>
-      </div>
+      <div class="gallery-item reveal" style="--delay:0s"><img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80" alt="Manicura"><div class="gallery-overlay"><span>Manicura</span></div></div>
+      <div class="gallery-item reveal" style="--delay:0.1s"><img src="https://images.unsplash.com/photo-1604654894497-6e6fe0bf4ca5?w=500&q=80" alt="Pedicura"><div class="gallery-overlay"><span>Pedicura</span></div></div>
+      <div class="gallery-item tall reveal" style="--delay:0.2s"><img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" alt="Maquillaje"><div class="gallery-overlay"><span>Maquillaje</span></div></div>
+      <div class="gallery-item reveal" style="--delay:0.3s"><img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&q=80" alt="Tratamiento facial"><div class="gallery-overlay"><span>Tratamiento facial</span></div></div>
+      <div class="gallery-item wide reveal" style="--delay:0.4s"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80" alt="Salón"><div class="gallery-overlay"><span>Nuestro salón</span></div></div>
+      <div class="gallery-item reveal" style="--delay:0.5s"><img src="https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=500&q=80" alt="Nail art"><div class="gallery-overlay"><span>Nail Art</span></div></div>
     </div>
   </section>
 
@@ -376,7 +859,6 @@
       <p class="section-label reveal">Síguenos</p>
       <h2 class="section-title reveal delay-1">Síguenos</h2>
       <h3 class="section-subtitle reveal delay-2"><em>en Instagram</em></h3>
-
       <a href="https://instagram.com/manoioannina" target="_blank" rel="noopener" class="instagram-btn reveal delay-3">
         <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         @manoioannina
@@ -392,41 +874,21 @@
         <h2 class="section-title reveal delay-1">Contacto</h2>
         <h3 class="section-subtitle reveal delay-2"><em>¡Con gusto te atendemos!</em></h3>
       </div>
-
       <div class="contact-grid">
         <div class="contact-info">
           <div class="contact-card reveal">
-            <div class="contact-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div>
-              <h4>Dirección</h4>
-              <p>Zygomali 20, Ioannina</p>
-            </div>
+            <div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+            <div><h4>Dirección</h4><p>Zygomali 20, Ioannina</p></div>
           </div>
-
           <div class="contact-card reveal delay-1">
-            <div class="contact-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-            </div>
-            <div>
-              <h4>Teléfono</h4>
-              <a href="tel:2651036900">2651 036 900</a>
-            </div>
+            <div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
+            <div><h4>Teléfono</h4><a href="tel:2651036900">2651 036 900</a></div>
           </div>
-
           <div class="contact-card reveal delay-2">
-            <div class="contact-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            </div>
-            <div>
-              <h4>Email</h4>
-              <a href="mailto:[email protected]">[email protected]</a>
-            </div>
+            <div class="contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+            <div><h4>Email</h4><a href="mailto:[email protected]">[email protected]</a></div>
           </div>
         </div>
-
-        <!-- Contact Form -->
         <form class="contact-form reveal delay-2" id="contact-form" novalidate>
           <div class="form-row">
             <div class="form-group">
@@ -465,13 +927,8 @@
           </div>
         </form>
       </div>
-
-      <!-- Map placeholder -->
       <div class="map-wrap reveal">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3055.4!2d20.8535!3d39.6650!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sZygomali+20%2C+Ioannina!5e0!3m2!1ses!2sgr!4v1"
-          allowfullscreen="" loading="lazy"
-          title="Ubicación Mano Ioannina"></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3055.4!2d20.8535!3d39.6650!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sZygomali+20%2C+Ioannina!5e0!3m2!1ses!2sgr!4v1" allowfullscreen="" loading="lazy" title="Ubicación Mano Ioannina"></iframe>
       </div>
     </div>
   </section>
@@ -494,6 +951,159 @@
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+'use strict';
+
+/* ─── HEADER scroll ─── */
+const header = document.getElementById('header');
+function updateHeader() {
+  header.classList.toggle('scrolled', window.scrollY > 40);
+}
+window.addEventListener('scroll', updateHeader, { passive: true });
+updateHeader();
+
+/* ─── MOBILE MENU ─── */
+const hamburger = document.getElementById('hamburger');
+const navMobile = document.getElementById('nav-mobile');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = navMobile.classList.toggle('open');
+  hamburger.classList.toggle('open', isOpen);
+  hamburger.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
+});
+
+document.querySelectorAll('.mobile-link').forEach(link => {
+  link.addEventListener('click', () => {
+    navMobile.classList.remove('open');
+    hamburger.classList.remove('open');
+  });
+});
+
+document.addEventListener('click', (e) => {
+  if (navMobile.classList.contains('open') &&
+      !navMobile.contains(e.target) &&
+      !hamburger.contains(e.target)) {
+    navMobile.classList.remove('open');
+    hamburger.classList.remove('open');
+  }
+});
+
+/* ─── SCROLL REVEAL ─── */
+const revealObserver = new IntersectionObserver(
+  (entries) => entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  }),
+  { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+);
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ─── SERVICE TABS ─── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.service-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('tab-' + btn.dataset.tab);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+/* ─── SMOOTH SCROLL ─── */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const id = this.getAttribute('href');
+    if (id === '#') return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - header.offsetHeight, behavior: 'smooth' });
+  });
+});
+
+/* ─── HERO PARALLAX ─── */
+const heroBg = document.querySelector('.hero-bg');
+if (heroBg) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY < window.innerHeight)
+      heroBg.style.transform = `translateY(${window.scrollY * 0.25}px)`;
+  }, { passive: true });
+}
+
+/* ─── FORMULARIO ─── */
+const form = document.getElementById('contact-form');
+const formSuccess = document.getElementById('form-success');
+
+function showError(id, msg) {
+  const el = document.getElementById('error-' + id);
+  const inp = document.getElementById(id);
+  if (el) el.textContent = msg;
+  if (inp) inp.style.borderColor = '#c0392b';
+}
+function clearError(id) {
+  const el = document.getElementById('error-' + id);
+  const inp = document.getElementById(id);
+  if (el) el.textContent = '';
+  if (inp) inp.style.borderColor = '';
+}
+
+document.getElementById('nombre')?.addEventListener('input', function() {
+  if (this.value.trim()) clearError('nombre');
+});
+document.getElementById('email')?.addEventListener('input', function() {
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value.trim())) clearError('email');
+});
+
+form?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const nombre = document.getElementById('nombre').value.trim();
+  const email  = document.getElementById('email').value.trim();
+  let valid = true;
+
+  if (!nombre) { showError('nombre', 'Por favor, ingresa tu nombre.'); valid = false; }
+  else clearError('nombre');
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('email', 'Por favor, ingresa un email válido.'); valid = false; }
+  else clearError('email');
+
+  if (!valid) return;
+
+  const btn = form.querySelector('.btn-submit');
+  btn.textContent = 'Enviando…';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    form.reset();
+    formSuccess.classList.add('visible');
+    btn.textContent = 'Enviar mensaje';
+    btn.disabled = false;
+    setTimeout(() => formSuccess.classList.remove('visible'), 5000);
+  }, 1200);
+});
+
+/* ─── LIGHTBOX GALERÍA ─── */
+const lightbox = document.createElement('div');
+lightbox.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(28,23,20,0.95);z-index:999;align-items:center;justify-content:center;cursor:zoom-out;';
+const lbImg = document.createElement('img');
+lbImg.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;border-radius:2px;box-shadow:0 30px 80px rgba(0,0,0,0.6);';
+const lbClose = document.createElement('button');
+lbClose.innerHTML = '&times;';
+lbClose.style.cssText = 'position:absolute;top:1.5rem;right:2rem;background:none;border:none;color:rgba(250,246,240,0.7);font-size:2.5rem;cursor:pointer;line-height:1;padding:0;';
+lightbox.appendChild(lbImg);
+lightbox.appendChild(lbClose);
+document.body.appendChild(lightbox);
+
+function openLb(src, alt) { lbImg.src = src; lbImg.alt = alt||''; lightbox.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+function closeLb() { lightbox.style.display = 'none'; document.body.style.overflow = ''; }
+
+document.querySelectorAll('.gallery-item').forEach(item => {
+  item.addEventListener('click', () => { const img = item.querySelector('img'); if (img) openLb(img.src, img.alt); });
+});
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLb(); });
+lbClose.addEventListener('click', closeLb);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLb(); });
+  </script>
 </body>
 </html>
