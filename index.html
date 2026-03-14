@@ -4,643 +4,76 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Inicio – Mano Ioannina – Maria Kakaidi</title>
-<style>
-/* ─── FUENTES DEL ORIGINAL ─── */
-@font-face {
-  font-family: 'Cera';
-  font-weight: 300;
-  font-display: swap;
-  src: url('https://mano.gr/wp-content/uploads/2019/10/Cera-GR-Light.woff') format('woff');
-}
-@font-face {
-  font-family: 'Cera';
-  font-weight: 400;
-  font-display: swap;
-  src: url('https://mano.gr/wp-content/uploads/2019/10/Cera-GR.woff') format('woff');
-}
-@font-face {
-  font-family: 'Cera';
-  font-weight: 700;
-  font-display: swap;
-  src: url('https://mano.gr/wp-content/uploads/2019/10/Cera-GR-Bold.woff') format('woff');
-}
-@font-face {
-  font-family: 'Garamont';
-  font-weight: 700;
-  font-display: swap;
-  src: url('https://mano.gr/wp-content/uploads/2019/10/PFGaramondClassicOsF-Bold.woff') format('woff');
-}
-
-/* ─── VARIABLES ─── */
-:root {
-  --gold:       #af8f54;
-  --gold-light: #d8c9a4;
-  --dark:       #231f20;
-  --gray:       #7a7a7a;
-  --gray-light: #d8d8d8;
-  --offwhite:   #f8f8f8;
-  --bgsection:  #f5f2ed;
-}
-
-/* ─── RESET ─── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Cera', Arial, sans-serif;
-  font-weight: 400;
-  background: #fff;
-  color: var(--dark);
-  overflow-x: hidden;
-}
-a { text-decoration: none; color: inherit; }
-img { display: block; max-width: 100%; }
-
-/* ─── NAVBAR ─── */
-#navbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 48px;
-  height: 85px;
-  background: transparent;
-  transition: background 0.4s, height 0.4s, box-shadow 0.4s;
-}
-#navbar.scrolled {
-  background: rgba(175,143,84,0.95);
-  height: 62px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
-}
-.nav-logo img {
-  height: 52px;
-  width: auto;
-  transition: height 0.4s;
-}
-#navbar.scrolled .nav-logo img { height: 38px; }
-
-.nav-links {
-  display: flex;
-  list-style: none;
-  gap: 4px;
-}
-.nav-links a {
-  font-family: 'Cera', Arial, sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: #fff;
-  padding: 8px 14px;
-  letter-spacing: 0.3px;
-  position: relative;
-  transition: opacity 0.2s;
-  display: block;
-}
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: 2px; left: 14px; right: 14px;
-  height: 1px;
-  background: #fff;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s;
-}
-.nav-links a:hover { opacity: 0.8; }
-.nav-links a:hover::after { transform: scaleX(1); }
-
-.nav-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  padding: 4px;
-}
-.nav-toggle span {
-  display: block; width: 26px; height: 2px;
-  background: #fff;
-  transition: transform 0.3s, opacity 0.3s;
-}
-.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-toggle.open span:nth-child(2) { opacity: 0; }
-.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-/* ─── MOBILE MENU ─── */
-.mobile-nav {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(175,143,84,0.97);
-  z-index: 10000;
-  flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 32px;
-}
-.mobile-nav.open { display: flex; animation: fadeIn 0.25s ease; }
-.mobile-nav a {
-  font-family: 'Cera', Arial, sans-serif;
-  font-weight: 300;
-  font-size: 1.4rem;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  color: #fff;
-  transition: opacity 0.2s;
-}
-.mobile-nav a:hover { opacity: 0.7; }
-
-/* ─── HERO ─── */
-/* FIX: height con dvh para móvil, centrado, sin padding-bottom enorme */
-#hero {
-  position: relative;
-  height: 100vh;
-  height: 100dvh;          /* FIX: evita que la barra del navegador móvil cause overflow */
-  min-height: 500px;
-  max-height: 900px;       /* FIX: evita que sea demasiado alta en pantallas grandes */
-  overflow: hidden;
-  display: flex;
-  align-items: center;     /* FIX: centrado vertical en lugar de flex-end */
-  justify-content: flex-start;
-}
-
-.hero-slide {
-  position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center center;
-  opacity: 0;
-  transition: opacity 1.8s ease;
-  will-change: opacity;
-}
-.hero-slide.active { opacity: 1; }
-.hero-slide:nth-child(1) { background-image: url('https://mano.gr/wp-content/uploads/2019/10/mano-reception-01.jpg'); }
-.hero-slide:nth-child(2) { background-image: url('https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg'); }
-.hero-slide:nth-child(3) { background-image: url('https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg'); }
-.hero-slide:nth-child(4) { background-image: url('https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg'); }
-.hero-slide:nth-child(5) { background-image: url('https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg'); }
-
-.hero-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(0,0,0,0.55) 0%,
-    rgba(0,0,0,0.15) 70%
-  );
-  pointer-events: none;
-}
-
-/* FIX: padding relativo al viewport, sin valores fijos grandes */
-.hero-content {
-  position: relative; z-index: 3;
-  padding: 0 6vw;
-  max-width: min(680px, 90vw);
-}
-.hero-content h1 {
-  font-family: 'Garamont', Georgia, serif;
-  font-weight: 700;
-  font-size: clamp(2.8rem, 5.5vw, 5.5rem);
-  line-height: 1.08;
-  color: var(--gold);
-  margin-bottom: 14px;
-  text-shadow: 2px 2px 12px rgba(0,0,0,0.5);
-  animation: heroUp 1.1s ease 0.2s both;
-}
-.hero-content h2 {
-  font-family: 'Cera', Arial, sans-serif;
-  font-weight: 400;
-  font-size: clamp(1.1rem, 2.5vw, 2rem); /* FIX: no hardcoded 38px */
-  letter-spacing: -0.5px;
-  color: #fff;
-  line-height: 1.3;
-  animation: heroUp 1.1s ease 0.45s both;
-}
-@keyframes heroUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* scroll indicator */
-.hero-scroll {
-  position: absolute;
-  bottom: 28px; left: 50%;
-  transform: translateX(-50%);
-  z-index: 3; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center;
-  animation: bounce 2.5s infinite 2.5s;
-}
-.hero-scroll span {
-  display: block; width: 1px; height: 44px;
-  background: rgba(255,255,255,0.45);
-}
-.hero-scroll::after {
-  content: '';
-  display: block; width: 7px; height: 7px;
-  border-right: 1px solid rgba(255,255,255,0.55);
-  border-bottom: 1px solid rgba(255,255,255,0.55);
-  transform: rotate(45deg);
-  margin-top: -9px;
-}
-@keyframes bounce {
-  0%,100% { transform: translateX(-50%) translateY(0); }
-  50%      { transform: translateX(-50%) translateY(8px); }
-}
-
-/* hero dots */
-.hero-dots {
-  position: absolute; bottom: 26px; right: 36px;
-  display: flex; flex-direction: column; gap: 7px;
-  z-index: 3;
-}
-.hero-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
-}
-.hero-dot.active { background: #fff; transform: scale(1.5); }
-
-/* ─── SCROLL REVEAL ─── */
-.reveal, .reveal-l, .reveal-r {
-  opacity: 0;
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-.reveal   { transform: translateY(36px); }
-.reveal-l { transform: translateX(-36px); }
-.reveal-r { transform: translateX(36px); }
-.reveal.in, .reveal-l.in, .reveal-r.in { opacity: 1; transform: none; }
-
-/* FIX stagger: el contenedor es visible, los hijos se animan */
-.stagger > * {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.stagger.in > *:nth-child(1)  { opacity:1; transform:none; transition-delay: 0.00s; }
-.stagger.in > *:nth-child(2)  { opacity:1; transform:none; transition-delay: 0.07s; }
-.stagger.in > *:nth-child(3)  { opacity:1; transform:none; transition-delay: 0.14s; }
-.stagger.in > *:nth-child(4)  { opacity:1; transform:none; transition-delay: 0.21s; }
-.stagger.in > *:nth-child(5)  { opacity:1; transform:none; transition-delay: 0.28s; }
-.stagger.in > *:nth-child(6)  { opacity:1; transform:none; transition-delay: 0.35s; }
-.stagger.in > *:nth-child(7)  { opacity:1; transform:none; transition-delay: 0.42s; }
-.stagger.in > *:nth-child(8)  { opacity:1; transform:none; transition-delay: 0.49s; }
-
-/* ─── HELPERS COMUNES ─── */
-.section-tag {
-  font-family: 'Cera', Arial, sans-serif;
-  font-weight: 300;
-  font-size: 11px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 6px;
-  display: block;
-}
-.section-title {
-  font-family: 'Garamont', Georgia, serif;
-  font-weight: 700;
-  font-size: clamp(2rem, 3.8vw, 3.6rem);
-  line-height: 1.1;
-  color: var(--dark);
-}
-.section-title.white { color: #fff; }
-
-.gold-divider {
-  width: 55px; height: 2px;
-  background: var(--gold-light);
-  margin: 16px 0 30px;
-}
-.gold-divider.center { margin: 16px auto 30px; }
-
-/* ─── ABOUT ─── */
-#about {
-  background: var(--offwhite);
-  padding: 90px 60px;
-}
-.about-grid {
-  max-width: 1180px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 80px; align-items: center;
-}
-.about-text h4 {
-  font-family: 'Cera', Arial, sans-serif;
-  font-weight: 700; font-size: 11px;
-  letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--gold); margin: 26px 0 9px;
-}
-.about-text p {
-  font-weight: 300; font-size: 14px;
-  line-height: 1.85; color: var(--gray);
-  letter-spacing: 0.2px; margin-bottom: 12px;
-}
-.about-images {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-}
-.about-images img { width: 100%; object-fit: cover; }
-.about-images img:first-child { grid-column: 1/-1; height: 280px; }
-.about-images img:not(:first-child) { height: 190px; }
-
-/* ─── CITY ─── */
-#city {
-  background: var(--dark);
-  padding: 90px 60px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-#city::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: url('https://mano.gr/wp-content/uploads/2019/10/geometry-bg-01.svg') center/cover no-repeat;
-  opacity: 0.05;
-  pointer-events: none;
-}
-#city .section-tag  { color: var(--gold-light); }
-#city .section-title { color: #fff; }
-#city .gold-divider { background: var(--gold); }
-#city p {
-  max-width: 660px; margin: 0 auto 13px;
-  font-weight: 300; font-size: 14px;
-  line-height: 1.9; color: rgba(255,255,255,0.58);
-}
-#city .highlight {
-  font-weight: 700; color: var(--gold);
-  font-size: 13px; letter-spacing: 1.5px;
-  text-transform: uppercase; margin-top: 4px;
-  display: block;
-}
-/* FIX: fotos city más pequeñas para no desbordarse */
-.city-strip {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  margin-top: 60px; gap: 0;
-}
-.city-strip-item { overflow: hidden; }
-.city-strip-item img {
-  width: 100%; height: 300px; object-fit: cover;
-  filter: brightness(0.58) saturate(0.7);
-  transition: transform 0.7s ease, filter 0.7s ease;
-  display: block;
-}
-.city-strip-item:hover img {
-  transform: scale(1.05);
-  filter: brightness(0.8) saturate(1);
-}
-
-/* ─── SERVICES ─── */
-#services { background: #fff; padding: 90px 60px; }
-.services-inner { max-width: 1180px; margin: 0 auto; }
-.services-header { text-align: center; margin-bottom: 60px; }
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 44px 52px;
-}
-.service-block h3 {
-  font-weight: 700; font-size: 10px;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--dark);
-  padding-bottom: 11px;
-  border-bottom: 2px solid var(--gold-light);
-  margin-bottom: 14px;
-}
-.service-row {
-  display: flex; align-items: baseline;
-  padding: 6px 0;
-  border-bottom: 2px dotted var(--gray-light);
-}
-.service-row:last-child { border-bottom: none; }
-.service-row .name {
-  flex: 1; font-weight: 400; font-size: 13.5px;
-  line-height: 1.35; color: var(--gray);
-}
-.service-row .sub {
-  display: block; font-size: 10px;
-  color: var(--gold); letter-spacing: 1px;
-  text-transform: uppercase; margin-top: 2px;
-}
-.service-row .price {
-  font-weight: 400; font-size: 13.5px;
-  color: var(--gray);
-  margin-left: 8px; flex-shrink: 0;
-  white-space: nowrap;
-}
-
-/* ─── SCHEDULE ─── */
-#schedule { background: var(--dark); padding: 90px 60px; }
-.schedule-inner { max-width: 540px; margin: 0 auto; text-align: center; }
-.sched-table { margin-top: 42px; }
-.sched-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  font-size: 13px; font-weight: 300;
-}
-.sched-row:first-child { border-top: 1px solid rgba(255,255,255,0.07); }
-.sched-row .day {
-  font-weight: 400; font-size: 10px;
-  letter-spacing: 2.5px; text-transform: uppercase;
-  color: rgba(255,255,255,0.48);
-}
-.sched-row .hours { color: rgba(255,255,255,0.88); letter-spacing: 0.5px; }
-.sched-row .closed {
-  color: var(--gold); font-size: 10px;
-  letter-spacing: 2px; text-transform: uppercase;
-}
-
-/* ─── GALLERY ─── */
-#gallery { background: var(--bgsection); padding: 90px 0; overflow: hidden; }
-.gallery-header { text-align: center; padding: 0 60px; margin-bottom: 52px; }
-.gallery-outer { overflow: hidden; position: relative; }
-.gallery-track {
-  display: flex; gap: 5px;
-  width: max-content;
-  animation: gScroll 42s linear infinite;
-  will-change: transform;
-}
-.gallery-track:hover { animation-play-state: paused; }
-.gallery-track img {
-  height: 260px; width: auto; flex-shrink: 0;
-  object-fit: cover;
-  filter: brightness(0.7) saturate(0.78);
-  transition: filter 0.45s, transform 0.45s;
-  cursor: pointer;
-}
-.gallery-track img:hover {
-  filter: brightness(1) saturate(1);
-  transform: scale(1.04);
-  position: relative; z-index: 2;
-}
-.gallery-controls {
-  display: flex; justify-content: center; gap: 10px;
-  margin-top: 32px;
-}
-.gallery-btn {
-  width: 42px; height: 42px;
-  background: var(--gold);
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-.gallery-btn:hover { background: var(--dark); }
-/* FIX: SVG arrows con stroke, no fill */
-.gallery-btn svg {
-  width: 14px; height: 14px;
-  fill: none;
-  stroke: #fff;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-@keyframes gScroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-/* ─── LIGHTBOX ─── */
-.lightbox {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.96);
-  z-index: 99999;
-  align-items: center; justify-content: center;
-}
-.lightbox.open { display: flex; animation: fadeIn 0.2s ease; }
-.lightbox img {
-  max-width: 92vw; max-height: 88vh;
-  object-fit: contain;
-  box-shadow: 0 0 60px rgba(0,0,0,0.8);
-}
-.lb-close {
-  position: absolute; top: 18px; right: 26px;
-  font-size: 2.2rem; line-height: 1;
-  color: rgba(255,255,255,0.6);
-  cursor: pointer;
-  transition: color 0.2s, transform 0.25s;
-  user-select: none;
-}
-.lb-close:hover { color: var(--gold); transform: rotate(90deg); }
-
-/* ─── INSTAGRAM ─── */
-#instagram { background: var(--offwhite); padding: 90px 60px; text-align: center; }
-.ig-btn {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--gray);
-  border: 1px solid var(--gold-light);
-  padding: 13px 36px; margin-top: 10px;
-  transition: border-color 0.3s, color 0.3s, background 0.3s;
-}
-.ig-btn:hover {
-  border-color: var(--gold); color: var(--dark);
-  background: rgba(175,143,84,0.05);
-}
-.ig-btn svg {
-  width: 15px; height: 15px;
-  fill: none; stroke: currentColor;
-  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
-}
-
-/* ─── CONTACT ─── */
-#contact { background: #fff; padding: 90px 60px; }
-.contact-grid {
-  max-width: 1100px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 80px; align-items: start;
-}
-.contact-info .subtitle {
-  font-weight: 300; font-style: italic;
-  font-size: 0.92rem; color: var(--gray);
-  margin-bottom: 40px; letter-spacing: 0.5px;
-  display: block;
-}
-.contact-item { margin-bottom: 28px; }
-.contact-item h4 {
-  font-weight: 700; font-size: 9px;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 6px;
-}
-.contact-item a,
-.contact-item p {
-  font-size: 14.5px; font-weight: 300;
-  color: var(--gray); letter-spacing: 0.3px;
-  transition: color 0.2s;
-}
-.contact-item a:hover { color: var(--gold); }
-.contact-map iframe {
-  width: 100%; height: 400px; border: none;
-  display: block;
-}
-
-/* ─── FOOTER ─── */
-footer {
-  background: var(--dark);
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 34px 48px; text-align: center;
-  font-size: 11px; letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.3); font-weight: 300;
-}
-footer strong { color: rgba(255,255,255,0.55); font-weight: 400; }
-footer a { color: var(--gold-light); transition: color 0.2s; }
-footer a:hover { color: var(--gold); }
-
-/* ─── KEYFRAMES ─── */
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-
-/* ─── RESPONSIVE ─── */
-@media (max-width: 1100px) {
-  .services-grid { grid-template-columns: repeat(2,1fr); }
-}
-
-@media (max-width: 860px) {
-  /* Navbar */
-  #navbar, #navbar.scrolled { padding: 0 20px; }
-  .nav-links { display: none; }
-  .nav-toggle { display: flex; }
-
-  /* Secciones */
-  #about, #city, #services, #schedule,
-  #instagram, #contact { padding: 64px 24px; }
-  #gallery { padding: 64px 0; }
-  .gallery-header { padding: 0 24px; }
-
-  /* About */
-  .about-grid { grid-template-columns: 1fr; gap: 36px; }
-
-  /* City */
-  .city-strip { grid-template-columns: 1fr; }
-  .city-strip-item img { height: 200px; }
-
-  /* Services */
-  .services-grid { grid-template-columns: 1fr; gap: 32px; }
-
-  /* Contact */
-  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
-  .contact-map iframe { height: 300px; }
-}
-
-@media (max-width: 540px) {
-  /* Hero más compacto en móvil */
-  #hero { max-height: 700px; }
-  .hero-content h1 { font-size: 2.4rem; }
-  .hero-content h2 { font-size: 1rem; }
-
-  /* About images apiladas */
-  .about-images { grid-template-columns: 1fr; }
-  .about-images img:first-child { height: 200px; }
-  .about-images img:not(:first-child) { height: 165px; }
-
-  /* Galería más pequeña */
-  .gallery-track img { height: 200px; }
-
-  footer { padding: 28px 20px; }
-}
-</style>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
 
-<!-- LIGHTBOX -->
+<!-- ══════════════════════════════════
+     SVG ICONS (reutilizables con <use>)
+     ══════════════════════════════════ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="ico-nail" viewBox="0 0 60 60">
+      <line x1="10" y1="50" x2="50" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="16" y1="50" x2="50" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+      <rect x="6" y="44" width="10" height="5" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+    </symbol>
+    <symbol id="ico-foot" viewBox="0 0 60 60">
+      <path d="M20 50 Q15 40 18 28 Q20 18 28 15 Q36 12 38 20 Q40 28 34 35 Q28 42 26 50Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+      <circle cx="38" cy="16" r="3"   stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="44" cy="20" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="46" cy="27" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="44" cy="34" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </symbol>
+    <symbol id="ico-sculpt" viewBox="0 0 60 60">
+      <path d="M15 45 L15 30 Q15 20 25 20 L35 20 Q45 20 45 30 L45 45" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+      <line x1="12" y1="45" x2="48" y2="45" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M22 20 Q22 13 30 13 Q38 13 38 20" stroke="currentColor" stroke-width="2" fill="none"/>
+      <line x1="24" y1="30" x2="36" y2="30" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+      <line x1="24" y1="36" x2="36" y2="36" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+    </symbol>
+    <symbol id="ico-wax" viewBox="0 0 60 60">
+      <line x1="10" y1="50" x2="50" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M42 18 L50 10 L52 18 L44 20Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path d="M15 43 Q25 35 35 38 Q42 40 38 48" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-makeup" viewBox="0 0 60 60">
+      <path d="M20 35 Q30 45 40 35 Q35 25 30 28 Q25 25 20 35Z" stroke="currentColor" stroke-width="2" fill="none"/>
+      <path d="M22 33 Q30 39 38 33" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"/>
+      <line x1="30" y1="10" x2="30" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M24 14 Q30 10 36 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ico-piercing" viewBox="0 0 60 60">
+      <circle cx="30" cy="28" r="14" stroke="currentColor" stroke-width="2"   fill="none"/>
+      <circle cx="30" cy="28" r="6"  stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"/>
+      <line x1="30" y1="42" x2="30" y2="52" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="30" cy="54" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
+    </symbol>
+    <symbol id="ico-massage" viewBox="0 0 60 60">
+      <path d="M15 40 Q15 28 22 24 L28 20 Q32 18 34 22 L34 30" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M34 30 L38 26 Q42 24 44 28 L44 34 Q44 42 36 46 L24 50 L16 46" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 24 L26 18 Q29 14 32 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
+    </symbol>
+    <symbol id="ico-facial" viewBox="0 0 60 60">
+      <circle cx="30" cy="28" r="16" stroke="currentColor" stroke-width="2" fill="none"/>
+      <path d="M22 22 Q26 18 30 22 Q34 26 38 22" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
+      <path d="M22 30 Q26 26 30 30 Q34 34 38 30" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
+      <path d="M26 38 Q28 34 30 38 Q32 42 34 38" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ══════════════════════════════════
+     LIGHTBOX
+     ══════════════════════════════════ -->
 <div class="lightbox" id="lightbox">
   <span class="lb-close" id="lbClose">&times;</span>
   <img src="" alt="" id="lbImg"/>
 </div>
 
-<!-- NAVBAR -->
+<!-- ══════════════════════════════════
+     NAVBAR
+     ══════════════════════════════════ -->
 <nav id="navbar">
   <a href="#hero" class="nav-logo">
     <img src="https://mano.gr/wp-content/uploads/2019/10/mano-logo-white-nobox2.svg"
@@ -660,7 +93,7 @@ footer a:hover { color: var(--gold); }
   </div>
 </nav>
 
-<!-- MOBILE MENU -->
+<!-- Menú móvil -->
 <div class="mobile-nav" id="mobileNav">
   <a href="#about"     class="mob">perfil</a>
   <a href="#services"  class="mob">servicios</a>
@@ -670,7 +103,9 @@ footer a:hover { color: var(--gold); }
   <a href="#contact"   class="mob">contacto</a>
 </div>
 
-<!-- HERO -->
+<!-- ══════════════════════════════════
+     HERO
+     ══════════════════════════════════ -->
 <section id="hero">
   <div class="hero-slide active"></div>
   <div class="hero-slide"></div>
@@ -688,18 +123,20 @@ footer a:hover { color: var(--gold); }
   <div class="hero-dots" id="heroDots"></div>
 </section>
 
-<!-- ABOUT -->
+<!-- ══════════════════════════════════
+     ABOUT
+     ══════════════════════════════════ -->
 <section id="about">
   <div class="about-grid">
     <div class="about-text reveal-l">
       <span class="section-tag">Sobre mano</span>
       <h2 class="section-title">María Kakaidi</h2>
-      <div class="gold-divider"></div>
+      <div class="gold-bar"></div>
       <h4>Filosofía de Mano Ioannina</h4>
       <p>Mano Ioannina es para mí un espacio de inspiración. Quise crear un espacio de estética impecable que ofreciera lo mejor a cada cliente que nos visita.</p>
       <h4>Mi sueño</h4>
       <p>Siempre creí que la belleza interior lo es todo. Pero para brillar un poco más necesitamos el cuidado y la atención de personas expertas. La belleza no es un lujo, sino una necesidad personal.</p>
-      <p>La necesidad de sentirse bien con uno mismo es igual de importante para ambos sexos, por eso los servicios de Mano Ioannina van dirigidos tanto a mujeres como a hombres. Mi objetivo son las sonrisas de mis clientes. Mi sueño comenzó y se llama Mano Ioannina.</p>
+      <p>La necesidad de sentirse bien con uno mismo es igual de importante para ambos sexos, por eso los servicios de Mano Ioannina van dirigidos tanto a mujeres como a hombres. Mi objetivo son las sonrisas de mis clientes.</p>
     </div>
     <div class="about-images reveal-r">
       <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Mano Salon" loading="lazy"/>
@@ -709,41 +146,69 @@ footer a:hover { color: var(--gold); }
   </div>
 </section>
 
-<!-- CITY -->
+<!-- ══════════════════════════════════
+     CITY
+     ══════════════════════════════════ -->
 <section id="city">
-  <div class="reveal">
+  <svg class="botanical-svg" viewBox="0 0 280 500" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M140 480 Q138 400 142 320 Q140 240 138 160 Q136 80 140 20" stroke="#af8f54" stroke-width="1.2" fill="none" opacity=".8"/>
+    <path d="M139 380 Q100 350 60 360 Q90 330 140 340"   stroke="#af8f54" stroke-width="1" fill="none" opacity=".7"/>
+    <path d="M139 320 Q90 280 50 290 Q85 260 140 270"    stroke="#af8f54" stroke-width="1" fill="none" opacity=".7"/>
+    <path d="M139 230 Q80 190 40 200 Q80 170 140 185"    stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M139 150 Q95 115 65 125 Q95 95 140 110"     stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M141 350 Q185 320 220 328 Q190 300 140 310" stroke="#af8f54" stroke-width="1" fill="none" opacity=".7"/>
+    <path d="M141 270 Q192 240 230 248 Q196 218 140 232" stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M141 185 Q188 155 220 162 Q194 134 140 148" stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M141 100 Q180 72 210 78 Q186 54 140 68"     stroke="#af8f54" stroke-width="1" fill="none" opacity=".5"/>
+    <path d="M139 380 Q120 365 100 368" stroke="#af8f54" stroke-width=".6" opacity=".4"/>
+    <path d="M139 320 Q116 305 90 308"  stroke="#af8f54" stroke-width=".6" opacity=".4"/>
+    <path d="M141 350 Q165 337 185 340" stroke="#af8f54" stroke-width=".6" opacity=".4"/>
+  </svg>
+
+  <div class="reveal" style="position:relative;z-index:2">
     <span class="section-tag">En el corazón</span>
     <h2 class="section-title white">de la ciudad</h2>
-    <div class="gold-divider center"></div>
+    <div class="gold-bar gold center"></div>
     <p>Un espacio de elegancia en el centro de la ciudad para quienes el cuidado personal es una combinación de estética, bienestar propio y servicios a precios razonables.</p>
-    <p>Profesionalidad y creatividad. Imaginación e ideas. Reserve con tiempo su cita para la próxima semana.</p>
+    <p>Profesionalidad y creatividad. Imaginación e ideas. Reserve su cita con anticipación.</p>
     <span class="highlight">¡Nos encanta ver tu sonrisa!</span>
   </div>
-  <div class="city-strip">
-    <div class="city-strip-item reveal" style="transition-delay:.0s">
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="" loading="lazy"/>
-    </div>
-    <div class="city-strip-item reveal" style="transition-delay:.12s">
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="" loading="lazy"/>
-    </div>
-    <div class="city-strip-item reveal" style="transition-delay:.24s">
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="" loading="lazy"/>
-    </div>
+  <div class="city-strip" style="position:relative;z-index:2">
+    <div class="city-strip-item reveal" style="transition-delay:.00s"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="" loading="lazy"/></div>
+    <div class="city-strip-item reveal" style="transition-delay:.12s"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="" loading="lazy"/></div>
+    <div class="city-strip-item reveal" style="transition-delay:.24s"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="" loading="lazy"/></div>
   </div>
 </section>
 
-<!-- SERVICES -->
+<!-- ══════════════════════════════════
+     SERVICES
+     ══════════════════════════════════ -->
 <section id="services">
+  <svg class="services-bg-svg" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M600 800 Q598 640 604 480 Q600 320 596 160 Q594 60 600 0"  stroke="#af8f54" stroke-width="1.5" opacity=".6"/>
+    <path d="M599 680 Q530 640 470 650 Q525 615 600 628" stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
+    <path d="M599 560 Q510 515 445 525 Q510 490 600 508" stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
+    <path d="M599 420 Q505 375 440 385 Q505 350 600 368" stroke="#af8f54" stroke-width="1.2" opacity=".45"/>
+    <path d="M599 280 Q515 238 455 246 Q514 212 600 228" stroke="#af8f54" stroke-width="1.2" opacity=".4"/>
+    <path d="M601 640 Q672 605 730 614 Q678 580 600 596" stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
+    <path d="M601 500 Q678 464 738 472 Q682 438 600 454" stroke="#af8f54" stroke-width="1.2" opacity=".45"/>
+    <path d="M601 355 Q675 320 732 328 Q678 295 600 310" stroke="#af8f54" stroke-width="1.2" opacity=".4"/>
+    <path d="M601 210 Q670 178 720 185 Q672 154 600 168" stroke="#af8f54" stroke-width="1.2" opacity=".35"/>
+  </svg>
+
   <div class="services-inner">
     <div class="services-header reveal">
-      <span class="section-tag" style="color:var(--gold)">Tu Belleza</span>
-      <h2 class="section-title">empieza aquí</h2>
-      <div class="gold-divider center"></div>
+      <h2 class="section-title"><span style="color:var(--gold)">Tu belleza</span></h2>
+      <div style="font-family:'Cera',Arial,sans-serif;font-weight:300;font-size:clamp(1.3rem,2.8vw,2rem);color:var(--dark);margin-top:2px">comienza aquí</div>
+      <div class="gold-bar" style="margin-top:16px"></div>
     </div>
     <div class="services-grid stagger">
 
       <div class="service-block">
-        <h3>Manicura</h3>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-nail"/></svg></span>
+          <h3>Manicura</h3>
+        </div>
         <div class="service-row"><span class="name">Limado + pintado sencillo</span><span class="price">5€</span></div>
         <div class="service-row"><span class="name">Francesa</span><span class="price">+2€</span></div>
         <div class="service-row"><span class="name">Semipermanente</span><span class="price">5€</span></div>
@@ -754,7 +219,10 @@ footer a:hover { color: var(--gold); }
       </div>
 
       <div class="service-block">
-        <h3>Pedicura</h3>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-foot"/></svg></span>
+          <h3>Pedicura</h3>
+        </div>
         <div class="service-row"><span class="name">Pedicura</span><span class="price">18€</span></div>
         <div class="service-row"><span class="name">Pedicura semipermanente</span><span class="price">20€</span></div>
         <div class="service-row"><span class="name">Tratamiento planta del pie</span><span class="price">10€</span></div>
@@ -763,7 +231,10 @@ footer a:hover { color: var(--gold); }
       </div>
 
       <div class="service-block">
-        <h3>Escultura de uñas</h3>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-sculpt"/></svg></span>
+          <h3>Escultura de uñas</h3>
+        </div>
         <div class="service-row"><span class="name">Escultura con semipermanente</span><span class="price">29€</span></div>
         <div class="service-row"><span class="name">Mantenimiento semipermanente</span><span class="price">25€</span></div>
         <div class="service-row"><span class="name">Reparación de uña rota</span><span class="price">2€</span></div>
@@ -771,36 +242,25 @@ footer a:hover { color: var(--gold); }
       </div>
 
       <div class="service-block">
-        <h3>Tratamientos corporales</h3>
-        <div class="service-row">
-          <span class="name">Masaje relajante corporal<span class="sub">40 minutos</span></span>
-          <span class="price">25€</span>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-wax"/></svg></span>
+          <h3>Depilación</h3>
         </div>
-        <div class="service-row">
-          <span class="name">Facial, cuello y escote<span class="sub">30 minutos</span></span>
-          <span class="price">15€</span>
-        </div>
-      </div>
-
-      <div class="service-block">
-        <h3>Depilación</h3>
         <div class="service-row"><span class="name">Cejas</span><span class="price">5€</span></div>
         <div class="service-row"><span class="name">Labio superior</span><span class="price">5€</span></div>
         <div class="service-row"><span class="name">Gemelos / Muslos</span><span class="price">10€</span></div>
         <div class="service-row"><span class="name">Piernas &amp; bikini</span><span class="price">25€</span></div>
-        <div class="service-row"><span class="name">Bikini</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Bikini completo</span><span class="price">13€</span></div>
+        <div class="service-row"><span class="name">Bikini / Bikini completo</span><span class="price">10–13€</span></div>
         <div class="service-row"><span class="name">Brazos</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Cintura</span><span class="price">3€</span></div>
-        <div class="service-row"><span class="name">Abdomen</span><span class="price">3€</span></div>
         <div class="service-row"><span class="name">Hilo cara completa</span><span class="price">13€</span></div>
-        <div class="service-row"><span class="name">Espalda</span><span class="price">15€</span></div>
-        <div class="service-row"><span class="name">Pecho</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Piernas</span><span class="price">25€</span></div>
+        <div class="service-row"><span class="name">Espalda / Pecho</span><span class="price">15–10€</span></div>
       </div>
 
       <div class="service-block">
-        <h3>Maquillaje</h3>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-makeup"/></svg></span>
+          <h3>Maquillaje</h3>
+        </div>
         <div class="service-row"><span class="name">Tinte de pestañas</span><span class="price">10€</span></div>
         <div class="service-row"><span class="name">Maquillaje</span><span class="price">25€</span></div>
         <div class="service-row"><span class="name">Maquillaje fuera de horario</span><span class="price">40€</span></div>
@@ -808,14 +268,29 @@ footer a:hover { color: var(--gold); }
       </div>
 
       <div class="service-block">
-        <h3>Piercing</h3>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-piercing"/></svg></span>
+          <h3>Piercing</h3>
+        </div>
         <div class="service-row"><span class="name">Perforación infantil</span><span class="price">25€</span></div>
         <div class="service-row"><span class="name">Oreja</span><span class="price">8€</span></div>
         <div class="service-row"><span class="name">Ombligo<span class="sub">Pendiente de regalo</span></span><span class="price">35€</span></div>
       </div>
 
       <div class="service-block">
-        <h3>Facial</h3>
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-massage"/></svg></span>
+          <h3>Tratamientos</h3>
+        </div>
+        <div class="service-row"><span class="name">Masaje relajante<span class="sub">40 minutos</span></span><span class="price">25€</span></div>
+        <div class="service-row"><span class="name">Facial, cuello y escote<span class="sub">30 minutos</span></span><span class="price">15€</span></div>
+      </div>
+
+      <div class="service-block">
+        <div class="service-block-header">
+          <span class="service-icon"><svg><use href="#ico-facial"/></svg></span>
+          <h3>Facial</h3>
+        </div>
         <div class="service-row"><span class="name">Limpieza facial</span><span class="price">40€</span></div>
         <div class="service-row"><span class="name">Hidratación – Firmeza</span><span class="price">40€</span></div>
         <div class="service-row"><span class="name">Guinot doble ionización<span class="sub">Guinot lift +20€</span></span><span class="price">70€</span></div>
@@ -825,12 +300,32 @@ footer a:hover { color: var(--gold); }
   </div>
 </section>
 
-<!-- SCHEDULE -->
+<!-- ══════════════════════════════════
+     SCHEDULE
+     ══════════════════════════════════ -->
 <section id="schedule">
+  <svg class="schedule-leaf" viewBox="0 0 300 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M150 510 Q148 420 153 340 Q150 250 147 170 Q144 80 150 10" stroke="#af8f54" stroke-width="1.5" opacity=".9"/>
+    <path d="M149 430 Q95 392 55 402 Q100 368 150 382"   stroke="#af8f54" stroke-width="1.2" opacity=".8"/>
+    <path d="M149 350 Q84 308 44 318 Q92 282 150 298"    stroke="#af8f54" stroke-width="1.2" opacity=".7"/>
+    <path d="M149 260 Q78 218 38 228 Q88 192 150 210"    stroke="#af8f54" stroke-width="1.2" opacity=".65"/>
+    <path d="M149 170 Q90 132 56 142 Q96 108 150 124"    stroke="#af8f54" stroke-width="1.2" opacity=".6"/>
+    <path d="M149 80 Q102 48 72 56 Q104 26 150 42"       stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
+    <path d="M151 400 Q208 364 248 374 Q206 340 150 356" stroke="#af8f54" stroke-width="1.2" opacity=".8"/>
+    <path d="M151 318 Q214 282 256 290 Q212 256 150 272" stroke="#af8f54" stroke-width="1.2" opacity=".7"/>
+    <path d="M151 230 Q210 196 248 204 Q208 170 150 186" stroke="#af8f54" stroke-width="1.2" opacity=".65"/>
+    <path d="M151 140 Q206 108 240 115 Q204 84 150 98"   stroke="#af8f54" stroke-width="1.2" opacity=".55"/>
+    <path d="M151 54 Q196 26 224 32 Q198 8 150 20"       stroke="#af8f54" stroke-width="1.2" opacity=".45"/>
+    <path d="M149 430 Q130 418 110 422" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
+    <path d="M149 350 Q126 338 104 342" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
+    <path d="M151 400 Q174 388 194 392" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
+    <path d="M151 318 Q178 306 198 310" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
+  </svg>
+
   <div class="schedule-inner reveal">
-    <span class="section-tag" style="color:var(--gold-light)">Horario</span>
-    <h2 class="section-title white">de apertura</h2>
-    <div class="gold-divider center" style="background:var(--gold)"></div>
+    <span class="section-tag">Horario</span>
+    <h2 class="section-title" style="color:var(--gold)">de apertura</h2>
+    <div class="gold-bar" style="margin-top:16px"></div>
     <div class="sched-table stagger">
       <div class="sched-row"><span class="day">Lunes</span><span class="hours">9:00 – 17:00</span></div>
       <div class="sched-row"><span class="day">Martes</span><span class="hours">11:00 – 19:00</span></div>
@@ -843,90 +338,80 @@ footer a:hover { color: var(--gold); }
   </div>
 </section>
 
-<!-- GALLERY -->
+<!-- ══════════════════════════════════
+     GALLERY
+     ══════════════════════════════════ -->
 <section id="gallery">
   <div class="gallery-header reveal">
-    <span class="section-tag">El salón</span>
-    <h2 class="section-title">fotografías</h2>
-    <div class="gold-divider center"></div>
+    <h2 class="section-title">El <span style="color:var(--gold)">salón</span></h2>
+    <div style="font-family:'Cera',Arial,sans-serif;font-weight:300;font-size:clamp(1.3rem,2.8vw,2rem);color:var(--dark);margin-top:2px">fotografía</div>
+    <div class="gold-bar" style="margin-top:14px"></div>
   </div>
-  <div class="gallery-outer">
-    <div class="gallery-track" id="gtrack">
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7616.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7882.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8162.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8174.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8193.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7901.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7572.jpg" alt="Salon" loading="lazy"/>
-      <!-- duplicados para loop sin corte -->
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7616.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7882.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8162.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8174.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8193.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7901.jpg" alt="Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7572.jpg" alt="Salon" loading="lazy"/>
-    </div>
-  </div>
-  <div class="gallery-controls">
-    <button class="gallery-btn" id="gPrev" title="Anterior" aria-label="Anterior">
-      <svg viewBox="0 0 14 14"><polyline points="9,2 4,7 9,12"/></svg>
-    </button>
-    <button class="gallery-btn" id="gNext" title="Siguiente" aria-label="Siguiente">
-      <svg viewBox="0 0 14 14"><polyline points="5,2 10,7 5,12"/></svg>
-    </button>
+  <div class="gallery-grid stagger">
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7616.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7882.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8162.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8174.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8193.jpg" alt="Salon" loading="lazy"/></div>
+    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7901.jpg" alt="Salon" loading="lazy"/></div>
   </div>
 </section>
 
-<!-- INSTAGRAM -->
+<!-- ══════════════════════════════════
+     INSTAGRAM
+     ══════════════════════════════════ -->
 <section id="instagram">
-  <div class="reveal" style="text-align:center">
+  <div class="reveal-l">
     <span class="section-tag">Síguenos</span>
-    <h2 class="section-title">en instagram</h2>
-    <div class="gold-divider center"></div>
+    <div class="section-title" style="color:var(--gold);font-family:'Garamont',Georgia,serif;font-size:clamp(2rem,3.8vw,3.5rem)">en Instagram</div>
+    <div style="font-family:'Cera',Arial,sans-serif;font-weight:300;font-size:clamp(1.1rem,2.2vw,1.7rem);color:var(--dark);margin-top:4px">@manoioannina</div>
+    <div class="gold-bar" style="margin-top:16px"></div>
     <a href="https://www.instagram.com/manoioannina" target="_blank" rel="noopener" class="ig-btn">
       <svg viewBox="0 0 24 24">
         <rect x="2" y="2" width="20" height="20" rx="5"/>
         <circle cx="12" cy="12" r="4"/>
         <circle cx="17.5" cy="6.5" r="1.3" fill="currentColor" stroke="none"/>
       </svg>
-      @manoioannina
+      Seguir en Instagram
     </a>
+  </div>
+  <div class="ig-right reveal-r">
+    <div style="font-family:'Garamont',Georgia,serif;font-size:clamp(160px,22vw,280px);font-weight:700;color:var(--gold);opacity:.18;line-height:1;user-select:none;text-align:right">m</div>
   </div>
 </section>
 
-<!-- CONTACT -->
+<!-- ══════════════════════════════════
+     CONTACT
+     ══════════════════════════════════ -->
 <section id="contact">
   <div class="contact-grid">
     <div class="contact-info reveal-l">
       <span class="section-tag">Contacto</span>
-      <h2 class="section-title">¡Estaremos encantadas<br>de atenderte!</h2>
-      <div class="gold-divider"></div>
-      <span class="subtitle">Reserva tu cita con antelación</span>
-      <div class="contact-item">
-        <h4>Dirección</h4>
-        <a href="https://goo.gl/maps/R18LAsoiLZgvwCKRA" target="_blank">Zygomala 20, Ioannina</a>
-      </div>
-      <div class="contact-item">
-        <h4>Teléfono</h4>
-        <a href="tel:+302651036900">2651 036 900</a>
-      </div>
-      <div class="contact-item">
-        <h4>Email</h4>
-        <a href="mailto:info@mano.gr">info@mano.gr</a>
+      <h2 class="section-title" style="font-size:clamp(1.6rem,3vw,2.8rem)">¡Estaremos encantadas<br>de atenderte!</h2>
+      <div class="gold-bar" style="margin-top:14px"></div>
+      <span class="contact-subtitle">Reserva tu cita con antelación</span>
+      <div class="contact-items">
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
+          <h4>Dirección</h4>
+          <a href="https://goo.gl/maps/R18LAsoiLZgvwCKRA" target="_blank">Zygomala 20,<br>Ioannina</a>
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <h4>Teléfono</h4>
+          <a href="tel:+302651036900">2651 036 900</a>
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          <h4>Correo electrónico</h4>
+          <a href="mailto:mano@mano.gr">mano@mano.gr</a>
+        </div>
       </div>
     </div>
     <div class="contact-map reveal-r">
@@ -940,107 +425,15 @@ footer a:hover { color: var(--gold); }
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- ══════════════════════════════════
+     FOOTER
+     ══════════════════════════════════ -->
 <footer>
-  <p>Copyright &copy; 2025 &nbsp;&mdash;&nbsp; <strong>mano | Maria Kakaidi</strong></p>
-  <p style="margin-top:7px">Creado por <a href="https://medusamarketing.gr" target="_blank" rel="noopener">Medusa Marketing</a></p>
+  <p>&copy; 2025 &nbsp;<strong>mano | Maria Kakaidi</strong></p>
+  <p>Creado por <a href="https://medusamarketing.gr" target="_blank" rel="noopener">Medusa Marketing</a></p>
 </footer>
 
-<script>
-/* ── Navbar scroll: transparente → dorado ── */
-const navbar = document.getElementById('navbar');
-const onScroll = () => navbar.classList.toggle('scrolled', window.scrollY > 55);
-window.addEventListener('scroll', onScroll, { passive: true });
-
-/* ── Menú hamburguesa ── */
-const toggle    = document.getElementById('navToggle');
-const mobileNav = document.getElementById('mobileNav');
-toggle.addEventListener('click', () => {
-  const open = toggle.classList.toggle('open');
-  mobileNav.classList.toggle('open', open);
-  document.body.style.overflow = open ? 'hidden' : '';
-});
-document.querySelectorAll('.mob').forEach(l => {
-  l.addEventListener('click', () => {
-    toggle.classList.remove('open');
-    mobileNav.classList.remove('open');
-    document.body.style.overflow = '';
-  });
-});
-
-/* ── Hero slideshow ── */
-const slides = document.querySelectorAll('.hero-slide');
-const dotsC  = document.getElementById('heroDots');
-let cur = 0;
-slides.forEach((_, i) => {
-  const d = document.createElement('div');
-  d.className = 'hero-dot' + (i === 0 ? ' active' : '');
-  d.addEventListener('click', () => goTo(i));
-  dotsC.appendChild(d);
-});
-function goTo(n) {
-  slides[cur].classList.remove('active');
-  dotsC.children[cur].classList.remove('active');
-  cur = (n + slides.length) % slides.length;
-  slides[cur].classList.add('active');
-  dotsC.children[cur].classList.add('active');
-}
-setInterval(() => goTo(cur + 1), 5500);
-
-/* ── Scroll reveal con IntersectionObserver ── */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('in');
-      io.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-document.querySelectorAll('.reveal, .reveal-l, .reveal-r, .stagger')
-  .forEach(el => io.observe(el));
-
-/* ── Galería: botones prev / next ── */
-// FIX: manejo limpio con offset, sin transforms acumulados
-const gtrack = document.getElementById('gtrack');
-let gOffset = 0;
-const STEP = 280;
-
-function moveGallery(dir) {
-  // Pausar la animación CSS
-  gtrack.style.animationPlayState = 'paused';
-  gOffset += dir * STEP;
-  gtrack.style.transform = `translateX(${gOffset}px)`;
-  // Reanudar después de un momento
-  clearTimeout(moveGallery._t);
-  moveGallery._t = setTimeout(() => {
-    gtrack.style.transform = '';
-    gOffset = 0;
-    gtrack.style.animationPlayState = 'running';
-  }, 600);
-}
-
-document.getElementById('gPrev').addEventListener('click', () => moveGallery(1));
-document.getElementById('gNext').addEventListener('click', () => moveGallery(-1));
-
-/* ── Lightbox ── */
-document.querySelectorAll('.gallery-track img').forEach(img => {
-  img.addEventListener('click', () => {
-    document.getElementById('lbImg').src = img.src;
-    document.getElementById('lightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  });
-});
-function closeLb() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-  document.getElementById('lbImg').src = '';
-}
-document.getElementById('lbClose').addEventListener('click', closeLb);
-document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target.id === 'lightbox') closeLb();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
-</script>
+<!-- Script al final del body para mejor rendimiento -->
+<script src="script.js"></script>
 </body>
 </html>
