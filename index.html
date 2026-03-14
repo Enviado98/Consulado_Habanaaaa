@@ -1,243 +1,789 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="el">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Calendario Consular La Habana</title>
-<link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/images.png">
-<link rel="stylesheet" href="styles.css">
-<style>
-/* ── VISTA LMD FULLSCREEN ── */
-#view-lmd {
-  position: fixed;
-  /* top desde el header, bottom desde el tab-bar */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 300;
-  background: #e8e8ed;
-  display: none;
-  flex-direction: column;
-}
-#view-lmd.active { display: flex; }
-#lmd-iframe {
-  flex: 1;
-  width: 100%;
-  border: none;
-  display: block;
-  /* dejar espacio al tab-bar (90px aprox) */
-  margin-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
-}
-/* Ocultar header/status/ticker cuando LMD está activo */
-body.lmd-active header,
-body.lmd-active #statusPanel,
-body.lmd-active .news-ticker-container { display: none !important; }
-body.lmd-active { padding-top: 0 !important; }
-/* 4to tab color activo: violeta LMD */
-.tab-btn:nth-child(4).active { color: #5040b8 !important; }
-/* Tab LMD — ícono SVG hereda color */
-.tab-btn:nth-child(4) svg { stroke: currentColor; }
-</style>
-<meta name="description" content="Estado en tiempo real de trámites consulares, citas, legalizaciones, tasas de cambio y déficit energético en Cuba.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Calendario Consular La Habana">
-<meta property="og:description" content="Estado de citas, legalizaciones, Euro/Dólar y déficit. Actualizado en vivo.">
-<meta property="og:image" content="https://raw.githubusercontent.com/Enviado98/Consulado_Habana/main/social-preview.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f5f5f7">
-<style id="dynamicTickerStyles"></style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homepage - Mano Ioannina - Maria Kakaidi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a96e;
+      --gold-light: #e8d5b0;
+      --dark: #1a1a1a;
+      --darker: #111;
+      --white: #fff;
+      --offwhite: #f8f5f0;
+      --gray: #888;
+      --light-gray: #eee;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--white);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(17,17,17,0.92);
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-logo img { height: 48px; }
+
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.85;
+      transition: opacity .2s, color .2s;
+    }
+    .nav-links a:hover { opacity: 1; color: var(--gold); }
+
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--white); }
+
+    /* ── HERO ── */
+    #hero {
+      height: 100vh;
+      background: var(--darker);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg') center/cover no-repeat;
+      opacity: 0.35;
+    }
+
+    .hero-content {
+      position: relative;
+      text-align: center;
+      color: var(--white);
+    }
+
+    .hero-content h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 400;
+      letter-spacing: 6px;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .hero-content p {
+      font-size: 12px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-top: 12px;
+    }
+
+    .hero-taglines {
+      margin-top: 28px;
+    }
+    .hero-taglines .line {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 4vw, 2.8rem);
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 3px;
+      color: var(--white);
+      opacity: 0.9;
+    }
+
+    .hero-divider {
+      width: 60px; height: 1px;
+      background: var(--gold);
+      margin: 20px auto;
+    }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 90px 48px; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 400;
+      line-height: 1.15;
+    }
+
+    .gold-line {
+      width: 50px; height: 2px;
+      background: var(--gold);
+      margin: 20px 0 32px;
+    }
+
+    /* ── ABOUT ── */
+    #about {
+      background: var(--offwhite);
+    }
+
+    .about-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-text h2 { color: var(--dark); }
+    .about-text h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+    .about-text p {
+      font-size: 14px;
+      line-height: 1.9;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .about-images {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .about-images img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+    .about-images img:first-child {
+      grid-column: 1 / -1;
+      height: 280px;
+    }
+
+    /* ── CITY SECTION ── */
+    #city {
+      background: var(--darker);
+      color: var(--white);
+      text-align: center;
+      padding: 90px 48px;
+    }
+
+    #city .section-title { color: var(--white); }
+    #city .section-title em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--gold);
+      display: block;
+      font-size: 1.4em;
+    }
+
+    #city p {
+      max-width: 680px;
+      margin: 0 auto;
+      font-size: 14px;
+      line-height: 1.9;
+      color: rgba(255,255,255,.7);
+      margin-top: 24px;
+    }
+
+    #city .gold-line { margin: 20px auto; }
+
+    /* ── CITY PHOTOS ── */
+    .city-photos {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 60px;
+    }
+    .city-photos img {
+      width: 100%; height: 300px;
+      object-fit: cover;
+      filter: brightness(0.7);
+      transition: filter .3s;
+    }
+    .city-photos img:hover { filter: brightness(1); }
+
+    /* ── SERVICES ── */
+    #services {
+      background: var(--white);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .services-header { text-align: center; margin-bottom: 60px; }
+    .services-header .gold-line { margin: 20px auto; }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 40px;
+    }
+
+    .service-card {
+      border-top: 2px solid var(--gold);
+      padding-top: 24px;
+    }
+
+    .service-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--dark);
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+    }
+
+    .service-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--light-gray);
+      font-size: 13px;
+    }
+    .service-item:last-child { border-bottom: none; }
+
+    .service-item span:first-child { color: #444; }
+    .service-item .price {
+      font-weight: 600;
+      color: var(--gold);
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    .service-sub {
+      font-size: 10px;
+      color: var(--gray);
+      letter-spacing: 1px;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* ── SCHEDULE ── */
+    #schedule {
+      background: var(--darker);
+      color: var(--white);
+    }
+
+    .schedule-inner {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .schedule-inner .section-title { color: var(--white); }
+    .schedule-inner .gold-line { margin: 20px auto; }
+
+    .schedule-grid {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .schedule-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      font-size: 14px;
+    }
+
+    .schedule-row .day {
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .schedule-row .hours { color: var(--gold); letter-spacing: 1px; }
+    .schedule-row .closed { color: #c0392b; letter-spacing: 2px; font-size: 11px; }
+
+    /* ── GALLERY ── */
+    #gallery {
+      background: var(--offwhite);
+      padding: 90px 0;
+    }
+
+    .gallery-header {
+      text-align: center;
+      padding: 0 48px;
+      margin-bottom: 48px;
+    }
+    .gallery-header .gold-line { margin: 20px auto; }
+
+    .gallery-track-wrapper {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gallery-track {
+      display: flex;
+      gap: 16px;
+      animation: scroll-gallery 30s linear infinite;
+      width: max-content;
+    }
+
+    .gallery-track:hover { animation-play-state: paused; }
+
+    @keyframes scroll-gallery {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .gallery-track img {
+      height: 260px;
+      width: auto;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* ── INSTAGRAM ── */
+    #instagram {
+      background: var(--darker);
+      color: var(--white);
+      text-align: center;
+      padding: 80px 48px;
+    }
+
+    #instagram .section-title { color: var(--white); margin-bottom: 8px; }
+
+    #instagram a {
+      display: inline-block;
+      margin-top: 24px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid var(--gold);
+      padding: 12px 36px;
+      transition: background .2s, color .2s;
+    }
+    #instagram a:hover { background: var(--gold); color: var(--darker); }
+
+    /* ── CONTACT ── */
+    #contact {
+      background: var(--white);
+      padding: 90px 48px;
+    }
+
+    .contact-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .contact-info .section-title { margin-bottom: 12px; }
+    .contact-info .subtitle {
+      font-size: 14px;
+      color: var(--gray);
+      margin-bottom: 40px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+    }
+
+    .contact-item { margin-bottom: 28px; }
+    .contact-item h4 {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .contact-item a, .contact-item p {
+      font-size: 15px;
+      color: var(--dark);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .contact-item a:hover { color: var(--gold); }
+
+    .contact-map iframe {
+      width: 100%;
+      height: 400px;
+      border: 0;
+      filter: grayscale(30%);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--darker);
+      color: rgba(255,255,255,.5);
+      text-align: center;
+      padding: 32px 48px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    footer a { color: var(--gold); text-decoration: none; }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(17,17,17,0.97);
+      z-index: 2000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 18px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .mobile-menu a:hover { color: var(--gold); }
+
+    .mobile-close {
+      position: absolute;
+      top: 24px; right: 32px;
+      font-size: 28px;
+      color: var(--white);
+      cursor: pointer;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+
+      section { padding: 60px 24px; }
+
+      .about-inner { grid-template-columns: 1fr; gap: 40px; }
+      .city-photos { grid-template-columns: 1fr 1fr; }
+      .services-grid { grid-template-columns: 1fr; }
+      .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+      #contact { padding: 60px 24px; }
+      .gallery-header { padding: 0 24px; }
+    }
+
+    @media (max-width: 600px) {
+      .city-photos { grid-template-columns: 1fr; }
+      .city-photos img { height: 200px; }
+      .about-images { grid-template-columns: 1fr; }
+      .about-images img:first-child { grid-column: 1; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="header-inner">
-    <div class="header-left">
-      <div class="header-flags">
-        <span class="flag-es">ES</span>
-        <span class="flag-divider"></span>
-        <span class="flag-cu">CU</span>
-      </div>
-      <div class="header-text">
-        <h1>Trámites Consulares</h1>
-        <p>Habana · Web no oficial · Comunidad</p>
-      </div>
+  <!-- NAVBAR -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="https://mano.gr/wp-content/uploads/2019/10/mano-logo-white-nobox2.svg" alt="Mano Ioannina" onerror="this.style.display='none'">
+      <span style="color:#fff;font-family:'Playfair Display',serif;font-size:1.5rem;letter-spacing:3px;">MANO</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">προφίλ</a></li>
+      <li><a href="#services">υπηρεσίες</a></li>
+      <li><a href="#schedule">ωράριο</a></li>
+      <li><a href="#gallery">gallery</a></li>
+      <li><a href="#instagram">instagram</a></li>
+      <li><a href="#contact">επικοινωνία</a></li>
+    </ul>
+    <div class="nav-hamburger" onclick="document.getElementById('mobileMenu').classList.add('open')">
+      <span></span><span></span><span></span>
     </div>
-    <div class="header-right">
-      <div id="viewCounter" class="view-counter">···</div>
-      <div class="header-badge" id="fecha-actualizacion">···</div>
-    </div>
-  </div>
-</header>
+  </nav>
 
-<!-- PANEL ESTADO -->
-<div id="statusPanel" class="status-panel-container">
-  <div class="status-panel-header">
-    <span class="sp-title">Estado económico y energético</span>
-    <div class="live-container"><span class="live-dot"></span>EN VIVO</div>
-    <span id="lastEditedTime" style="display:none;"></span>
-  </div>
-  <div id="statusDataContainer" class="status-panel-data">Cargando...</div>
-</div>
-
-<!-- TICKER -->
-<div id="newsTicker" class="news-ticker-container" style="display:none;">
-  <strong class="news-ticker-fixed-label">Reportes</strong>
-  <div class="news-ticker-wrap">
-    <div id="newsTickerContent" class="news-ticker-content"></div>
-  </div>
-</div>
-
-<!-- ════════ VISTAS ════════ -->
-
-<!-- TAB 1: CALENDARIO -->
-<div id="view-calendario" class="tab-view active">
-  <div class="login-controls">
-    <div id="statusMessage" class="login-message">Activa modo edición para actualizar información</div>
-    <button id="toggleAdminBtn" class="btn btn-primary">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/></svg>
-      Activar Modo Edición
-    </button>
-    <div id="adminControlsPanel">
-      <button id="saveBtn" class="btn btn-success">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Guardar Cambios
-      </button>
-    </div>
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <span class="mobile-close" onclick="document.getElementById('mobileMenu').classList.remove('open')">&times;</span>
+    <a href="#about" onclick="document.getElementById('mobileMenu').classList.remove('open')">προφίλ</a>
+    <a href="#services" onclick="document.getElementById('mobileMenu').classList.remove('open')">υπηρεσίες</a>
+    <a href="#schedule" onclick="document.getElementById('mobileMenu').classList.remove('open')">ωράριο</a>
+    <a href="#gallery" onclick="document.getElementById('mobileMenu').classList.remove('open')">gallery</a>
+    <a href="#instagram" onclick="document.getElementById('mobileMenu').classList.remove('open')">instagram</a>
+    <a href="#contact" onclick="document.getElementById('mobileMenu').classList.remove('open')">επικοινωνία</a>
   </div>
 
-  <div class="container" id="contenedor"></div>
-</div>
-
-<!-- TAB 2: NOTICIAS -->
-<div id="view-noticias" class="tab-view">
-  <div class="tab-top-bar">
-    <h2 class="tab-section-title">Reportes</h2>
-    <div class="tab-top-actions">
-      <button class="glass-add-btn" id="openNewsModalBtn">
-        <span class="glass-add-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </span>
-        <span>Añadir Reporte</span>
-      </button>
-      <button class="glass-delete-btn" id="deleteNewsBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="noticias-admin-btns" id="noticiasAdminBtns" style="display:none!important;"></div>
-  <button id="addNewsBtn" style="display:none"></button>
-
-  <div id="noticias-list"><div class="noticias-empty">Cargando noticias...</div></div>
-</div>
-
-<!-- MODAL AÑADIR NOTICIA -->
-<div id="newsModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog">
-  <div class="modal-glass">
-    <div class="modal-header">
-      <span class="modal-title">Nuevo Reporte</span>
-      <button class="modal-close" id="closeNewsModal" aria-label="Cerrar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <p class="modal-subtitle">Tu noticia aparecerá en el ticker y en la lista. Cualquier persona puede publicar.</p>
-    <textarea id="newsModalText" class="modal-textarea" placeholder="Escribe aquí tu noticia..." maxlength="140"></textarea>
-    <div class="modal-meta">
-      <span class="modal-char"><span id="newsCharCount">0</span>/140</span>
-    </div>
-    <button class="modal-submit-btn" id="submitNewsBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      Publicar
-    </button>
-  </div>
-</div>
-
-<!-- TAB 3: CHAT -->
-<div id="view-chat" class="tab-view chat-view">
-  <h2 class="tab-section-title">Comunidad</h2>
-
-  <div class="comments-display-wrap" id="commentsScroll">
-    <div id="commentsContainer">
-      <p class="loading-msg">Cargando comentarios...</p>
-    </div>
-  </div>
-
-  <div class="chat-composer">
-    <div class="chat-composer-inner">
-      <input type="text" id="commenterName" class="chat-name-input" placeholder="Tu nombre" maxlength="30" autocomplete="off">
-      <div class="chat-msg-row">
-        <input type="text" id="commentText" class="chat-msg-input" placeholder="Escribe un comentario..." maxlength="250" autocomplete="off">
-        <button id="publishCommentBtn" class="chat-send-btn" aria-label="Enviar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-taglines">
+        <div class="line">A place of beauty</div>
+        <div class="hero-divider"></div>
+        <div class="line">only for you</div>
       </div>
     </div>
-  </div>
-</div>
+  </section>
 
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-inner">
+      <div class="about-text">
+        <p class="section-label">About mano</p>
+        <h2 class="section-title">Μαρία Κακαϊδή</h2>
+        <div class="gold-line"></div>
+        <h3>Mano Ioannina Philosophy</h3>
+        <p>Το Mano Ioannina είναι για εμένα χώρος έμπνευσης. Θέλησα να δημιουργήσω έναν χώρο άψογης αισθητικής που θα προσφέρει.</p>
+        <h3>My dream</h3>
+        <p>Πάντοτε πίστευα πως η εσωτερική ομορφιά είναι το παν. Για να λάμψουμε όμως λιγάκι παραπάνω χρειαζόμαστε την φροντίδα και την περιποίηση από έμπειρους ανθρώπους. Η ομορφιά δεν είναι πολυτέλεια αλλά προσωπική ανάγκη. Γι' αυτό τον λόγο επέλεξα να ασχοληθώ με τον χώρο της αισθητικής.</p>
+        <p>Η ανάγκη του να νιώθεις όμορφα με τον εαυτό σου είναι το ίδιο απαραίτητη και στα δύο φύλα γι' αυτό και οι παροχές του Mano Ioannina απευθύνονται τόσο σε γυναίκες όσο και σε άνδρες. Στόχος μου τα χαμόγελα των πελατών μου. Το όνειρό μου ξεκίνησε κι ακούει στο όνομα Mano Ioannina.</p>
+      </div>
+      <div class="about-images">
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Mano Salon" />
+      </div>
+    </div>
+  </section>
 
-<!-- TAB 4: LMD REVISIÓN PDF -->
-<div id="view-lmd">
-  <iframe id="lmd-iframe" src="lmd.html" title="Revisión PDF LMD" allow="camera"></iframe>
-</div>
+  <!-- CITY SECTION -->
+  <section id="city">
+    <p class="section-label">Στην καρδιά</p>
+    <h2 class="section-title">της <em>πόλης</em></h2>
+    <div class="gold-line"></div>
+    <p>Ένας χώρος κομψότητας στο κέντρο της πόλης για εσάς που η περιποίηση και η φροντίδα είναι συνδυασμός αισθητικής, προσωπικής ευεξίας αλλά και παροχών σε λογικές τιμές. Επαγγελματισμός και δημιουργία. Φαντασία και ιδέες. Κλείστε έγκαιρα τα ραντεβού σας για την εβδομάδα που έρχεται.</p>
+    <p style="margin-top:16px;color:var(--gold);font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;">We Love To See Your Smiles!</p>
+    <div class="city-photos">
+      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="" />
+      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="" />
+      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="" />
+    </div>
+  </section>
 
-<!-- BARRA INFERIOR + FOOTER -->
-<div class="tab-bar-wrap">
-<nav class="tab-bar">
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="services-header">
+      <p class="section-label">Your Beauty</p>
+      <h2 class="section-title">starts here</h2>
+      <div class="gold-line"></div>
+    </div>
 
-  <button class="tab-btn active" data-tab="view-calendario">
-    <span class="ti ti-cal">
-      <span class="ti-cal-cap"></span>
-      <span class="ti-cal-body">
-        <span class="ti-cal-row"><i></i><i></i><i></i></span>
-        <span class="ti-cal-row"><i></i><i></i><i></i></span>
-      </span>
-    </span>
-    <span class="tab-label">Calendario</span>
-  </button>
+    <div class="services-grid">
 
-  <button class="tab-btn" data-tab="view-noticias">
-    <span class="ti ti-signal">
-      <span class="ti-sig-dot"></span>
-      <span class="ti-sig-arc a1"></span>
-      <span class="ti-sig-arc a2"></span>
-      <span class="ti-sig-arc a3"></span>
-    </span>
-    <span class="tab-label">Reportes</span>
-  </button>
+      <!-- Manicure -->
+      <div class="service-card">
+        <h3>Manicure</h3>
+        <div class="service-item"><span>Λιμάρισμα - βάψιμο απλό</span><span class="price">5€</span></div>
+        <div class="service-item"><span>Γαλλικό</span><span class="price">+2€</span></div>
+        <div class="service-item"><span>Ημιμόνιμο</span><span class="price">5€</span></div>
+        <div class="service-item"><span>Λιμάρισμα</span><span class="price">3€</span></div>
+        <div class="service-item"><span>Μανικιούρ απλό βερνίκι</span><span class="price">12€</span></div>
+        <div class="service-item"><span>Μανικιούρ ημιμόνιμο</span><span class="price">15€</span></div>
+        <div class="service-item"><span>Μανικιούρ boost</span><span class="price">20€</span></div>
+      </div>
 
-  <button class="tab-btn" data-tab="view-chat">
-    <span class="ti ti-bubble">
-      <span class="ti-bub-main"><i></i><i></i><i></i></span>
-      <span class="ti-bub-tail"></span>
-    </span>
-    <span class="tab-label">Chat</span>
-  </button>
+      <!-- Pedicure -->
+      <div class="service-card">
+        <h3>Pedicure</h3>
+        <div class="service-item"><span>Πεντικιούρ</span><span class="price">18€</span></div>
+        <div class="service-item"><span>Πεντικιούρ ημιμόνιμο</span><span class="price">20€</span></div>
+        <div class="service-item"><span>Περιποίηση πέλματος</span><span class="price">10€</span></div>
+        <div class="service-item"><span>Κόψιμο νυχιών</span><span class="price">3€</span></div>
+        <div class="service-item"><span>Αφαίρεση κάλων</span><span class="price">από 7€</span></div>
+      </div>
 
+      <!-- Ονυχοπλαστική -->
+      <div class="service-card">
+        <h3>Ονυχοπλαστική</h3>
+        <div class="service-item"><span>Ονυχοπλαστική με ημιμόνιμο</span><span class="price">29€</span></div>
+        <div class="service-item"><span>Συντήρηση με ημιμόνιμο</span><span class="price">25€</span></div>
+        <div class="service-item"><span>Τοποθέτηση σπασμένου νυχιού</span><span class="price">2€</span></div>
+        <div class="service-item"><span>Αφαίρεση gel και ακρυλικού</span><span class="price">5€</span></div>
+      </div>
 
-  <button class="tab-btn" data-tab="view-lmd" id="btn-lmd">
-    <span style="display:flex;align-items:center;justify-content:center;width:1em;height:1em;font-size:20px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
-      </svg>
-    </span>
-    <span class="tab-label">LMD</span>
-  </button>
+      <!-- Αποτρίχωση (θεραπείες) -->
+      <div class="service-card">
+        <h3>Θεραπείες</h3>
+        <div class="service-item">
+          <span>Χαλαρωτικό σώματος<span class="service-sub">40 λεπτά</span></span>
+          <span class="price">25€</span>
+        </div>
+        <div class="service-item">
+          <span>Προσώπου, αυχένα, ντεκολτέ<span class="service-sub">30 λεπτά</span></span>
+          <span class="price">15€</span>
+        </div>
+      </div>
 
-</nav>
-<div class="tab-bar-footer">
-  Desarrollado por <a href="https://myservicesin.onrender.com" target="_blank" rel="noopener">Render</a>
-  &nbsp;·&nbsp; © 2026
-</div>
-</div>
+      <!-- Αποτρίχωση -->
+      <div class="service-card">
+        <h3>Αποτρίχωση</h3>
+        <div class="service-item"><span>Φρύδια</span><span class="price">5€</span></div>
+        <div class="service-item"><span>Άνω χείλος</span><span class="price">5€</span></div>
+        <div class="service-item"><span>Γάμπες / Μηροί</span><span class="price">10€</span></div>
+        <div class="service-item"><span>Πόδια &amp; μπικίνι</span><span class="price">25€</span></div>
+        <div class="service-item"><span>Μπικίνι</span><span class="price">10€</span></div>
+        <div class="service-item"><span>Μπικίνι full</span><span class="price">13€</span></div>
+        <div class="service-item"><span>Χέρια</span><span class="price">10€</span></div>
+        <div class="service-item"><span>Μέση</span><span class="price">3€</span></div>
+        <div class="service-item"><span>Κοιλιά</span><span class="price">3€</span></div>
+        <div class="service-item"><span>Κλωστή όλο το πρόσωπο</span><span class="price">13€</span></div>
+        <div class="service-item"><span>Πλάτη</span><span class="price">15€</span></div>
+        <div class="service-item"><span>Θώρακας</span><span class="price">10€</span></div>
+        <div class="service-item"><span>Πόδια</span><span class="price">25€</span></div>
+      </div>
 
-<script type="module" src="script.js"></script>
+      <!-- Μακιγιάζ -->
+      <div class="service-card">
+        <h3>Μακιγιάζ</h3>
+        <div class="service-item"><span>Βαφή βλεφαρίδων</span><span class="price">10€</span></div>
+        <div class="service-item"><span>Μακιγιάζ</span><span class="price">25€</span></div>
+        <div class="service-item"><span>Μακιγιάζ εκτός ωραρίου</span><span class="price">40€</span></div>
+        <div class="service-item"><span>Μακιγιάζ νυφικό<span class="service-sub">+ ΔΩΡΟ ΕΝΑ ΜΑΚΙΓΙΑΖ</span></span><span class="price">250€</span></div>
+      </div>
+
+      <!-- Piercing -->
+      <div class="service-card">
+        <h3>Piercing</h3>
+        <div class="service-item"><span>Παιδικό τρύπημα</span><span class="price">25€</span></div>
+        <div class="service-item"><span>Αυτί</span><span class="price">8€</span></div>
+        <div class="service-item"><span>Αφαλός<span class="service-sub">ΔΩΡΟ ΤΟ ΣΚΟΥΛΑΡΙΚΙ</span></span><span class="price">35€</span></div>
+      </div>
+
+      <!-- Πρόσωπο -->
+      <div class="service-card">
+        <h3>Πρόσωπο</h3>
+        <div class="service-item"><span>Καθαρισμός προσώπου</span><span class="price">40€</span></div>
+        <div class="service-item"><span>Θεραπείες (Ενυδάτωση - Σύσφιξη)</span><span class="price">40€</span></div>
+        <div class="service-item"><span>Guinot double ionisation<span class="service-sub">Guinot lift +20€</span></span><span class="price">70€</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section id="schedule">
+    <div class="schedule-inner">
+      <p class="section-label">Ωράριο</p>
+      <h2 class="section-title">λειτουργίας</h2>
+      <div class="gold-line"></div>
+      <div class="schedule-grid">
+        <div class="schedule-row"><span class="day">Δευτέρα</span><span class="hours">9:00 πμ – 5:00 μμ</span></div>
+        <div class="schedule-row"><span class="day">Τρίτη</span><span class="hours">11:00 πμ – 7:00 μμ</span></div>
+        <div class="schedule-row"><span class="day">Τετάρτη</span><span class="hours">9:00 πμ – 5:00 μμ</span></div>
+        <div class="schedule-row"><span class="day">Πέμπτη</span><span class="hours">11:00 πμ – 7:00 μμ</span></div>
+        <div class="schedule-row"><span class="day">Παρασκευή</span><span class="hours">11:00 πμ – 7:00 μμ</span></div>
+        <div class="schedule-row"><span class="day">Σάββατο</span><span class="hours">9:00 πμ – 5:00 μμ</span></div>
+        <div class="schedule-row"><span class="day">Κυριακή</span><span class="closed">ΚΛΕΙΣΤΑ</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section id="gallery">
+    <div class="gallery-header">
+      <p class="section-label">Salon</p>
+      <h2 class="section-title">photography</h2>
+      <div class="gold-line"></div>
+    </div>
+    <div class="gallery-track-wrapper">
+      <div class="gallery-track">
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7616.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7882.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8162.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8174.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8193.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7901.jpg" alt="Mano Salon" />
+        <!-- duplicate for infinite loop -->
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7616.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7882.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8162.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8174.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8193.jpg" alt="Mano Salon" />
+        <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7901.jpg" alt="Mano Salon" />
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTAGRAM -->
+  <section id="instagram">
+    <p class="section-label">Follow us</p>
+    <h2 class="section-title" style="color:var(--white);">on instagram</h2>
+    <div class="gold-line" style="margin:20px auto;"></div>
+    <a href="https://www.instagram.com/manoioannina" target="_blank" rel="noopener">@manoioannina</a>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="contact-inner">
+      <div class="contact-info">
+        <p class="section-label">Επικοινωνία</p>
+        <h2 class="section-title">Θα χαρούμε<br>να σας εξυπηρετήσουμε!</h2>
+        <div class="gold-line"></div>
+
+        <div class="contact-item">
+          <h4>Διεύθυνση</h4>
+          <a href="https://goo.gl/maps/R18LAsoiLZgvwCKRA" target="_blank">Ζυγομάλη 20, Ιωάννινα</a>
+        </div>
+        <div class="contact-item">
+          <h4>Τηλέφωνο</h4>
+          <a href="tel:+302651036900">2651036900</a>
+        </div>
+        <div class="contact-item">
+          <h4>Email</h4>
+          <a href="mailto:info@mano.gr">info@mano.gr</a>
+        </div>
+      </div>
+      <div class="contact-map">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3026.2!2d20.8537!3d39.6652!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x135b01f6e7b0d0b5%3A0x0!2sZygomala+20%2C+Ioannina!5e0!3m2!1sel!2sgr!4v1600000000"
+          allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mano Ioannina Map">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Copyright &copy; 2025 &nbsp;|&nbsp; <strong style="color:var(--gold-light)">mano | Maria Kakaidi</strong></p>
+    <p style="margin-top:8px;">Created by <a href="https://medusamarketing.gr" target="_blank">Medusa Marketing</a></p>
+  </footer>
+
 </body>
 </html>
