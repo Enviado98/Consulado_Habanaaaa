@@ -132,31 +132,55 @@ button{font-family:var(--FB);cursor:pointer}
 @keyframes sDrop{0%{top:-100%;opacity:0}15%{opacity:1}100%{top:100%;opacity:0}}
 
 /* ── ABOUT ───────────────────────────────────── */
-#perfil{position:relative;padding:140px 0 0;background:var(--white)}
-/* Split background: izq blanco, der crema */
-#perfil::after{content:'';position:absolute;top:0;right:0;bottom:0;width:50%;background:var(--cream);z-index:0;pointer-events:none}
-.about-deco{position:absolute;top:60px;right:0;width:50%;height:70%;background-image:url('https://mano.gr/wp-content/uploads/2019/10/nature-element-01-light.svg');background-position:top right;background-repeat:no-repeat;background-size:65% auto;opacity:.22;z-index:1;pointer-events:none}
-.about-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+#perfil{position:relative;padding:120px 0 0;background:var(--white)}
+#perfil::after{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:55%;
+  background:var(--cream);z-index:0;pointer-events:none;
+}
+.about-deco{
+  position:absolute;top:40px;right:0;width:55%;height:75%;
+  background-image:url('https://mano.gr/wp-content/uploads/2019/10/nature-element-01-light.svg');
+  background-position:top right;background-repeat:no-repeat;background-size:70% auto;
+  opacity:.2;z-index:1;pointer-events:none;
+}
+/* SIEMPRE dos columnas — imagen izq, texto der */
+.about-grid{
+  position:relative;z-index:2;
+  display:grid;
+  /* imagen ~38%, texto ~62% — mismo que el original */
+  grid-template-columns:38% 1fr;
+  gap:40px;align-items:start;
+}
 .a-img-wrap{position:relative}
-.a-img{aspect-ratio:3/4;overflow:hidden;box-shadow:28px 28px 0 rgba(175,143,84,.1),0 40px 80px rgba(35,31,32,.1)}
+.a-img{
+  /* imagen más compacta para que quepa en móvil junto al texto */
+  aspect-ratio:3/4;max-height:460px;
+  overflow:hidden;
+  box-shadow:20px 20px 0 rgba(175,143,84,.1),0 32px 60px rgba(35,31,32,.1);
+}
 .a-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s var(--e1)}
 .a-img:hover img{transform:scale(1.04)}
-.a-badge{position:absolute;bottom:-12px;right:-12px;width:80px;height:80px;background:var(--dark);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 14px 36px rgba(35,31,32,.28)}
-.a-badge span{font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-lt);line-height:1}
-.a-badge strong{font-family:var(--FD);font-size:1.4rem;color:var(--white);line-height:1.2}
+.a-badge{
+  position:absolute;bottom:-10px;right:-10px;
+  width:72px;height:72px;background:var(--dark);border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 12px 28px rgba(35,31,32,.3);
+}
+.a-badge span{font-size:.44rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-lt);line-height:1}
+.a-badge strong{font-family:var(--FD);font-size:1.3rem;color:var(--white);line-height:1.2}
 .a-txt{padding-top:.4rem}
 .s-label{font-size:.65rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:.85rem}
-.s-title{font-size:clamp(2.4rem,4.5vw,4rem);color:var(--dark);line-height:.95;margin-bottom:.15em}
-.s-sub{font-family:var(--FD);font-size:clamp(1.4rem,2.8vw,2.4rem);font-weight:700;font-style:italic;color:var(--gold)}
-.gold-line{width:0;height:2px;background:var(--gold);margin:1.8rem 0;transition:width 1.2s var(--e2)}
+.s-title{font-size:clamp(2rem,4vw,4rem);color:var(--dark);line-height:.95;margin-bottom:.12em}
+.s-sub{font-family:var(--FD);font-size:clamp(1.2rem,2.5vw,2.4rem);font-weight:700;font-style:italic;color:var(--gold)}
+.gold-line{width:0;height:2px;background:var(--gold);margin:1.4rem 0;transition:width 1.2s var(--e2)}
 .gold-line.on{width:44px}
-.a-name{font-family:var(--FD);font-size:1.75rem;font-style:italic;color:var(--dark);margin-bottom:.3rem;font-weight:700}
-.a-blk{padding-left:1.3rem;border-left:2px solid var(--div);margin-bottom:2rem}
-.a-blk h3{font-family:var(--FB);font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dark);margin-bottom:.6rem}
-.a-blk p{font-size:.93rem;line-height:1.9;color:var(--text)}
+.a-name{font-family:var(--FD);font-size:clamp(1.3rem,3vw,1.75rem);font-style:italic;color:var(--dark);margin-bottom:.3rem;font-weight:700}
+.a-blk{padding-left:1.1rem;border-left:2px solid var(--div);margin-bottom:1.6rem}
+.a-blk h3{font-family:var(--FB);font-size:.63rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dark);margin-bottom:.55rem}
+.a-blk p{font-size:.88rem;line-height:1.85;color:var(--text)}
 
 /* Marquee */
-.marq{position:relative;z-index:2;margin-top:100px;background:var(--dark);padding:1.1rem 0;overflow:hidden;width:100%}
+.marq{position:relative;z-index:2;margin-top:80px;background:var(--dark);padding:1.1rem 0;overflow:hidden;width:100%}
 .marq-track{display:flex;width:max-content;animation:mq 32s linear infinite}
 .marq-track:hover{animation-play-state:paused}
 .marq-item{display:flex;align-items:center;gap:1.6rem;padding:0 1.6rem;white-space:nowrap}
@@ -164,15 +188,23 @@ button{font-family:var(--FB);cursor:pointer}
 .marq-dot{color:var(--gold);font-size:1rem}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-/* Tagline / "En el corazón" */
-.tagline{position:relative;z-index:2;padding:90px 0 100px;background:var(--white)}
-.tagline::after{content:'';position:absolute;top:0;right:0;bottom:0;width:55%;background:var(--cream);z-index:0;pointer-events:none}
-.tagline-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1.1fr;gap:60px;align-items:center}
-.tagline-h{font-size:clamp(2rem,3.8vw,3.2rem);color:var(--dark);line-height:1.15;margin-bottom:1.6rem}
+/* Tagline / "En el corazón" — SIEMPRE dos columnas */
+.tagline{position:relative;z-index:2;padding:80px 0 90px;background:var(--white)}
+.tagline::after{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:55%;
+  background:var(--cream);z-index:0;pointer-events:none;
+}
+.tagline-grid{
+  position:relative;z-index:1;
+  display:grid;
+  grid-template-columns:42% 1fr;
+  gap:50px;align-items:center;
+}
+.tagline-h{font-size:clamp(1.6rem,3.8vw,3.2rem);color:var(--dark);line-height:1.15;margin-bottom:1.4rem}
 .tagline-h em{color:var(--gold);font-style:normal}
-.tagline-p{font-size:.92rem;line-height:1.9;color:var(--text);margin-bottom:.8rem}
-.tagline-bold{font-weight:700;font-size:.92rem;color:var(--dark)}
-.tagline-photo{aspect-ratio:4/3;overflow:hidden;box-shadow:0 32px 72px rgba(35,31,32,.1)}
+.tagline-p{font-size:.88rem;line-height:1.85;color:var(--text);margin-bottom:.7rem}
+.tagline-bold{font-weight:700;font-size:.88rem;color:var(--dark)}
+.tagline-photo{aspect-ratio:4/3;overflow:hidden;box-shadow:0 24px 60px rgba(35,31,32,.1)}
 .tagline-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s var(--e1)}
 .tagline-photo:hover img{transform:scale(1.05)}
 
@@ -325,41 +357,86 @@ footer{background:var(--dark2);padding:2.2rem 0;border-top:1px solid rgba(175,14
 #lb-x:hover{border-color:var(--gold);color:var(--gold)}
 
 /* ── RESPONSIVE ──────────────────────────────── */
+
+/* Tablet 768–1080px: mantener 2 columnas pero ajustar tamaños */
 @media(max-width:1080px){
-  .about-grid{grid-template-columns:1fr;gap:2.5rem}
-  #perfil::after,.about-deco{display:none}
-  .tagline-grid{grid-template-columns:1fr}
-  .tagline::after{display:none}
-  .tagline{background:var(--cream)}
+  /* about y tagline se mantienen en 2 columnas, solo ajustamos gap y proporciones */
+  .about-grid{gap:28px}
+  .a-img{max-height:380px}
+  .tagline-grid{gap:32px}
+  /* Los que sí colapsan en tablet */
   .svc-layout{grid-template-columns:1fr;gap:2.5rem}
   .svc-sticky{position:relative;top:auto}
   .sch-inner{grid-template-columns:1fr}
   .ig-inner{grid-template-columns:1fr}
-  .cnt-cards{grid-template-columns:1fr}
+  .cnt-cards{grid-template-columns:1fr 1fr}
   .gal-grid{grid-template-columns:repeat(3,1fr)}
 }
+
+/* Móvil pequeño <768px: about y tagline SIGUEN en 2 columnas como el original */
 @media(max-width:768px){
   :root{scrollbar-gutter:auto}
-  .w{padding:0 20px}
-  .hdr-in{padding:0 20px}
+  .w{padding:0 16px}
+  .hdr-in{padding:0 16px}
   .hdr-nav{display:none}
   .brg{display:flex}
-  .h-content{padding-left:20px;padding-right:20px;padding-bottom:80px}
-  .h-scroll{right:20px}
+  .h-content{padding-left:16px;padding-right:16px;padding-bottom:72px}
+  .h-scroll{right:16px}
+
+  /* About: imagen más pequeña pero siempre al lado del texto */
+  #perfil{padding-top:96px}
+  .about-grid{
+    grid-template-columns:36% 1fr;
+    gap:16px;
+  }
+  .a-img{
+    aspect-ratio:3/4;max-height:280px;
+    box-shadow:10px 10px 0 rgba(175,143,84,.1),0 16px 30px rgba(35,31,32,.1);
+  }
+  .a-badge{width:56px;height:56px;bottom:-8px;right:-8px}
+  .a-badge strong{font-size:1.05rem}
+  .a-badge span{font-size:.38rem}
+  /* Reducir texto para que quepa */
+  .a-blk{padding-left:.8rem;margin-bottom:1.1rem}
+  .a-blk p{font-size:.78rem;line-height:1.7}
+  /* Ocultar la barra decorativa para ganar espacio */
+  .gold-line{display:none}
+  /* Fondo split solo en >=480px */
+  #perfil::after,.about-deco{display:none}
+
+  /* Tagline: texto izquierda, foto derecha — siempre 2 columnas */
+  .tagline::after{display:none}
+  .tagline{background:var(--cream);padding:60px 0 70px}
+  .tagline-grid{
+    grid-template-columns:45% 1fr;
+    gap:16px;
+  }
+  .tagline-h{font-size:clamp(1.2rem,5.5vw,1.8rem);margin-bottom:.9rem}
+  .tagline-p{font-size:.76rem;line-height:1.65;margin-bottom:.5rem}
+  .tagline-bold{font-size:.76rem}
+
   .svc-grid{grid-template-columns:1fr}
   .svc-card:nth-child(odd){border-right:none}
-  .gal-grid{grid-template-columns:1fr 1fr;grid-auto-rows:150px}
+  .gal-grid{grid-template-columns:1fr 1fr;grid-auto-rows:140px}
   .gi.t2{grid-row:span 1}.gi.c2{grid-column:span 2}
   .cnt-cards{grid-template-columns:1fr}
-  footer .w{padding:0 20px}
-  .ig-m{font-size:45vw}
-  .cnt-watermark{font-size:35vw}
+  footer .w{padding:0 16px}
+  .ig-m{font-size:55vw}
+  .cnt-watermark{font-size:38vw}
+  .cnt-map{aspect-ratio:4/3}
 }
+
+/* Muy pequeño <480px */
 @media(max-width:480px){
-  .gal-grid{grid-template-columns:1fr 1fr;grid-auto-rows:120px}
-  .h-t1{font-size:4rem}
+  .about-grid{grid-template-columns:38% 1fr;gap:12px}
+  .a-img{max-height:220px}
+  .tagline-grid{grid-template-columns:1fr;gap:20px}
+  .tagline-photo{aspect-ratio:16/9}
+  .gal-grid{grid-template-columns:1fr 1fr;grid-auto-rows:110px}
+  .h-t1{font-size:3.6rem}
   .svc-grid{grid-template-columns:1fr 1fr}
   .svc-card:nth-child(odd){border-right:1px solid rgba(216,201,164,.25)}
+  .svc-card{padding:24px 16px}
 }
 </style>
 </head>
