@@ -1,439 +1,499 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Inicio – Mano Ioannina – Maria Kakaidi</title>
-<link rel="stylesheet" href="styles.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mano Ioannina | Salón de Belleza</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- ══════════════════════════════════
-     SVG ICONS (reutilizables con <use>)
-     ══════════════════════════════════ -->
-<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <symbol id="ico-nail" viewBox="0 0 60 60">
-      <line x1="10" y1="50" x2="50" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="16" y1="50" x2="50" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
-      <rect x="6" y="44" width="10" height="5" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
-    </symbol>
-    <symbol id="ico-foot" viewBox="0 0 60 60">
-      <path d="M20 50 Q15 40 18 28 Q20 18 28 15 Q36 12 38 20 Q40 28 34 35 Q28 42 26 50Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
-      <circle cx="38" cy="16" r="3"   stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <circle cx="44" cy="20" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <circle cx="46" cy="27" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <circle cx="44" cy="34" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-    </symbol>
-    <symbol id="ico-sculpt" viewBox="0 0 60 60">
-      <path d="M15 45 L15 30 Q15 20 25 20 L35 20 Q45 20 45 30 L45 45" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
-      <line x1="12" y1="45" x2="48" y2="45" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      <path d="M22 20 Q22 13 30 13 Q38 13 38 20" stroke="currentColor" stroke-width="2" fill="none"/>
-      <line x1="24" y1="30" x2="36" y2="30" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
-      <line x1="24" y1="36" x2="36" y2="36" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
-    </symbol>
-    <symbol id="ico-wax" viewBox="0 0 60 60">
-      <line x1="10" y1="50" x2="50" y2="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M42 18 L50 10 L52 18 L44 20Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path d="M15 43 Q25 35 35 38 Q42 40 38 48" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="ico-makeup" viewBox="0 0 60 60">
-      <path d="M20 35 Q30 45 40 35 Q35 25 30 28 Q25 25 20 35Z" stroke="currentColor" stroke-width="2" fill="none"/>
-      <path d="M22 33 Q30 39 38 33" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"/>
-      <line x1="30" y1="10" x2="30" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      <path d="M24 14 Q30 10 36 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="ico-piercing" viewBox="0 0 60 60">
-      <circle cx="30" cy="28" r="14" stroke="currentColor" stroke-width="2"   fill="none"/>
-      <circle cx="30" cy="28" r="6"  stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"/>
-      <line x1="30" y1="42" x2="30" y2="52" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="30" cy="54" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
-    </symbol>
-    <symbol id="ico-massage" viewBox="0 0 60 60">
-      <path d="M15 40 Q15 28 22 24 L28 20 Q32 18 34 22 L34 30" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M34 30 L38 26 Q42 24 44 28 L44 34 Q44 42 36 46 L24 50 L16 46" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M22 24 L26 18 Q29 14 32 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
-    </symbol>
-    <symbol id="ico-facial" viewBox="0 0 60 60">
-      <circle cx="30" cy="28" r="16" stroke="currentColor" stroke-width="2" fill="none"/>
-      <path d="M22 22 Q26 18 30 22 Q34 26 38 22" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
-      <path d="M22 30 Q26 26 30 30 Q34 34 38 30" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
-      <path d="M26 38 Q28 34 30 38 Q32 42 34 38" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".6"/>
-    </symbol>
-  </defs>
-</svg>
+  <!-- ─── HEADER / NAV ─── -->
+  <header id="header">
+    <div class="header-inner">
+      <a href="#inicio" class="logo">
+        <span class="logo-main">mano</span>
+        <span class="logo-sub">ioannina</span>
+      </a>
 
-<!-- ══════════════════════════════════
-     LIGHTBOX
-     ══════════════════════════════════ -->
-<div class="lightbox" id="lightbox">
-  <span class="lb-close" id="lbClose">&times;</span>
-  <img src="" alt="" id="lbImg"/>
-</div>
+      <nav class="nav-desktop">
+        <ul>
+          <li><a href="#perfil">Perfil</a></li>
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#horario">Horario</a></li>
+          <li><a href="#galeria">Galería</a></li>
+          <li><a href="#instagram">Instagram</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
 
-<!-- ══════════════════════════════════
-     NAVBAR
-     ══════════════════════════════════ -->
-<nav id="navbar">
-  <a href="#hero" class="nav-logo">
-    <img src="https://mano.gr/wp-content/uploads/2019/10/mano-logo-white-nobox2.svg"
-         alt="Mano Ioannina"
-         onerror="this.style.display='none'"/>
-  </a>
-  <ul class="nav-links">
-    <li><a href="#about">perfil</a></li>
-    <li><a href="#services">servicios</a></li>
-    <li><a href="#schedule">horario</a></li>
-    <li><a href="#gallery">galería</a></li>
-    <li><a href="#instagram">instagram</a></li>
-    <li><a href="#contact">contacto</a></li>
-  </ul>
-  <div class="nav-toggle" id="navToggle">
-    <span></span><span></span><span></span>
-  </div>
-</nav>
-
-<!-- Menú móvil -->
-<div class="mobile-nav" id="mobileNav">
-  <a href="#about"     class="mob">perfil</a>
-  <a href="#services"  class="mob">servicios</a>
-  <a href="#schedule"  class="mob">horario</a>
-  <a href="#gallery"   class="mob">galería</a>
-  <a href="#instagram" class="mob">instagram</a>
-  <a href="#contact"   class="mob">contacto</a>
-</div>
-
-<!-- ══════════════════════════════════
-     HERO
-     ══════════════════════════════════ -->
-<section id="hero">
-  <div class="hero-slide active"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-slide"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <h1>Un lugar<br>de belleza</h1>
-    <h2>solo para ti</h2>
-  </div>
-  <div class="hero-scroll" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
-    <span></span>
-  </div>
-  <div class="hero-dots" id="heroDots"></div>
-</section>
-
-<!-- ══════════════════════════════════
-     ABOUT
-     ══════════════════════════════════ -->
-<section id="about">
-  <div class="about-grid">
-    <div class="about-text reveal-l">
-      <span class="section-tag">Sobre mano</span>
-      <h2 class="section-title">María Kakaidi</h2>
-      <div class="gold-bar"></div>
-      <h4>Filosofía de Mano Ioannina</h4>
-      <p>Mano Ioannina es para mí un espacio de inspiración. Quise crear un espacio de estética impecable que ofreciera lo mejor a cada cliente que nos visita.</p>
-      <h4>Mi sueño</h4>
-      <p>Siempre creí que la belleza interior lo es todo. Pero para brillar un poco más necesitamos el cuidado y la atención de personas expertas. La belleza no es un lujo, sino una necesidad personal.</p>
-      <p>La necesidad de sentirse bien con uno mismo es igual de importante para ambos sexos, por eso los servicios de Mano Ioannina van dirigidos tanto a mujeres como a hombres. Mi objetivo son las sonrisas de mis clientes.</p>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <div class="about-images reveal-r">
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Mano Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Mano Salon" loading="lazy"/>
-      <img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Mano Salon" loading="lazy"/>
+
+    <!-- Mobile nav -->
+    <nav class="nav-mobile" id="nav-mobile">
+      <ul>
+        <li><a href="#perfil" class="mobile-link">Perfil</a></li>
+        <li><a href="#servicios" class="mobile-link">Servicios</a></li>
+        <li><a href="#horario" class="mobile-link">Horario</a></li>
+        <li><a href="#galeria" class="mobile-link">Galería</a></li>
+        <li><a href="#instagram" class="mobile-link">Instagram</a></li>
+        <li><a href="#contacto" class="mobile-link">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ─── HERO ─── -->
+  <section id="inicio" class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow reveal">Un lugar de</p>
+      <h1 class="hero-title reveal delay-1">belleza</h1>
+      <p class="hero-subtitle reveal delay-2">solo para ti</p>
+      <a href="#servicios" class="btn-hero reveal delay-3">Descubrir</a>
     </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     CITY
-     ══════════════════════════════════ -->
-<section id="city">
-  <svg class="botanical-svg" viewBox="0 0 280 500" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M140 480 Q138 400 142 320 Q140 240 138 160 Q136 80 140 20" stroke="#af8f54" stroke-width="1.2" fill="none" opacity=".8"/>
-    <path d="M139 380 Q100 350 60 360 Q90 330 140 340"   stroke="#af8f54" stroke-width="1" fill="none" opacity=".7"/>
-    <path d="M139 320 Q90 280 50 290 Q85 260 140 270"    stroke="#af8f54" stroke-width="1" fill="none" opacity=".7"/>
-    <path d="M139 230 Q80 190 40 200 Q80 170 140 185"    stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
-    <path d="M139 150 Q95 115 65 125 Q95 95 140 110"     stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
-    <path d="M141 350 Q185 320 220 328 Q190 300 140 310" stroke="#af8f54" stroke-width="1" fill="none" opacity=".7"/>
-    <path d="M141 270 Q192 240 230 248 Q196 218 140 232" stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
-    <path d="M141 185 Q188 155 220 162 Q194 134 140 148" stroke="#af8f54" stroke-width="1" fill="none" opacity=".6"/>
-    <path d="M141 100 Q180 72 210 78 Q186 54 140 68"     stroke="#af8f54" stroke-width="1" fill="none" opacity=".5"/>
-    <path d="M139 380 Q120 365 100 368" stroke="#af8f54" stroke-width=".6" opacity=".4"/>
-    <path d="M139 320 Q116 305 90 308"  stroke="#af8f54" stroke-width=".6" opacity=".4"/>
-    <path d="M141 350 Q165 337 185 340" stroke="#af8f54" stroke-width=".6" opacity=".4"/>
-  </svg>
-
-  <div class="reveal" style="position:relative;z-index:2">
-    <span class="section-tag">En el corazón</span>
-    <h2 class="section-title white">de la ciudad</h2>
-    <div class="gold-bar gold center"></div>
-    <p>Un espacio de elegancia en el centro de la ciudad para quienes el cuidado personal es una combinación de estética, bienestar propio y servicios a precios razonables.</p>
-    <p>Profesionalidad y creatividad. Imaginación e ideas. Reserve su cita con anticipación.</p>
-    <span class="highlight">¡Nos encanta ver tu sonrisa!</span>
-  </div>
-  <div class="city-strip" style="position:relative;z-index:2">
-    <div class="city-strip-item reveal" style="transition-delay:.00s"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="" loading="lazy"/></div>
-    <div class="city-strip-item reveal" style="transition-delay:.12s"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="" loading="lazy"/></div>
-    <div class="city-strip-item reveal" style="transition-delay:.24s"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="" loading="lazy"/></div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     SERVICES
-     ══════════════════════════════════ -->
-<section id="services">
-  <svg class="services-bg-svg" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M600 800 Q598 640 604 480 Q600 320 596 160 Q594 60 600 0"  stroke="#af8f54" stroke-width="1.5" opacity=".6"/>
-    <path d="M599 680 Q530 640 470 650 Q525 615 600 628" stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
-    <path d="M599 560 Q510 515 445 525 Q510 490 600 508" stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
-    <path d="M599 420 Q505 375 440 385 Q505 350 600 368" stroke="#af8f54" stroke-width="1.2" opacity=".45"/>
-    <path d="M599 280 Q515 238 455 246 Q514 212 600 228" stroke="#af8f54" stroke-width="1.2" opacity=".4"/>
-    <path d="M601 640 Q672 605 730 614 Q678 580 600 596" stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
-    <path d="M601 500 Q678 464 738 472 Q682 438 600 454" stroke="#af8f54" stroke-width="1.2" opacity=".45"/>
-    <path d="M601 355 Q675 320 732 328 Q678 295 600 310" stroke="#af8f54" stroke-width="1.2" opacity=".4"/>
-    <path d="M601 210 Q670 178 720 185 Q672 154 600 168" stroke="#af8f54" stroke-width="1.2" opacity=".35"/>
-  </svg>
-
-  <div class="services-inner">
-    <div class="services-header reveal">
-      <h2 class="section-title"><span style="color:var(--gold)">Tu belleza</span></h2>
-      <div style="font-family:'Cera',Arial,sans-serif;font-weight:300;font-size:clamp(1.3rem,2.8vw,2rem);color:var(--dark);margin-top:2px">comienza aquí</div>
-      <div class="gold-bar" style="margin-top:16px"></div>
+    <div class="hero-scroll">
+      <span></span>
     </div>
-    <div class="services-grid stagger">
+  </section>
 
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-nail"/></svg></span>
-          <h3>Manicura</h3>
+  <!-- ─── PERFIL / ABOUT ─── -->
+  <section id="perfil" class="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image-wrap reveal">
+          <div class="about-image">
+            <img src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=600&q=80" alt="Mano Ioannina salón de belleza">
+          </div>
+          <div class="about-tag">
+            <span>desde</span>
+            <strong>2020</strong>
+          </div>
         </div>
-        <div class="service-row"><span class="name">Limado + pintado sencillo</span><span class="price">5€</span></div>
-        <div class="service-row"><span class="name">Francesa</span><span class="price">+2€</span></div>
-        <div class="service-row"><span class="name">Semipermanente</span><span class="price">5€</span></div>
-        <div class="service-row"><span class="name">Limado</span><span class="price">3€</span></div>
-        <div class="service-row"><span class="name">Manicura esmalte sencillo</span><span class="price">12€</span></div>
-        <div class="service-row"><span class="name">Manicura semipermanente</span><span class="price">15€</span></div>
-        <div class="service-row"><span class="name">Manicura boost</span><span class="price">20€</span></div>
-      </div>
 
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-foot"/></svg></span>
-          <h3>Pedicura</h3>
-        </div>
-        <div class="service-row"><span class="name">Pedicura</span><span class="price">18€</span></div>
-        <div class="service-row"><span class="name">Pedicura semipermanente</span><span class="price">20€</span></div>
-        <div class="service-row"><span class="name">Tratamiento planta del pie</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Corte de uñas</span><span class="price">3€</span></div>
-        <div class="service-row"><span class="name">Eliminación de callos</span><span class="price">desde 7€</span></div>
-      </div>
+        <div class="about-text">
+          <p class="section-label reveal">Sobre nosotros</p>
+          <h2 class="section-title reveal delay-1">About <em>mano</em></h2>
+          <h3 class="about-name reveal delay-2">María Kakaidi</h3>
 
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-sculpt"/></svg></span>
-          <h3>Escultura de uñas</h3>
-        </div>
-        <div class="service-row"><span class="name">Escultura con semipermanente</span><span class="price">29€</span></div>
-        <div class="service-row"><span class="name">Mantenimiento semipermanente</span><span class="price">25€</span></div>
-        <div class="service-row"><span class="name">Reparación de uña rota</span><span class="price">2€</span></div>
-        <div class="service-row"><span class="name">Retirada de gel y acrílico</span><span class="price">5€</span></div>
-      </div>
+          <div class="about-block reveal delay-3">
+            <h4>Filosofía Mano Ioannina</h4>
+            <p>Mano Ioannina es para mí un espacio de inspiración. Quería crear un lugar de estética impecable que ofrezca servicios de primera calidad. Elementos esenciales para un espacio de belleza. Mi filosofía es una sola: resultado perfecto en todo lo que hacemos.</p>
+          </div>
 
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-wax"/></svg></span>
-          <h3>Depilación</h3>
-        </div>
-        <div class="service-row"><span class="name">Cejas</span><span class="price">5€</span></div>
-        <div class="service-row"><span class="name">Labio superior</span><span class="price">5€</span></div>
-        <div class="service-row"><span class="name">Gemelos / Muslos</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Piernas &amp; bikini</span><span class="price">25€</span></div>
-        <div class="service-row"><span class="name">Bikini / Bikini completo</span><span class="price">10–13€</span></div>
-        <div class="service-row"><span class="name">Brazos</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Hilo cara completa</span><span class="price">13€</span></div>
-        <div class="service-row"><span class="name">Espalda / Pecho</span><span class="price">15–10€</span></div>
-      </div>
-
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-makeup"/></svg></span>
-          <h3>Maquillaje</h3>
-        </div>
-        <div class="service-row"><span class="name">Tinte de pestañas</span><span class="price">10€</span></div>
-        <div class="service-row"><span class="name">Maquillaje</span><span class="price">25€</span></div>
-        <div class="service-row"><span class="name">Maquillaje fuera de horario</span><span class="price">40€</span></div>
-        <div class="service-row"><span class="name">Maquillaje de novia<span class="sub">+ Regalo un maquillaje</span></span><span class="price">250€</span></div>
-      </div>
-
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-piercing"/></svg></span>
-          <h3>Piercing</h3>
-        </div>
-        <div class="service-row"><span class="name">Perforación infantil</span><span class="price">25€</span></div>
-        <div class="service-row"><span class="name">Oreja</span><span class="price">8€</span></div>
-        <div class="service-row"><span class="name">Ombligo<span class="sub">Pendiente de regalo</span></span><span class="price">35€</span></div>
-      </div>
-
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-massage"/></svg></span>
-          <h3>Tratamientos</h3>
-        </div>
-        <div class="service-row"><span class="name">Masaje relajante<span class="sub">40 minutos</span></span><span class="price">25€</span></div>
-        <div class="service-row"><span class="name">Facial, cuello y escote<span class="sub">30 minutos</span></span><span class="price">15€</span></div>
-      </div>
-
-      <div class="service-block">
-        <div class="service-block-header">
-          <span class="service-icon"><svg><use href="#ico-facial"/></svg></span>
-          <h3>Facial</h3>
-        </div>
-        <div class="service-row"><span class="name">Limpieza facial</span><span class="price">40€</span></div>
-        <div class="service-row"><span class="name">Hidratación – Firmeza</span><span class="price">40€</span></div>
-        <div class="service-row"><span class="name">Guinot doble ionización<span class="sub">Guinot lift +20€</span></span><span class="price">70€</span></div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     SCHEDULE
-     ══════════════════════════════════ -->
-<section id="schedule">
-  <svg class="schedule-leaf" viewBox="0 0 300 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M150 510 Q148 420 153 340 Q150 250 147 170 Q144 80 150 10" stroke="#af8f54" stroke-width="1.5" opacity=".9"/>
-    <path d="M149 430 Q95 392 55 402 Q100 368 150 382"   stroke="#af8f54" stroke-width="1.2" opacity=".8"/>
-    <path d="M149 350 Q84 308 44 318 Q92 282 150 298"    stroke="#af8f54" stroke-width="1.2" opacity=".7"/>
-    <path d="M149 260 Q78 218 38 228 Q88 192 150 210"    stroke="#af8f54" stroke-width="1.2" opacity=".65"/>
-    <path d="M149 170 Q90 132 56 142 Q96 108 150 124"    stroke="#af8f54" stroke-width="1.2" opacity=".6"/>
-    <path d="M149 80 Q102 48 72 56 Q104 26 150 42"       stroke="#af8f54" stroke-width="1.2" opacity=".5"/>
-    <path d="M151 400 Q208 364 248 374 Q206 340 150 356" stroke="#af8f54" stroke-width="1.2" opacity=".8"/>
-    <path d="M151 318 Q214 282 256 290 Q212 256 150 272" stroke="#af8f54" stroke-width="1.2" opacity=".7"/>
-    <path d="M151 230 Q210 196 248 204 Q208 170 150 186" stroke="#af8f54" stroke-width="1.2" opacity=".65"/>
-    <path d="M151 140 Q206 108 240 115 Q204 84 150 98"   stroke="#af8f54" stroke-width="1.2" opacity=".55"/>
-    <path d="M151 54 Q196 26 224 32 Q198 8 150 20"       stroke="#af8f54" stroke-width="1.2" opacity=".45"/>
-    <path d="M149 430 Q130 418 110 422" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
-    <path d="M149 350 Q126 338 104 342" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
-    <path d="M151 400 Q174 388 194 392" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
-    <path d="M151 318 Q178 306 198 310" stroke="#af8f54" stroke-width=".7" opacity=".4"/>
-  </svg>
-
-  <div class="schedule-inner reveal">
-    <span class="section-tag">Horario</span>
-    <h2 class="section-title" style="color:var(--gold)">de apertura</h2>
-    <div class="gold-bar" style="margin-top:16px"></div>
-    <div class="sched-table stagger">
-      <div class="sched-row"><span class="day">Lunes</span><span class="hours">9:00 – 17:00</span></div>
-      <div class="sched-row"><span class="day">Martes</span><span class="hours">11:00 – 19:00</span></div>
-      <div class="sched-row"><span class="day">Miércoles</span><span class="hours">9:00 – 17:00</span></div>
-      <div class="sched-row"><span class="day">Jueves</span><span class="hours">11:00 – 19:00</span></div>
-      <div class="sched-row"><span class="day">Viernes</span><span class="hours">11:00 – 19:00</span></div>
-      <div class="sched-row"><span class="day">Sábado</span><span class="hours">9:00 – 17:00</span></div>
-      <div class="sched-row"><span class="day">Domingo</span><span class="closed">Cerrado</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     GALLERY
-     ══════════════════════════════════ -->
-<section id="gallery">
-  <div class="gallery-header reveal">
-    <h2 class="section-title">El <span style="color:var(--gold)">salón</span></h2>
-    <div style="font-family:'Cera',Arial,sans-serif;font-weight:300;font-size:clamp(1.3rem,2.8vw,2rem);color:var(--dark);margin-top:2px">fotografía</div>
-    <div class="gold-bar" style="margin-top:14px"></div>
-  </div>
-  <div class="gallery-grid stagger">
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7858.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7877.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7573.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7878.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8159.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7569.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7616.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7882.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8162.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8174.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_8193.jpg" alt="Salon" loading="lazy"/></div>
-    <div class="gallery-item"><img src="https://mano.gr/wp-content/uploads/2019/10/IMG_7901.jpg" alt="Salon" loading="lazy"/></div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     INSTAGRAM
-     ══════════════════════════════════ -->
-<section id="instagram">
-  <div class="reveal-l">
-    <span class="section-tag">Síguenos</span>
-    <div class="section-title" style="color:var(--gold);font-family:'Garamont',Georgia,serif;font-size:clamp(2rem,3.8vw,3.5rem)">en Instagram</div>
-    <div style="font-family:'Cera',Arial,sans-serif;font-weight:300;font-size:clamp(1.1rem,2.2vw,1.7rem);color:var(--dark);margin-top:4px">@manoioannina</div>
-    <div class="gold-bar" style="margin-top:16px"></div>
-    <a href="https://www.instagram.com/manoioannina" target="_blank" rel="noopener" class="ig-btn">
-      <svg viewBox="0 0 24 24">
-        <rect x="2" y="2" width="20" height="20" rx="5"/>
-        <circle cx="12" cy="12" r="4"/>
-        <circle cx="17.5" cy="6.5" r="1.3" fill="currentColor" stroke="none"/>
-      </svg>
-      Seguir en Instagram
-    </a>
-  </div>
-  <div class="ig-right reveal-r">
-    <div style="font-family:'Garamont',Georgia,serif;font-size:clamp(160px,22vw,280px);font-weight:700;color:var(--gold);opacity:.18;line-height:1;user-select:none;text-align:right">m</div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════
-     CONTACT
-     ══════════════════════════════════ -->
-<section id="contact">
-  <div class="contact-grid">
-    <div class="contact-info reveal-l">
-      <span class="section-tag">Contacto</span>
-      <h2 class="section-title" style="font-size:clamp(1.6rem,3vw,2.8rem)">¡Estaremos encantadas<br>de atenderte!</h2>
-      <div class="gold-bar" style="margin-top:14px"></div>
-      <span class="contact-subtitle">Reserva tu cita con antelación</span>
-      <div class="contact-items">
-        <div class="contact-item">
-          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
-          <h4>Dirección</h4>
-          <a href="https://goo.gl/maps/R18LAsoiLZgvwCKRA" target="_blank">Zygomala 20,<br>Ioannina</a>
-        </div>
-        <div class="contact-item">
-          <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-          <h4>Teléfono</h4>
-          <a href="tel:+302651036900">2651 036 900</a>
-        </div>
-        <div class="contact-item">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-          <h4>Correo electrónico</h4>
-          <a href="mailto:mano@mano.gr">mano@mano.gr</a>
+          <div class="about-block reveal delay-4">
+            <h4>Mi sueño</h4>
+            <p>Siempre creí que la belleza interior lo es todo. Sin embargo, para brillar un poco más necesitamos el cuidado y la atención de personas expertas. La belleza no es un lujo sino una necesidad personal. Por eso elegí dedicarme con pasión a este arte.</p>
+          </div>
         </div>
       </div>
     </div>
-    <div class="contact-map reveal-r">
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d791.06!2d20.85227!3d39.66538!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x135b006a67b6a87b%3A0xa7b7fb8a55b37ef6!2sMano%20Ioannina!5e0!3m2!1ses!2ses!4v1700000000"
-        allowfullscreen loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="Mano Ioannina ubicación">
-      </iframe>
+
+    <div class="about-banner">
+      <div class="banner-inner">
+        <p>En el corazón de la ciudad</p>
+        <span class="divider-dot">·</span>
+        <p>Un espacio de elegancia</p>
+        <span class="divider-dot">·</span>
+        <p>¡Reserva tu cita con anticipación!</p>
+        <span class="divider-dot">·</span>
+        <p>We Love To See Your Smiles!</p>
+        <span class="divider-dot">·</span>
+        <p>En el corazón de la ciudad</p>
+        <span class="divider-dot">·</span>
+        <p>Un espacio de elegancia</p>
+        <span class="divider-dot">·</span>
+        <p>¡Reserva tu cita con anticipación!</p>
+        <span class="divider-dot">·</span>
+        <p>We Love To See Your Smiles!</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ══════════════════════════════════
-     FOOTER
-     ══════════════════════════════════ -->
-<footer>
-  <p>&copy; 2025 &nbsp;<strong>mano | Maria Kakaidi</strong></p>
-  <p>Creado por <a href="https://medusamarketing.gr" target="_blank" rel="noopener">Medusa Marketing</a></p>
-</footer>
+  <!-- ─── SERVICIOS ─── -->
+  <section id="servicios" class="services">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Lo que ofrecemos</p>
+        <h2 class="section-title reveal delay-1">Tu Belleza</h2>
+        <h3 class="section-subtitle reveal delay-2"><em>empieza aquí</em></h3>
+      </div>
 
-<!-- Script al final del body para mejor rendimiento -->
-<script src="script.js"></script>
+      <!-- Service Tabs -->
+      <div class="service-tabs reveal delay-2">
+        <button class="tab-btn active" data-tab="manicura">Manicura</button>
+        <button class="tab-btn" data-tab="pedicura">Pedicura</button>
+        <button class="tab-btn" data-tab="extensiones">Extensiones</button>
+        <button class="tab-btn" data-tab="depilacion">Depilación</button>
+        <button class="tab-btn" data-tab="maquillaje">Maquillaje</button>
+        <button class="tab-btn" data-tab="piercing">Piercing</button>
+        <button class="tab-btn" data-tab="masaje">Masaje</button>
+        <button class="tab-btn" data-tab="rostro">Rostro</button>
+      </div>
+
+      <!-- Panels -->
+      <div class="service-panels">
+
+        <div class="service-panel active" id="tab-manicura">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Manicura</h3>
+            <ul class="price-list">
+              <li><span class="item-name">Limado y esmalte simple</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Francés</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Semipermanente</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Limado</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Manicura con esmalte simple</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Manicura semipermanente</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Manicura boost</span><span class="dots"></span><span class="item-price">consultar</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-pedicura">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Pedicura</h3>
+            <ul class="price-list">
+              <li><span class="item-name">Pedicura</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Pedicura semipermanente</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Cuidado de la planta del pie</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Corte de uñas</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Eliminación de callos</span><span class="dots"></span><span class="item-price">desde 7 €</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-extensiones">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Extensiones de Uñas</h3>
+            <ul class="price-list">
+              <li><span class="item-name">Extensiones con semipermanente</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Mantenimiento con semipermanente</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Reparación de uña rota</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Eliminación de gel y acrílico</span><span class="dots"></span><span class="item-price">consultar</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-depilacion">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Depilación</h3>
+            <ul class="price-list">
+              <li><span class="item-name">Cejas</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Labio superior</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Pantorrillas / Muslos</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Piernas y bikini</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Bikini</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Bikini completo</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Brazos</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Cintura</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Abdomen</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Hilo facial completo</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Espalda</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Tórax</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Piernas completas</span><span class="dots"></span><span class="item-price">consultar</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-maquillaje">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Maquillaje</h3>
+            <ul class="price-list">
+              <li><span class="item-name">Tinte de pestañas</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Maquillaje</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li><span class="item-name">Maquillaje fuera de horario</span><span class="dots"></span><span class="item-price">consultar</span></li>
+              <li>
+                <span class="item-name">Maquillaje nupcial</span><span class="dots"></span><span class="item-price">250 €</span>
+                <p class="item-note">+ 1 MAQUILLAJE DE REGALO</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-piercing">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Piercing</h3>
+            <ul class="price-list">
+              <li>
+                <span class="item-name">Perforación infantil</span><span class="dots"></span><span class="item-price">consultar</span>
+              </li>
+              <li>
+                <span class="item-name">Oreja</span><span class="dots"></span><span class="item-price">consultar</span>
+              </li>
+              <li>
+                <span class="item-name">Ombligo</span><span class="dots"></span><span class="item-price">consultar</span>
+                <p class="item-note">PENDIENTE DE REGALO</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-masaje">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Masaje</h3>
+            <ul class="price-list">
+              <li>
+                <span class="item-name">Masaje relajante corporal</span><span class="dots"></span><span class="item-price">consultar</span>
+                <p class="item-note">40 minutos</p>
+              </li>
+              <li>
+                <span class="item-name">Cara, cuello y escote</span><span class="dots"></span><span class="item-price">consultar</span>
+                <p class="item-note">30 minutos</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="service-panel" id="tab-rostro">
+          <div class="panel-inner">
+            <div class="panel-deco">✦</div>
+            <h3>Tratamientos Faciales</h3>
+            <ul class="price-list">
+              <li>
+                <span class="item-name">Limpieza facial</span><span class="dots"></span><span class="item-price">consultar</span>
+              </li>
+              <li>
+                <span class="item-name">Tratamientos faciales</span><span class="dots"></span><span class="item-price">consultar</span>
+                <p class="item-note">Hidratación · Reafirmación</p>
+              </li>
+              <li>
+                <span class="item-name">Guinot doble ionización</span><span class="dots"></span><span class="item-price">consultar</span>
+                <p class="item-note">Guinot lift +20 €</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div><!-- /service-panels -->
+    </div>
+  </section>
+
+  <!-- ─── HORARIO ─── -->
+  <section id="horario" class="schedule">
+    <div class="schedule-bg"></div>
+    <div class="container">
+      <div class="schedule-grid">
+        <div class="schedule-text">
+          <p class="section-label reveal">Planifica tu visita</p>
+          <h2 class="section-title reveal delay-1">Horario</h2>
+          <h3 class="section-subtitle reveal delay-2"><em>de atención</em></h3>
+        </div>
+
+        <div class="schedule-table reveal delay-3">
+          <div class="schedule-row">
+            <span class="day">Lunes</span>
+            <span class="separator"></span>
+            <span class="time">9:00 – 17:00</span>
+          </div>
+          <div class="schedule-row">
+            <span class="day">Martes</span>
+            <span class="separator"></span>
+            <span class="time">11:00 – 19:00</span>
+          </div>
+          <div class="schedule-row">
+            <span class="day">Miércoles</span>
+            <span class="separator"></span>
+            <span class="time">9:00 – 17:00</span>
+          </div>
+          <div class="schedule-row">
+            <span class="day">Jueves</span>
+            <span class="separator"></span>
+            <span class="time">11:00 – 19:00</span>
+          </div>
+          <div class="schedule-row">
+            <span class="day">Viernes</span>
+            <span class="separator"></span>
+            <span class="time">11:00 – 19:00</span>
+          </div>
+          <div class="schedule-row">
+            <span class="day">Sábado</span>
+            <span class="separator"></span>
+            <span class="time">9:00 – 17:00</span>
+          </div>
+          <div class="schedule-row closed">
+            <span class="day">Domingo</span>
+            <span class="separator"></span>
+            <span class="time">Cerrado</span>
+          </div>
+        </div>
+      </div>
+
+      <a href="#contacto" class="btn-outline reveal">Reservar cita</a>
+    </div>
+  </section>
+
+  <!-- ─── GALERÍA ─── -->
+  <section id="galeria" class="gallery">
+    <div class="container">
+      <p class="section-label reveal">Nuestro trabajo</p>
+      <h2 class="section-title reveal delay-1">Salón</h2>
+      <h3 class="section-subtitle reveal delay-2"><em>fotografía</em></h3>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="gallery-item reveal" style="--delay: 0s">
+        <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80" alt="Manicura">
+        <div class="gallery-overlay"><span>Manicura</span></div>
+      </div>
+      <div class="gallery-item reveal" style="--delay: 0.1s">
+        <img src="https://images.unsplash.com/photo-1604654894497-6e6fe0bf4ca5?w=500&q=80" alt="Pedicura">
+        <div class="gallery-overlay"><span>Pedicura</span></div>
+      </div>
+      <div class="gallery-item tall reveal" style="--delay: 0.2s">
+        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" alt="Maquillaje">
+        <div class="gallery-overlay"><span>Maquillaje</span></div>
+      </div>
+      <div class="gallery-item reveal" style="--delay: 0.3s">
+        <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&q=80" alt="Tratamiento facial">
+        <div class="gallery-overlay"><span>Tratamiento facial</span></div>
+      </div>
+      <div class="gallery-item wide reveal" style="--delay: 0.4s">
+        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80" alt="Salón">
+        <div class="gallery-overlay"><span>Nuestro salón</span></div>
+      </div>
+      <div class="gallery-item reveal" style="--delay: 0.5s">
+        <img src="https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=500&q=80" alt="Nail art">
+        <div class="gallery-overlay"><span>Nail Art</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── INSTAGRAM ─── -->
+  <section id="instagram" class="instagram-section">
+    <div class="container">
+      <p class="section-label reveal">Síguenos</p>
+      <h2 class="section-title reveal delay-1">Síguenos</h2>
+      <h3 class="section-subtitle reveal delay-2"><em>en Instagram</em></h3>
+
+      <a href="https://instagram.com/manoioannina" target="_blank" rel="noopener" class="instagram-btn reveal delay-3">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        @manoioannina
+      </a>
+    </div>
+  </section>
+
+  <!-- ─── CONTACTO ─── -->
+  <section id="contacto" class="contact">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label reveal">Estamos aquí</p>
+        <h2 class="section-title reveal delay-1">Contacto</h2>
+        <h3 class="section-subtitle reveal delay-2"><em>¡Con gusto te atendemos!</em></h3>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-card reveal">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+              <h4>Dirección</h4>
+              <p>Zygomali 20, Ioannina</p>
+            </div>
+          </div>
+
+          <div class="contact-card reveal delay-1">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            </div>
+            <div>
+              <h4>Teléfono</h4>
+              <a href="tel:2651036900">2651 036 900</a>
+            </div>
+          </div>
+
+          <div class="contact-card reveal delay-2">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+              <h4>Email</h4>
+              <a href="mailto:[email protected]">[email protected]</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <form class="contact-form reveal delay-2" id="contact-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+              <span class="field-error" id="error-nombre"></span>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+              <span class="field-error" id="error-email"></span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="servicio">Servicio de interés</label>
+            <select id="servicio" name="servicio">
+              <option value="">Selecciona un servicio</option>
+              <option value="manicura">Manicura</option>
+              <option value="pedicura">Pedicura</option>
+              <option value="extensiones">Extensiones de uñas</option>
+              <option value="depilacion">Depilación</option>
+              <option value="maquillaje">Maquillaje</option>
+              <option value="piercing">Piercing</option>
+              <option value="masaje">Masaje</option>
+              <option value="rostro">Tratamientos Faciales</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" placeholder="¿En qué podemos ayudarte?" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Enviar mensaje</button>
+          <div class="form-success" id="form-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            ¡Mensaje enviado! Te contactaremos pronto.
+          </div>
+        </form>
+      </div>
+
+      <!-- Map placeholder -->
+      <div class="map-wrap reveal">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3055.4!2d20.8535!3d39.6650!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sZygomali+20%2C+Ioannina!5e0!3m2!1ses!2sgr!4v1"
+          allowfullscreen="" loading="lazy"
+          title="Ubicación Mano Ioannina"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span class="logo-main">mano</span>
+        <span class="logo-sub">ioannina</span>
+      </div>
+      <nav class="footer-nav">
+        <a href="#perfil">Perfil</a>
+        <a href="#servicios">Servicios</a>
+        <a href="#horario">Horario</a>
+        <a href="#galeria">Galería</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+      <p class="footer-copy">Copyright © 2025 · mano | María Kakaidi</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
