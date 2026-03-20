@@ -15,448 +15,18 @@
     <meta property="og:description" content="Protegemos su pensión y patrimonio. Especialistas en IMSS, Afore, Infonavit y Ley 73.">
     <meta property="og:image" content="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=1200&q=80">
     <meta name="twitter:card" content="summary_large_image">
-
-    <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"LegalService","name":"Ortiz & López Consultoría","description":"Consultoría legal especializada en seguridad social, pensiones IMSS, Afore e Infonavit en México.","url":"https://www.ortizlopez.com.mx","telephone":"+52-55-1234-5678","email":"contacto@ortizlopez.com.mx","address":{"@type":"PostalAddress","streetAddress":"Paseo de la Reforma 250","addressLocality":"Ciudad de México","addressCountry":"MX"},"areaServed":"MX","openingHoursSpecification":{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"09:00","closes":"18:00"}}
-    </script>
-
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"LegalService","name":"Ortiz & López Consultoría","description":"Consultoría legal especializada en seguridad social, pensiones IMSS, Afore e Infonavit en México.","url":"https://www.ortizlopez.com.mx","telephone":"+52-55-1234-5678","email":"contacto@ortizlopez.com.mx","address":{"@type":"PostalAddress","streetAddress":"Paseo de la Reforma 250","addressLocality":"Ciudad de México","addressCountry":"MX"},"areaServed":"MX","openingHoursSpecification":{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"09:00","closes":"18:00"}}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-
-    <style>
-        /* ── VARIABLES ── */
-        :root {
-            --navy:       #0d1b2a;
-            --gold:       #c5a059;
-            --white:      #ffffff;
-            --light-bg:   #f8f9fa;
-            --text-dark:  #333333;
-            --text-muted: #666666;
-            --whatsapp:   #25d366;
-            --ease:       all 0.3s ease;
-            --hh:         80px;
-        }
-
-        /* ── RESET ── */
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; overflow-x: hidden; }
-        body { font-family: 'Lato', sans-serif; color: var(--text-dark); line-height: 1.6; background: var(--white); overflow-x: hidden; }
-        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: var(--navy); font-weight: 700; }
-        img { max-width: 100%; display: block; }
-
-        /* ── SKIP LINK ── */
-        .skip-link { position: absolute; top: -100px; left: 0; background: var(--gold); color: #fff; padding: 10px 20px; font-weight: 700; z-index: 9999; text-decoration: none; transition: top 0.2s; }
-        .skip-link:focus { top: 0; }
-
-        /* ══════════════════════════════════════
-           HEADER
-        ══════════════════════════════════════ */
-        header {
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(10px);
-            padding: 0 5%;
-            height: var(--hh);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.07);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            color: var(--navy);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 1px;
-            font-weight: 700;
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
-        .logo em { color: var(--gold); font-style: italic; font-weight: 400; }
-
-        /* ── Desktop nav — scoped ONLY to .header-nav, never bleeds to mobile ── */
-        .header-nav ul { list-style: none; display: flex; gap: 28px; }
-        .header-nav a {
-            text-decoration: none;
-            color: var(--navy);
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            transition: var(--ease);
-            padding: 5px 0;
-            border-bottom: 2px solid transparent;
-        }
-        .header-nav a:hover,
-        .header-nav a.active { color: var(--gold); border-bottom-color: var(--gold); }
-
-        .header-right { display: flex; align-items: center; gap: 16px; }
-
-        .header-tel {
-            display: flex; align-items: center; gap: 6px;
-            color: var(--navy); text-decoration: none; font-size: 13px; font-weight: 700;
-            transition: var(--ease); white-space: nowrap;
-        }
-        .header-tel:hover { color: var(--gold); }
-
-        /* ── BUTTONS ── */
-        .btn-gold {
-            background: var(--gold); color: #fff !important;
-            padding: 12px 24px; border: 2px solid var(--gold);
-            text-decoration: none; font-size: 12px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
-            transition: var(--ease); display: inline-block;
-            font-family: 'Lato', sans-serif; white-space: nowrap;
-        }
-        .btn-gold:hover { background: var(--navy); border-color: var(--navy); color: #fff !important; }
-
-        .btn-outline {
-            background: transparent; color: #fff !important;
-            padding: 14px 30px; border: 2px solid #fff;
-            text-decoration: none; font-size: 13px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            transition: var(--ease); display: inline-block;
-            cursor: pointer; font-family: 'Lato', sans-serif;
-        }
-        .btn-outline:hover { background: #fff; color: var(--navy) !important; }
-
-        /* ══════════════════════════════════════
-           HAMBURGER
-        ══════════════════════════════════════ */
-        .hamburger {
-            display: none; flex-direction: column; justify-content: space-between;
-            width: 28px; height: 20px; background: none; border: none;
-            cursor: pointer; padding: 0; z-index: 1200; flex-shrink: 0;
-        }
-        .hamburger span {
-            display: block; width: 100%; height: 2px; background: var(--navy);
-            border-radius: 2px; transition: var(--ease);
-        }
-        .hamburger.is-open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
-        .hamburger.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-        .hamburger.is-open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
-
-        /* ══════════════════════════════════════
-           MOBILE MENU — fully isolated CSS
-        ══════════════════════════════════════ */
-        .mobile-menu {
-            display: none; position: fixed; inset: 0;
-            background: var(--navy); z-index: 1100;
-            flex-direction: column; justify-content: center; align-items: center;
-        }
-        .mobile-menu.is-open { display: flex; }
-
-        .mob-list { list-style: none; text-align: center; width: 100%; padding: 0; margin: 0; }
-        .mob-list li { border-bottom: 1px solid rgba(255,255,255,0.1); }
-        /* ✅ CRITICAL FIX: explicit white, no inheritance from .header-nav a */
-        .mob-list li a {
-            display: block !important;
-            padding: 18px 40px !important;
-            color: #ffffff !important;
-            text-decoration: none !important;
-            font-family: 'Playfair Display', serif !important;
-            font-size: clamp(1.4rem, 6vw, 1.9rem) !important;
-            font-weight: 700 !important;
-            letter-spacing: 2px !important;
-            text-transform: uppercase !important;
-            border-bottom: none !important;
-            transition: color 0.25s ease !important;
-        }
-        .mob-list li a:hover { color: var(--gold) !important; }
-
-        .mob-cta { margin-top: 35px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-        .mob-tel { color: var(--gold) !important; font-size: 1.1rem; font-weight: 700; text-decoration: none; letter-spacing: 1px; }
-
-        /* ══════════════════════════════════════
-           MULTI-PAGE
-        ══════════════════════════════════════ */
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-
-        .subpage-hero { background: var(--navy); color: #fff; padding: 90px 5% 70px; text-align: center; }
-        .subpage-hero h1 { color: #fff; font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 15px; }
-        .subpage-hero p  { color: var(--gold); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* ══════════════════════════════════════
-           HERO
-        ══════════════════════════════════════ */
-        .hero {
-            position: relative;
-            background: linear-gradient(rgba(13,27,42,0.82),rgba(13,27,42,0.82)),
-                url('https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
-            min-height: 90vh; display: flex; align-items: center; padding: 80px 5%; color: #fff;
-        }
-        .hero-content { max-width: 860px; }
-        .hero h1 { color: #fff; font-size: clamp(2.2rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 25px; }
-        .hero p  { font-size: 1.2rem; margin-bottom: 40px; font-weight: 300; opacity: .9; max-width: 680px; }
-        .hero-btns { display: flex; gap: 18px; flex-wrap: wrap; }
-
-        /* ══════════════════════════════════════
-           TRUST BAR
-        ══════════════════════════════════════ */
-        .trust-bar {
-            background: var(--navy); color: #fff; padding: 60px 5%;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
-            gap: 40px; text-align: center;
-            /* desktop overlap */
-            margin-top: -80px; position: relative; z-index: 10;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-        .trust-item { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .trust-item svg { color: var(--gold); }
-        .trust-item h3 { color: #fff; font-size: 1.3rem; letter-spacing: 1px; }
-        .trust-item p  { font-size: .95rem; opacity: .8; max-width: 260px; }
-
-        /* ══════════════════════════════════════
-           ABOUT
-        ══════════════════════════════════════ */
-        .about-home { padding: 100px 5%; text-align: center; background: var(--white); }
-        .about-home h2 { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 20px; }
-        .about-home p  { max-width: 800px; margin: 0 auto 40px; color: var(--text-muted); font-size: 1.1rem; }
-        .gold-divider  { width: 80px; height: 3px; background: var(--gold); margin: 0 auto 30px; }
-
-        /* ══════════════════════════════════════
-           STATS
-        ══════════════════════════════════════ */
-        .stats {
-            background: var(--light-bg); padding: 80px 5%;
-            display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-            gap: 40px; text-align: center;
-        }
-        .stat-item { display: flex; flex-direction: column; gap: 8px; }
-        .stat-number { font-family: 'Playfair Display', serif; font-size: clamp(2.4rem,5vw,3.8rem); color: var(--navy); font-weight: 700; line-height: 1; }
-        .stat-number em { color: var(--gold); font-style: normal; }
-        .stat-label { font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
-
-        /* ══════════════════════════════════════
-           TESTIMONIOS
-        ══════════════════════════════════════ */
-        .testimonials { padding: 100px 5%; background: var(--white); text-align: center; }
-        .testimonials h2 { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 15px; }
-        .testimonials > p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
-        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 30px; margin-top: 60px; text-align: left; }
-        .testimonial-card { background: var(--light-bg); padding: 38px 32px; border-left: 4px solid var(--gold); transition: var(--ease); will-change: transform; }
-        .testimonial-card:hover { transform: translateY(-6px); box-shadow: 0 15px 40px rgba(0,0,0,.08); }
-        .t-quote   { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--gold); line-height: 1; margin-bottom: 10px; opacity: .5; }
-        .t-stars   { color: var(--gold); font-size: 1rem; margin-bottom: 14px; }
-        .testimonial-card p { font-size: .98rem; color: var(--text-muted); font-style: italic; margin-bottom: 22px; line-height: 1.75; }
-        .t-author strong { display: block; font-style: normal; color: var(--navy); font-size: .88rem; font-family: 'Lato', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-        .t-author span   { font-size: .84rem; color: var(--gold); font-style: normal; }
-
-        /* ══════════════════════════════════════
-           SERVICIOS
-        ══════════════════════════════════════ */
-        .services { padding: 80px 5% 120px; background: var(--light-bg); }
-        .section-header { text-align: center; margin-bottom: 60px; }
-        .section-header h2 { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 15px; }
-        .section-header p  { color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.05rem; }
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 28px; }
-        .service-card {
-            background: var(--white); padding: 45px 35px;
-            border-top: 4px solid var(--gold); box-shadow: 0 5px 20px rgba(0,0,0,.04);
-            transition: var(--ease); display: flex; flex-direction: column; will-change: transform;
-        }
-        .service-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,.10); }
-        .service-card svg { color: var(--navy); margin-bottom: 22px; }
-        .service-card h3  { font-size: 1.3rem; margin-bottom: 14px; }
-        .service-card p   { color: var(--text-muted); font-size: .94rem; margin-bottom: 22px; flex-grow: 1; }
-        .service-link { color: var(--gold); text-decoration: none; font-weight: 700; font-size: .84rem; text-transform: uppercase; letter-spacing: 1px; transition: var(--ease); }
-        .service-link:hover { color: var(--navy); }
-
-        /* ══════════════════════════════════════
-           FAQ
-        ══════════════════════════════════════ */
-        .faq { padding: 100px 5%; background: var(--white); }
-        .faq-grid { max-width: 860px; margin: 60px auto 0; display: flex; flex-direction: column; gap: 10px; }
-        .faq-item { border: 1px solid #e5e5e5; overflow: hidden; transition: border-color .3s; }
-        .faq-item.open { border-color: var(--gold); }
-        .faq-question {
-            width: 100%; background: none; border: none; padding: 22px 28px;
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; text-align: left; font-family: 'Lato', sans-serif;
-            font-size: 1rem; font-weight: 700; color: var(--navy); transition: background .3s; gap: 16px;
-        }
-        .faq-question:hover { background: var(--light-bg); }
-        .faq-icon {
-            flex-shrink: 0; width: 24px; height: 24px; background: var(--gold); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 1.1rem; line-height: 1; transition: var(--ease);
-        }
-        .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--navy); }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s ease; padding: 0 28px; }
-        .faq-item.open .faq-answer { max-height: 400px; padding: 0 28px 22px; }
-        .faq-answer p { color: var(--text-muted); font-size: .96rem; line-height: 1.75; }
-
-        /* ══════════════════════════════════════
-           SEDES + MAPA
-        ══════════════════════════════════════ */
-        .locations { display: flex; flex-wrap: wrap; }
-        .locations-text { flex: 1; min-width: 320px; padding: 80px 5%; background: var(--white); }
-        .locations-text h2  { font-size: clamp(1.6rem,3vw,2.2rem); margin-bottom: 15px; }
-        .locations-text > p { color: var(--text-muted); margin-bottom: 40px; font-size: 1rem; line-height: 1.7; }
-        .locations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-        .location-item h4 {
-            color: var(--navy); font-size: .93rem; font-family: 'Lato', sans-serif;
-            text-transform: uppercase; letter-spacing: 1px;
-            border-bottom: 1px solid var(--gold); padding-bottom: 5px; display: inline-block; margin-bottom: 7px;
-        }
-        .location-item p { font-size: .91rem; color: var(--text-muted); }
-        .location-item.featured h4 { color: var(--gold); border-bottom-color: var(--navy); }
-        .map-container { flex: 1; min-width: 320px; min-height: 580px; background: #e5e5e5; }
-        .map-container iframe { width: 100%; height: 100%; min-height: 580px; border: 0; display: block; }
-
-        /* ══════════════════════════════════════
-           EQUIPO
-        ══════════════════════════════════════ */
-        .team { padding: 100px 5%; background: var(--light-bg); text-align: center; }
-        .team h2 { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 15px; }
-        .team > p { color: var(--text-muted); max-width: 680px; margin: 0 auto 60px; font-size: 1.05rem; }
-        .team-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 35px; }
-        .team-card { background: var(--white); padding: 40px 28px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,.05); }
-        .team-avatar { width: 88px; height: 88px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--gold); font-weight: 700; }
-        .team-card h3  { font-size: 1.12rem; margin-bottom: 6px; }
-        .team-role     { font-size: .83rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-        .team-card p   { font-size: .9rem; color: var(--text-muted); margin-top: 12px; line-height: 1.6; }
-
-        /* ══════════════════════════════════════
-           CONTACTO
-        ══════════════════════════════════════ */
-        .contact { padding: 80px 5% 120px; background: var(--light-bg); display: flex; justify-content: center; }
-        .contact-wrapper { background: var(--white); padding: 60px; max-width: 900px; width: 100%; box-shadow: 0 15px 50px rgba(0,0,0,.06); border-top: 5px solid var(--navy); }
-        .contact-wrapper h2  { font-size: clamp(1.8rem,4vw,2.8rem); text-align: center; margin-bottom: 15px; }
-        .contact-wrapper > p { text-align: center; color: var(--text-muted); margin-bottom: 35px; }
-        .contact-channels { display: flex; gap: 14px; justify-content: center; margin-bottom: 38px; flex-wrap: wrap; }
-        .contact-channel {
-            display: flex; align-items: center; gap: 8px;
-            background: var(--light-bg); padding: 11px 18px;
-            font-size: .9rem; font-weight: 700; color: var(--navy);
-            text-decoration: none; border: 1px solid #e5e5e5; transition: var(--ease);
-        }
-        .contact-channel:hover          { border-color: var(--gold); color: var(--gold); }
-        .contact-channel.whatsapp:hover { border-color: var(--whatsapp); color: var(--whatsapp); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-        .form-group.full { grid-column: 1 / -1; }
-        .form-group label { display: block; margin-bottom: 7px; font-weight: 700; color: var(--navy); font-size: .87rem; text-transform: uppercase; letter-spacing: .5px; }
-        .form-group input,
-        .form-group select,
-        .form-group textarea { width: 100%; padding: 14px; border: 1px solid #ddd; font-family: 'Lato', sans-serif; background: var(--light-bg); font-size: 1rem; transition: var(--ease); border-radius: 0; -webkit-appearance: none; }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus { outline: none; border-color: var(--gold); background: var(--white); }
-        .btn-submit { width: 100%; padding: 17px; font-size: 1rem; }
-        .form-note { text-align: center; margin-top: 14px; font-size: .82rem; color: var(--text-muted); }
-        .form-note a { color: var(--gold); text-decoration: none; }
-        .form-note a:hover { text-decoration: underline; }
-
-        /* ══════════════════════════════════════
-           FOOTER
-        ══════════════════════════════════════ */
-        footer { background: #08111a; color: #888; padding: 70px 5% 30px; }
-        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 50px; margin-bottom: 50px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; margin-bottom: 15px; letter-spacing: 2px; }
-        .footer-brand p { font-size: .9rem; line-height: 1.7; max-width: 270px; margin-bottom: 24px; }
-        .footer-socials { display: flex; gap: 10px; }
-        .footer-social-link { width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; color: #888; text-decoration: none; transition: var(--ease); font-size: .83rem; font-weight: 700; }
-        .footer-social-link:hover { border-color: var(--gold); color: var(--gold); }
-        .footer-col h4 { font-family: 'Lato', sans-serif; font-size: .79rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-col ul li a { color: #888; text-decoration: none; font-size: .9rem; transition: var(--ease); }
-        .footer-col ul li a:hover { color: var(--gold); }
-        .footer-contact-item { display: flex; gap: 10px; margin-bottom: 14px; font-size: .87rem; line-height: 1.5; }
-        .footer-contact-item svg { flex-shrink: 0; color: var(--gold); margin-top: 2px; }
-        .footer-contact-item a { color: #888; text-decoration: none; transition: var(--ease); }
-        .footer-contact-item a:hover { color: var(--gold); }
-        .footer-hours { font-size: .84rem; color: #666; line-height: 1.6; }
-        .footer-bottom { border-top: 1px solid rgba(255,255,255,.07); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; font-size: .77rem; }
-        .footer-legal { display: flex; gap: 20px; flex-wrap: wrap; }
-        .footer-legal a { color: #666; text-decoration: none; transition: var(--ease); }
-        .footer-legal a:hover { color: var(--gold); }
-
-        /* ══════════════════════════════════════
-           WHATSAPP FLOAT
-        ══════════════════════════════════════ */
-        .wa-float { position: fixed; bottom: 28px; right: 28px; width: 58px; height: 58px; background: var(--whatsapp); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(37,211,102,.4); z-index: 999; text-decoration: none; transition: var(--ease); animation: wa-pulse 2.5s infinite; }
-        .wa-float:hover { transform: scale(1.1); }
-        .wa-float svg { color: #fff; }
-        @keyframes wa-pulse { 0%,100%{box-shadow:0 6px 20px rgba(37,211,102,.4)}50%{box-shadow:0 6px 32px rgba(37,211,102,.7)} }
-
-        /* ══════════════════════════════════════
-           MODALES
-        ══════════════════════════════════════ */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(13,27,42,.75); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-overlay.is-open { display: flex; }
-        .modal-box { background: var(--white); max-width: 700px; width: 100%; max-height: 82vh; overflow-y: auto; padding: 50px; position: relative; border-top: 5px solid var(--navy); }
-        .modal-box h2 { font-size: 1.9rem; margin-bottom: 20px; }
-        .modal-box p, .modal-box li { color: var(--text-muted); font-size: .94rem; line-height: 1.8; margin-bottom: 12px; }
-        .modal-box ul { padding-left: 20px; margin-bottom: 14px; }
-        .modal-close { position: absolute; top: 18px; right: 18px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--navy); transition: var(--ease); line-height: 1; }
-        .modal-close:hover { color: var(--gold); }
-
-        /* ══════════════════════════════════════
-           ANIMACIONES ON-SCROLL
-        ══════════════════════════════════════ */
-        .reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease; }
-        .reveal.visible { opacity: 1; transform: none; }
-        .reveal-d1 { transition-delay: .1s; }
-        .reveal-d2 { transition-delay: .2s; }
-        .reveal-d3 { transition-delay: .3s; }
-
-        /* ══════════════════════════════════════
-           RESPONSIVE
-        ══════════════════════════════════════ */
-        @media (max-width: 1100px) {
-            .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
-            .header-nav ul { gap: 20px; }
-        }
-
-        /* 1024px: hamburguesa ON */
-        @media (max-width: 1024px) {
-            :root { --hh: 70px; }
-            .header-nav { display: none; }
-            .header-tel { display: none; }
-            .header-cta { display: none; }
-            .hamburger  { display: flex; }
-            .logo       { font-size: 18px; }
-            .trust-bar  { margin-top: 0; }          /* ✅ sin overlap en móvil */
-            .contact-wrapper { padding: 35px 22px; }
-            .modal-box  { padding: 35px 22px; }
-        }
-
-        @media (max-width: 768px) {
-            .logo { font-size: 16px; letter-spacing: .5px; }
-            .locations-grid { grid-template-columns: 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
-            .form-group.full { grid-column: 1; }
-        }
-
-        @media (max-width: 640px) {
-            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-            .footer-bottom { flex-direction: column; text-align: center; }
-            .testimonials-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 480px) {
-            .logo { font-size: 14px; letter-spacing: 0; }
-            .hero-btns { flex-direction: column; }
-            .hero-btns .btn-gold,
-            .hero-btns .btn-outline { text-align: center; }
-            .wa-float { bottom: 18px; right: 18px; width: 52px; height: 52px; }
-        }
-    </style>
+    <!-- ✅ Hoja de estilos externa -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-<!-- ══ MENÚ MÓVIL — div, no nav, para no heredar estilos de .header-nav ══ -->
+<!-- MENÚ MÓVIL (div, no nav, para aislar estilos del desktop) -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú de navegación">
     <ul class="mob-list">
         <li><a href="#inicio"    onclick="navTo('inicio')">Inicio</a></li>
@@ -467,16 +37,15 @@
     </ul>
     <div class="mob-cta">
         <a href="tel:+525512345678" class="mob-tel">📞 55 1234-5678</a>
-        <a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluación." class="btn-gold" target="_blank" rel="noopener">Agendar por WhatsApp</a>
+        <a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluaci%C3%B3n." class="btn-gold" target="_blank" rel="noopener">Agendar por WhatsApp</a>
     </div>
 </div>
 
-<!-- ══ HEADER ══ -->
+<!-- HEADER -->
 <header>
-    <a href="#inicio" onclick="navTo('inicio')" class="logo" aria-label="Inicio">
+    <a href="#inicio" onclick="navTo('inicio')" class="logo" aria-label="Ortiz & López Consultoría — Inicio">
         ORTIZ &amp; LÓPEZ <em>Consultoría</em>
     </a>
-
     <nav class="header-nav" aria-label="Navegación principal">
         <ul>
             <li><a href="#inicio"    onclick="navTo('inicio')"    class="nav-link" data-page="inicio"    aria-current="page">Inicio</a></li>
@@ -486,10 +55,9 @@
             <li><a href="#contacto"  onclick="navTo('contacto')"  class="nav-link" data-page="contacto">Contacto</a></li>
         </ul>
     </nav>
-
     <div class="header-right">
-        <a href="tel:+525512345678" class="header-tel" aria-label="Llamar">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <a href="tel:+525512345678" class="header-tel" aria-label="Llamar al 55 1234-5678">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             55 1234-5678
         </a>
         <a href="#contacto" onclick="navTo('contacto')" class="btn-gold header-cta">Agendar Cita</a>
@@ -499,12 +67,12 @@
     </div>
 </header>
 
-<!-- ══ MAIN ══ -->
+<!-- MAIN -->
 <main id="main-content">
 
-    <!-- ===== INICIO ===== -->
+    <!-- ═══ INICIO ═══ -->
     <div id="inicio" class="page active">
-        <section class="hero">
+        <section class="hero" aria-label="Bienvenida">
             <div class="hero-content">
                 <h1>Solidez en Seguridad Social y Pensiones.</h1>
                 <p>Garantizamos su tranquilidad financiera y protegemos su patrimonio. Firma de consultoría de excelencia dedicada a resolver su futuro ante el IMSS, Afore e Infonavit.</p>
@@ -515,32 +83,32 @@
             </div>
         </section>
 
-        <div class="trust-bar">
+        <div class="trust-bar" aria-label="Modalidades de atención">
             <div class="trust-item">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 <h3>Servicio Presencial</h3>
                 <p>Atención física y personalizada en nuestras 8 oficinas ejecutivas en CDMX y Querétaro.</p>
             </div>
             <div class="trust-item">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
                 <h3>Consultoría 100% en Línea</h3>
                 <p>Asesoría experta por videollamada para clientes en toda la República Mexicana.</p>
             </div>
             <div class="trust-item">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 <h3>Expertos Legales</h3>
                 <p>Su patrimonio en manos de abogados y actuarios con rigurosa ética y experiencia comprobada.</p>
             </div>
         </div>
 
         <section class="about-home">
-            <div class="gold-divider"></div>
+            <div class="gold-divider" aria-hidden="true"></div>
             <h2 class="reveal">Compromiso y Ética Profesional</h2>
             <p class="reveal reveal-d1">En Ortiz &amp; López Consultoría, entendemos que su pensión y derechos laborales son el fruto de toda una vida de esfuerzo. Nuestro equipo multidisciplinario evalúa su caso particular para ofrecerle la estrategia jurídica o administrativa que le otorgue el mayor beneficio posible.</p>
             <a href="#servicios" onclick="navTo('servicios')" class="btn-gold reveal reveal-d2">Conocer Áreas de Práctica</a>
         </section>
 
-        <section class="stats">
+        <section class="stats" aria-label="Estadísticas">
             <div class="stat-item reveal">
                 <div class="stat-number" data-target="2400">0<em>+</em></div>
                 <div class="stat-label">Casos Resueltos</div>
@@ -560,25 +128,25 @@
         </section>
 
         <section class="testimonials">
-            <div class="gold-divider"></div>
+            <div class="gold-divider" aria-hidden="true"></div>
             <h2 class="reveal">Lo Que Dicen Nuestros Clientes</h2>
             <p class="reveal reveal-d1">Casos reales, resultados reales. La confianza de cada cliente es nuestro mayor activo.</p>
             <div class="testimonials-grid">
                 <article class="testimonial-card reveal">
-                    <div class="t-stars">★★★★★</div>
-                    <div class="t-quote">"</div>
+                    <div class="t-stars" aria-label="5 estrellas">★★★★★</div>
+                    <div class="t-quote" aria-hidden="true">"</div>
                     <p>Gracias a Ortiz &amp; López logré mi cambio a Ley 73 y mi pensión aumentó casi el doble de lo que el IMSS me tenía calculado. No lo hubiera logrado solo.</p>
                     <div class="t-author"><strong>Roberto M.</strong><span>Cambio a Ley 73 — Guadalajara, Jal.</span></div>
                 </article>
                 <article class="testimonial-card reveal reveal-d1">
-                    <div class="t-stars">★★★★★</div>
-                    <div class="t-quote">"</div>
+                    <div class="t-stars" aria-label="5 estrellas">★★★★★</div>
+                    <div class="t-quote" aria-hidden="true">"</div>
                     <p>Tenía semanas perdidas de hace 20 años que el sistema no reconocía. En tres meses las recuperaron y ahora cuento con las cotizaciones suficientes para retirarme.</p>
                     <div class="t-author"><strong>Carmen L.</strong><span>Recuperación de Semanas — CDMX</span></div>
                 </article>
                 <article class="testimonial-card reveal reveal-d2">
-                    <div class="t-stars">★★★★★</div>
-                    <div class="t-quote">"</div>
+                    <div class="t-stars" aria-label="5 estrellas">★★★★★</div>
+                    <div class="t-quote" aria-hidden="true">"</div>
                     <p>Me atendieron por videollamada desde Monterrey. El equipo fue muy claro, profesional y me explicó todo el proceso de Modalidad 40 paso a paso. Excelente servicio.</p>
                     <div class="t-author"><strong>Ing. Felipe R.</strong><span>Modalidad 40 — Monterrey, N.L.</span></div>
                 </article>
@@ -586,7 +154,8 @@
         </section>
     </div><!-- /inicio -->
 
-    <!-- ===== SERVICIOS ===== -->
+
+    <!-- ═══ SERVICIOS ═══ -->
     <div id="servicios" class="page">
         <div class="subpage-hero">
             <h1>Nuestras Especialidades</h1>
@@ -599,61 +168,61 @@
             </div>
             <div class="services-grid">
                 <div class="service-card reveal">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <h3>Servicio Médico IMSS</h3>
                     <p>Gestión para el alta, reincorporación al régimen obligatorio y conservación de derechos para garantizar el acceso a la salud de su familia.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal reveal-d1">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
                     <h3>Ayuda por Desempleo</h3>
                     <p>Trámite ágil y legal para disponer de manera parcial de los recursos de su Afore ante una situación de desempleo temporal.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal reveal-d2">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     <h3>Aportaciones al RCV</h3>
                     <p>Consultoría para la administración, proyección y recuperación de los fondos acumulados en su subcuenta de Retiro, Cesantía y Vejez.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                     <h3>Gestión de Afore</h3>
                     <p>Auditoría de cuenta, orientación sobre traspasos seguros, unificación de saldos y planeación de retiros totales.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal reveal-d1">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     <h3>Trámites de Infonavit</h3>
                     <p>Asesoría profunda para liberación de gravamen, recuperación de saldos de subcuenta de vivienda y estrategias crediticias.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal reveal-d2">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                     <h3>Unificación de NSS</h3>
                     <p>Resolución de duplicidad de cuentas y homonimias. Consolidamos su historial laboral en un solo Número de Seguro Social.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
                     <h3>Recuperación de Semanas</h3>
                     <p>Rastreo y procesos de aclaración ante el instituto para recuperar semanas cotizadas antiguas que el sistema no reconoce.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal reveal-d1">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                     <h3>Cambio a Ley 73</h3>
                     <p>Estudio actuarial para asegurar que su pensión se calcule bajo el régimen de 1973, maximizando su beneficio vitalicio.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal reveal-d2">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                     <h3>Aumento de Semanas</h3>
                     <p>Estrategias legales como Modalidad 40 para incrementar su densidad de cotización y mejorar sustancialmente su pensión.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
                 </div>
                 <div class="service-card reveal">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
                     <h3>Recuperación del ISR</h3>
                     <p>Análisis fiscal y trámite de devolución de saldos a favor por retenciones indebidas de impuestos en sus retiros.</p>
                     <a href="#contacto" onclick="navTo('contacto')" class="service-link">Solicitar Análisis →</a>
@@ -661,45 +230,46 @@
             </div>
         </section>
 
-        <section class="faq">
+        <section class="faq" aria-label="Preguntas frecuentes">
             <div class="section-header">
-                <div class="gold-divider"></div>
+                <div class="gold-divider" aria-hidden="true"></div>
                 <h2>Preguntas Frecuentes</h2>
                 <p>Las dudas más comunes antes de la primera consulta.</p>
             </div>
             <div class="faq-grid" id="faqGrid">
                 <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">¿Cuántas semanas necesito para pensionarme bajo Ley 73?<span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>Bajo la Ley 73, el requisito mínimo es de 500 semanas cotizadas ante el IMSS. A más semanas, mayor será el porcentaje de su salario que recibirá como pensión mensual. Le recomendamos solicitar un análisis de su cuenta.</p></div>
+                    <button class="faq-question" aria-expanded="false">¿Cuántas semanas necesito para pensionarme bajo Ley 73?<span class="faq-icon" aria-hidden="true">+</span></button>
+                    <div class="faq-answer" role="region"><p>Bajo la Ley 73, el requisito mínimo es de 500 semanas cotizadas ante el IMSS. A más semanas, mayor será el porcentaje de su salario que recibirá como pensión mensual.</p></div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">¿Cuánto tarda el trámite de cambio a Ley 73?<span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>En promedio entre 3 y 6 meses desde que se inicia el expediente. Casos con semanas disputadas o duplicidad de NSS pueden requerir más tiempo, pero nuestro equipo trabaja activamente para agilizarlos.</p></div>
+                    <button class="faq-question" aria-expanded="false">¿Cuánto tarda el trámite de cambio a Ley 73?<span class="faq-icon" aria-hidden="true">+</span></button>
+                    <div class="faq-answer" role="region"><p>En promedio entre 3 y 6 meses. Casos con semanas disputadas o duplicidad de NSS pueden requerir más tiempo, pero nuestro equipo trabaja activamente para agilizarlos.</p></div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">¿Cobran honorarios por la consulta inicial?<span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>La evaluación inicial es sin costo. Analizamos su historial de cotización, identificamos oportunidades y explicamos qué estrategia aplica. Solo cobramos honorarios cuando decide continuar y le presentamos una propuesta formal.</p></div>
+                    <button class="faq-question" aria-expanded="false">¿Cobran honorarios por la consulta inicial?<span class="faq-icon" aria-hidden="true">+</span></button>
+                    <div class="faq-answer" role="region"><p>La evaluación inicial es sin costo. Solo cobramos honorarios cuando decide continuar y le presentamos una propuesta formal.</p></div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">¿Qué documentos necesito para empezar?<span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>Basta con su CURP, NSS y una identificación oficial vigente. Si tiene su estado de cuenta Afore o Resolución de Pensión del IMSS, también son útiles. Si no los tiene, le indicamos cómo obtenerlos.</p></div>
+                    <button class="faq-question" aria-expanded="false">¿Qué documentos necesito para empezar?<span class="faq-icon" aria-hidden="true">+</span></button>
+                    <div class="faq-answer" role="region"><p>Basta con su CURP, NSS y una identificación oficial vigente. Si tiene su estado de cuenta Afore también es útil. Si no los tiene, le indicamos cómo obtenerlos.</p></div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question" aria-expanded="false">¿Pueden atenderme si vivo fuera de CDMX?<span class="faq-icon">+</span></button>
-                    <div class="faq-answer"><p>Sí. Contamos con consultoría 100% en línea vía videollamada para toda la República. La mayoría de los trámites ante IMSS, Afore e Infonavit se gestionan de forma remota.</p></div>
+                    <button class="faq-question" aria-expanded="false">¿Pueden atenderme si vivo fuera de CDMX?<span class="faq-icon" aria-hidden="true">+</span></button>
+                    <div class="faq-answer" role="region"><p>Sí. Contamos con consultoría 100% en línea vía videollamada para toda la República. La mayoría de los trámites ante IMSS, Afore e Infonavit se gestionan de forma remota.</p></div>
                 </div>
             </div>
         </section>
     </div><!-- /servicios -->
 
-    <!-- ===== EQUIPO ===== -->
+
+    <!-- ═══ EQUIPO ═══ -->
     <div id="equipo" class="page">
         <div class="subpage-hero">
             <h1>Nuestro Equipo</h1>
             <p>Profesionales con propósito y experiencia comprobada</p>
         </div>
         <section class="team">
-            <div class="gold-divider"></div>
+            <div class="gold-divider" aria-hidden="true"></div>
             <h2 class="reveal">Los Expertos Detrás de su Caso</h2>
             <p class="reveal reveal-d1">Cada miembro está especializado en un área específica de la seguridad social mexicana, garantizando el análisis más preciso para su situación.</p>
             <div class="team-grid">
@@ -731,7 +301,8 @@
         </section>
     </div><!-- /equipo -->
 
-    <!-- ===== SEDES ===== -->
+
+    <!-- ═══ SEDES ═══ -->
     <div id="sedes" class="page">
         <div class="subpage-hero">
             <h1>Presencia Estratégica</h1>
@@ -739,7 +310,7 @@
         </div>
         <section class="locations">
             <div class="locations-text">
-                <div class="gold-divider"></div>
+                <div class="gold-divider" aria-hidden="true"></div>
                 <h2>8 Oficinas en México</h2>
                 <p>Contamos con 7 oficinas en la Ciudad de México y 1 en Querétaro para brindarle atención presencial ejecutiva.</p>
                 <div class="locations-grid">
@@ -753,8 +324,8 @@
                     <div class="location-item featured"><h4>Querétaro</h4><p>Av. Constituyentes 120, Centro Histórico.</p></div>
                 </div>
             </div>
-            <div class="map-container">
-                <iframe title="Mapa Ortiz & López CDMX"
+            <div class="map-container" aria-label="Mapa Ciudad de México">
+                <iframe title="Mapa Ortiz & López en CDMX"
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d120416.71180295834!2d-99.23122177573673!3d19.4184988448785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ce0026db097507%3A0x54061076265ee841!2sCiudad%20de%20M%C3%A9xico%2C%20CDMX!5e0!3m2!1ses-419!2smx!4v1700000000000!5m2!1ses-419!2smx"
                     allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                 </iframe>
@@ -762,7 +333,8 @@
         </section>
     </div><!-- /sedes -->
 
-    <!-- ===== CONTACTO ===== -->
+
+    <!-- ═══ CONTACTO ═══ -->
     <div id="contacto" class="page">
         <div class="subpage-hero">
             <h1>Agende su Cita</h1>
@@ -773,16 +345,16 @@
                 <h2>Formulario de Contacto</h2>
                 <p>Déjenos sus datos y un experto se comunicará con usted en menos de 24 horas.</p>
                 <div class="contact-channels">
-                    <a href="tel:+525512345678" class="contact-channel">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <a href="tel:+525512345678" class="contact-channel" aria-label="Llamar">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                         55 1234-5678
                     </a>
-                    <a href="mailto:contacto@ortizlopez.com.mx" class="contact-channel">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <a href="mailto:contacto@ortizlopez.com.mx" class="contact-channel" aria-label="Email">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         contacto@ortizlopez.com.mx
                     </a>
-                    <a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluación%20sin%20costo." target="_blank" rel="noopener" class="contact-channel whatsapp">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                    <a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluaci%C3%B3n%20sin%20costo." target="_blank" rel="noopener" class="contact-channel whatsapp" aria-label="WhatsApp">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                         WhatsApp
                     </a>
                 </div>
@@ -828,7 +400,7 @@
                     </div>
                 </form>
                 <p class="form-note">
-                    Al enviar, acepta nuestro <a href="#" onclick="openModal('privacidadModal'); return false;">Aviso de Privacidad</a>.
+                    Al enviar, acepta nuestro <a href="#" onclick="openModal('privacidadModal'); return false;" aria-haspopup="dialog">Aviso de Privacidad</a>.
                     Sus datos son confidenciales y nunca serán compartidos con terceros.
                 </p>
             </div>
@@ -837,7 +409,8 @@
 
 </main>
 
-<!-- ══ FOOTER ══ -->
+
+<!-- FOOTER -->
 <footer>
     <div class="footer-grid">
         <div class="footer-brand">
@@ -874,15 +447,15 @@
         <div class="footer-col">
             <h4>Contacto</h4>
             <div class="footer-contact-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 <a href="tel:+525512345678">55 1234-5678</a>
             </div>
             <div class="footer-contact-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 <a href="mailto:contacto@ortizlopez.com.mx">contacto@ortizlopez.com.mx</a>
             </div>
             <div class="footer-contact-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <div>
                     <div class="footer-hours">Lunes a Viernes</div>
                     <div class="footer-hours">9:00 AM — 6:00 PM</div>
@@ -899,14 +472,16 @@
     </div>
 </footer>
 
-<!-- ══ WHATSAPP FLOTANTE ══ -->
-<a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluación%20sin%20costo%20sobre%20mi%20pensión."
-   class="wa-float" target="_blank" rel="noopener" aria-label="WhatsApp">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+
+<!-- BOTÓN FLOTANTE WHATSAPP -->
+<a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluaci%C3%B3n%20sin%20costo%20sobre%20mi%20pensi%C3%B3n."
+   class="wa-float" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
 </a>
 
-<!-- ══ MODAL AVISO DE PRIVACIDAD ══ -->
-<div class="modal-overlay" id="privacidadModal" role="dialog" aria-modal="true" aria-labelledby="privTitle" onclick="if(event.target===this)closeModal('privacidadModal')">
+
+<!-- MODAL: AVISO DE PRIVACIDAD -->
+<div class="modal-overlay" id="privacidadModal" role="dialog" aria-modal="true" aria-labelledby="privTitle" onclick="if(event.target===this) closeModal('privacidadModal')">
     <div class="modal-box">
         <button class="modal-close" onclick="closeModal('privacidadModal')" aria-label="Cerrar">✕</button>
         <h2 id="privTitle">Aviso de Privacidad</h2>
@@ -925,32 +500,34 @@
     </div>
 </div>
 
-<!-- ══ MODAL TÉRMINOS ══ -->
-<div class="modal-overlay" id="terminosModal" role="dialog" aria-modal="true" aria-labelledby="termTitle" onclick="if(event.target===this)closeModal('terminosModal')">
+
+<!-- MODAL: TÉRMINOS DE SERVICIO -->
+<div class="modal-overlay" id="terminosModal" role="dialog" aria-modal="true" aria-labelledby="termTitle" onclick="if(event.target===this) closeModal('terminosModal')">
     <div class="modal-box">
         <button class="modal-close" onclick="closeModal('terminosModal')" aria-label="Cerrar">✕</button>
         <h2 id="termTitle">Términos de Servicio</h2>
         <p><strong>1. Información:</strong> El contenido de este sitio es informativo. No constituye asesoría legal formal. La relación se formaliza mediante contrato.</p>
         <p><strong>2. Confidencialidad:</strong> Toda la información compartida durante la consulta es tratada con estricta confidencialidad.</p>
-        <p><strong>3. Propiedad Intelectual:</strong> Los contenidos, logotipos y diseño son propiedad de Ortiz &amp; López Consultoría S.C.</p>
+        <p><strong>3. Propiedad Intelectual:</strong> Los contenidos, logotipos y diseño son propiedad exclusiva de Ortiz &amp; López Consultoría S.C.</p>
         <p><strong>4. Limitación de Responsabilidad:</strong> La firma no será responsable de decisiones tomadas únicamente con base en el contenido informativo de este sitio.</p>
         <p><strong>5. Jurisdicción:</strong> Controversias se resolverán ante los tribunales de la Ciudad de México.</p>
     </div>
 </div>
 
-<!-- ══ SCRIPTS ══ -->
+
+<!-- SCRIPTS -->
 <script>
-(function() {
+(function () {
     'use strict';
 
-    /* ── NAVEGACIÓN ── */
+    /* ── NAVEGACIÓN MULTIPÁGINA ── */
     function navTo(pageId) {
-        document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-        var t = document.getElementById(pageId);
-        if (t) t.classList.add('active');
-        document.querySelectorAll('.header-nav .nav-link').forEach(function(a) {
+        document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
+        var target = document.getElementById(pageId);
+        if (target) target.classList.add('active');
+        document.querySelectorAll('.header-nav .nav-link').forEach(function (a) {
             var cur = a.getAttribute('data-page') === pageId;
-            if (cur) { a.classList.add('active'); a.setAttribute('aria-current','page'); }
+            if (cur) { a.classList.add('active'); a.setAttribute('aria-current', 'page'); }
             else     { a.classList.remove('active'); a.removeAttribute('aria-current'); }
         });
         history.pushState({ page: pageId }, '', '#' + pageId);
@@ -959,24 +536,24 @@
     }
     window.navTo = navTo;
 
-    window.addEventListener('popstate', function(e) {
+    window.addEventListener('popstate', function (e) {
         var pg = (e.state && e.state.page) || 'inicio';
-        document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
         var t = document.getElementById(pg);
         if (t) t.classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(triggerReveal, 80);
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var hash = location.hash.replace('#','');
-        var valid = ['inicio','servicios','equipo','sedes','contacto'];
+    document.addEventListener('DOMContentLoaded', function () {
+        var hash  = location.hash.replace('#', '');
+        var valid = ['inicio', 'servicios', 'equipo', 'sedes', 'contacto'];
         if (hash && valid.indexOf(hash) !== -1) {
-            document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+            document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
             var t = document.getElementById(hash);
             if (t) t.classList.add('active');
-            document.querySelectorAll('.header-nav .nav-link').forEach(function(a) {
-                if (a.getAttribute('data-page') === hash) { a.classList.add('active'); a.setAttribute('aria-current','page'); }
+            document.querySelectorAll('.header-nav .nav-link').forEach(function (a) {
+                if (a.getAttribute('data-page') === hash) { a.classList.add('active'); a.setAttribute('aria-current', 'page'); }
                 else { a.classList.remove('active'); a.removeAttribute('aria-current'); }
             });
         }
@@ -985,31 +562,30 @@
     });
 
     /* ── HAMBURGUESA ── */
-    var btn  = document.getElementById('hamburgerBtn');
-    var menu = document.getElementById('mobileMenu');
+    var hamburgerBtn = document.getElementById('hamburgerBtn');
+    var mobileMenu   = document.getElementById('mobileMenu');
 
-    btn.addEventListener('click', function() {
-        var open = menu.classList.toggle('is-open');
-        btn.classList.toggle('is-open', open);
-        btn.setAttribute('aria-expanded', String(open));
-        document.body.style.overflow = open ? 'hidden' : '';
+    hamburgerBtn.addEventListener('click', function () {
+        var isOpen = mobileMenu.classList.toggle('is-open');
+        hamburgerBtn.classList.toggle('is-open', isOpen);
+        hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
+        document.body.style.overflow = isOpen ? 'hidden' : '';
     });
 
-    function closeMob() {
-        menu.classList.remove('is-open');
-        btn.classList.remove('is-open');
-        btn.setAttribute('aria-expanded','false');
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('is-open');
+        hamburgerBtn.classList.remove('is-open');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
     }
-    window.closeMobileMenu = closeMob;
+    window.closeMobileMenu = closeMobileMenu;
 
-    // Cerrar al tocar cualquier link del menú móvil
-    menu.querySelectorAll('a').forEach(function(a) {
-        a.addEventListener('click', closeMob);
+    mobileMenu.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', closeMobileMenu);
     });
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { closeMob(); closeAllModals(); }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeMobileMenu(); closeAllModals(); }
     });
 
     /* ── MODALES ── */
@@ -1022,109 +598,106 @@
         if (m) { m.classList.remove('is-open'); document.body.style.overflow = ''; }
     }
     function closeAllModals() {
-        document.querySelectorAll('.modal-overlay.is-open').forEach(function(m) { m.classList.remove('is-open'); });
+        document.querySelectorAll('.modal-overlay.is-open').forEach(function (m) { m.classList.remove('is-open'); });
         document.body.style.overflow = '';
     }
     window.openModal  = openModal;
     window.closeModal = closeModal;
 
-    /* ── FAQ ── */
-    var faq = document.getElementById('faqGrid');
-    if (faq) {
-        faq.addEventListener('click', function(e) {
-            var q = e.target.closest('.faq-question');
-            if (!q) return;
-            var item = q.parentElement;
-            var was  = item.classList.contains('open');
-            document.querySelectorAll('.faq-item').forEach(function(i) {
+    /* ── FAQ ACCORDION ── */
+    var faqGrid = document.getElementById('faqGrid');
+    if (faqGrid) {
+        faqGrid.addEventListener('click', function (e) {
+            var btn = e.target.closest('.faq-question');
+            if (!btn) return;
+            var item   = btn.parentElement;
+            var wasOpen = item.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(function (i) {
                 i.classList.remove('open');
-                i.querySelector('.faq-question').setAttribute('aria-expanded','false');
+                i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
             });
-            if (!was) { item.classList.add('open'); q.setAttribute('aria-expanded','true'); }
+            if (!wasOpen) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
         });
     }
 
-    /* ── REVEAL ON SCROLL ── */
+    /* ── ANIMACIONES ON-SCROLL ── */
     function triggerReveal() {
         var els = document.querySelectorAll('.page.active .reveal:not(.visible)');
         if (!window.IntersectionObserver) {
-            els.forEach(function(el) { el.classList.add('visible'); });
+            els.forEach(function (el) { el.classList.add('visible'); });
             return;
         }
-        var obs = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    obs.unobserve(entry.target);
-                }
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) { entry.target.classList.add('visible'); obs.unobserve(entry.target); }
             });
         }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
-        els.forEach(function(el) { obs.observe(el); });
+        els.forEach(function (el) { obs.observe(el); });
     }
     window.triggerReveal = triggerReveal;
 
-    /* ── CONTADORES ── */
+    /* ── CONTADORES ANIMADOS ── */
     function animateCounters() {
-        document.querySelectorAll('.stat-number[data-target]').forEach(function(el) {
+        document.querySelectorAll('.stat-number[data-target]').forEach(function (el) {
             if (el.dataset.animated) return;
             el.dataset.animated = '1';
-            var target = parseInt(el.dataset.target, 10);
-            var suffix = el.querySelector('em') ? el.querySelector('em').outerHTML : '';
-            var cur = 0, step = Math.max(1, Math.ceil(target / 55));
-            var t = setInterval(function() {
-                cur = Math.min(cur + step, target);
-                el.innerHTML = cur.toLocaleString('es-MX') + suffix;
-                if (cur >= target) clearInterval(t);
+            var target  = parseInt(el.dataset.target, 10);
+            var suffix  = el.querySelector('em') ? el.querySelector('em').outerHTML : '';
+            var current = 0;
+            var step    = Math.max(1, Math.ceil(target / 55));
+            var timer   = setInterval(function () {
+                current = Math.min(current + step, target);
+                el.innerHTML = current.toLocaleString('es-MX') + suffix;
+                if (current >= target) clearInterval(timer);
             }, 22);
         });
     }
     if (window.IntersectionObserver) {
-        var so = new IntersectionObserver(function(e) {
-            e.forEach(function(en) { if (en.isIntersecting) animateCounters(); });
+        var statsObs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) { if (e.isIntersecting) animateCounters(); });
         }, { threshold: 0.2 });
-        document.querySelectorAll('.stats').forEach(function(s) { so.observe(s); });
+        document.querySelectorAll('.stats').forEach(function (s) { statsObs.observe(s); });
     }
 
-    /* ── FORMULARIO ── */
+    /* ── FORMULARIO DE CONTACTO ── */
     var form = document.getElementById('contactForm');
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
             var nombre   = document.getElementById('nombre').value.trim();
             var telefono = document.getElementById('telefono').value.trim();
             var email    = document.getElementById('email').value.trim();
             var servicio = document.getElementById('servicio').value;
             if (!nombre || !telefono || !email || !servicio) {
-                alert('Por favor, complete todos los campos obligatorios (*).');
-                return;
+                alert('Por favor, complete todos los campos obligatorios (*).'); return;
             }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                alert('Por favor, ingrese un correo electrónico válido.');
-                return;
+                alert('Por favor, ingrese un correo electrónico válido.'); return;
             }
-            var modalidad  = document.getElementById('modalidad').value;
-            var coments    = document.getElementById('comentarios').value.trim();
-            var sLabel     = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
+            var modalidad   = document.getElementById('modalidad').value;
+            var comentarios = document.getElementById('comentarios').value.trim();
+            var sLabel      = document.getElementById('servicio').options[document.getElementById('servicio').selectedIndex].text;
             var msg = encodeURIComponent(
                 'Hola, mi nombre es ' + nombre + '.\n' +
                 '\uD83D\uDCCB Servicio: ' + sLabel + '\n' +
                 '\uD83D\uDCF1 Tel\u00E9fono: ' + telefono + '\n' +
                 '\uD83D\uDCE7 Email: ' + email + '\n' +
                 '\uD83D\uDDA5 Modalidad: ' + (modalidad === 'linea' ? 'En l\u00EDnea' : 'Presencial') + '\n' +
-                (coments ? '\uD83D\uDCAC ' + coments + '\n' : '') +
+                (comentarios ? '\uD83D\uDCAC ' + comentarios + '\n' : '') +
                 'Me gustar\u00EDa agendar una evaluaci\u00F3n gratuita.'
             );
             window.open('https://wa.me/525512345678?text=' + msg, '_blank');
             form.innerHTML =
                 '<div style="text-align:center;padding:40px 20px">' +
                 '<div style="font-size:3rem;margin-bottom:18px">\u2705</div>' +
-                '<h3 style="color:var(--navy);font-size:1.5rem;margin-bottom:14px">\u00A1Solicitud Enviada!</h3>' +
-                '<p style="color:var(--text-muted);font-size:1rem;line-height:1.7">Hemos abierto WhatsApp con sus datos.<br>' +
-                'Tambi\u00E9n puede llamarnos al <a href="tel:+525512345678" style="color:var(--gold);font-weight:700">55 1234-5678</a></p></div>';
+                '<h3 style="color:#0d1b2a;font-size:1.5rem;margin-bottom:14px">\u00A1Solicitud Enviada!</h3>' +
+                '<p style="color:#666;font-size:1rem;line-height:1.7">Hemos abierto WhatsApp con sus datos.<br>' +
+                'Tambi\u00E9n puede llamarnos al <a href="tel:+525512345678" style="color:#c5a059;font-weight:700">55 1234-5678</a><br>' +
+                'o escribirnos a <a href="mailto:contacto@ortizlopez.com.mx" style="color:#c5a059;font-weight:700">contacto@ortizlopez.com.mx</a></p></div>';
         });
     }
 
-})();
+}());
 </script>
 
 </body>
