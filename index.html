@@ -78,7 +78,7 @@
         ============================================ */
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
 
         body {
             font-family: 'Lato', sans-serif;
@@ -128,6 +128,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            overflow: visible;
         }
 
         .logo {
@@ -840,6 +841,9 @@
         ============================================ */
         @media (max-width: 1100px) {
             .footer-grid { grid-template-columns: 1fr 1fr; }
+            nav ul { gap: 18px; }
+            .logo { font-size: 18px; }
+            .header-contact { display: none; }
         }
 
         @media (max-width: 992px) {
@@ -848,24 +852,34 @@
             .form-group.full { grid-column: 1; }
         }
 
-        @media (max-width: 768px) {
+        /* ── Móvil / tablet: hamburguesa activa ── */
+        @media (max-width: 1024px) {
             :root { --header-h: 70px; }
-            nav { display: none; }
+            /* Ocultar nav de escritorio */
+            header > nav { display: none; }
             .header-contact { display: none; }
             .header-cta-desktop { display: none; }
+            /* Mostrar hamburguesa */
             .hamburger { display: flex; }
+            /* Logo más compacto */
+            .logo { font-size: 17px; letter-spacing: 0.5px; }
             .trust-bar { margin-top: 0; }
             .contact-wrapper { padding: 35px 25px; }
-            .footer-grid { grid-template-columns: 1fr; gap: 35px; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 35px; }
             .footer-bottom { flex-direction: column; text-align: center; }
             .modal-box { padding: 35px 25px; }
             .locations-grid { grid-template-columns: 1fr 1fr; }
         }
 
+        @media (max-width: 640px) {
+            .footer-grid { grid-template-columns: 1fr; }
+            .locations-grid { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 480px) {
+            .logo { font-size: 15px; letter-spacing: 0; }
             .hero-buttons { flex-direction: column; }
             .hero-buttons .btn-gold, .hero-buttons .btn-outline { text-align: center; }
-            .locations-grid { grid-template-columns: 1fr; }
             .whatsapp-float { bottom: 20px; right: 20px; width: 52px; height: 52px; }
         }
     </style>
@@ -893,7 +907,7 @@
     <!-- ✅ HEADER con teléfono visible y hamburguesa -->
     <header>
         <a href="#inicio" onclick="switchPage('inicio')" class="logo" aria-label="Ortiz & López Consultoría - Inicio">
-            ORTIZ&nbsp;&NBSP;LÓPEZ <span>Consultoría</span>
+            ORTIZ&nbsp;&amp;&nbsp;LÓPEZ <span>Consultoría</span>
         </a>
 
         <nav role="navigation" aria-label="Navegación principal">
@@ -1266,9 +1280,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                             55 1234-5678
                         </a>
-                        <a href="mailto:contacto@ortizlopez.com.mx" class="contact-channel" aria-label="Enviar correo electrónico">
+                        <a href="/cdn-cgi/l/email-protection#63000c0d170200170c230c11170a190f0c1306194d000c0e4d0e1b" class="contact-channel" aria-label="Enviar correo electrónico">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                            contacto@ortizlopez.com.mx
+                            <span class="__cf_email__" data-cfemail="ceada1a0baafadbaa18ea1bcbaa7b4a2a1beabb4e0ada1a3e0a3b6">[email&#160;protected]</span>
                         </a>
                         <a href="https://wa.me/525512345678?text=Hola%2C%20quiero%20agendar%20una%20evaluación%20sin%20costo." target="_blank" rel="noopener" class="contact-channel whatsapp" aria-label="Contactar por WhatsApp">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
@@ -1374,7 +1388,7 @@
                 </div>
                 <div class="footer-contact-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    <a href="mailto:contacto@ortizlopez.com.mx">contacto@ortizlopez.com.mx</a>
+                    <a href="/cdn-cgi/l/email-protection#d8bbb7b6acb9bbacb798b7aaacb1a2b4b7a8bda2f6bbb7b5f6b5a0"><span class="__cf_email__" data-cfemail="92f1fdfce6f3f1e6fdd2fde0e6fbe8fefde2f7e8bcf1fdffbcffea">[email&#160;protected]</span></a>
                 </div>
                 <div class="footer-contact-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1417,7 +1431,7 @@
                 <li>Enviarle información relacionada con nuestros servicios (previo consentimiento).</li>
             </ul>
             <p><strong>Transferencia de Datos:</strong> Sus datos personales NO serán transferidos a terceros sin su consentimiento expreso, salvo en los casos previstos por la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).</p>
-            <p><strong>Derechos ARCO:</strong> Usted tiene derecho de Acceso, Rectificación, Cancelación y Oposición al tratamiento de sus datos. Para ejercerlos, diríjase a <a href="mailto:privacidad@ortizlopez.com.mx">privacidad@ortizlopez.com.mx</a>.</p>
+            <p><strong>Derechos ARCO:</strong> Usted tiene derecho de Acceso, Rectificación, Cancelación y Oposición al tratamiento de sus datos. Para ejercerlos, diríjase a <a href="/cdn-cgi/l/email-protection#e191938897808288858085a18e9395889b8d8e91849bcf828e8ccf8c99"><span class="__cf_email__" data-cfemail="e292908b9483818b868386a28d90968b988e8d928798cc818d8fcc8f9a">[email&#160;protected]</span></a>.</p>
             <p><strong>Cambios al Aviso:</strong> Cualquier modificación será publicada en nuestro sitio web. Última actualización: marzo 2026.</p>
         </div>
     </div>
@@ -1439,7 +1453,7 @@
     <!-- ============================================
          SCRIPTS
     ============================================ -->
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ─── Navegación multipágina con hash ───────────────────────────────────
     function switchPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1638,15 +1652,4 @@
         this.innerHTML = `
             <div style="text-align:center; padding:40px 20px;">
                 <div style="font-size:3rem; margin-bottom:20px;">✅</div>
-                <h3 style="color:var(--navy); font-size:1.6rem; margin-bottom:15px;">¡Solicitud Enviada!</h3>
-                <p style="color:var(--text-muted); font-size:1rem; line-height:1.7;">
-                    Hemos abierto WhatsApp con sus datos. Si prefiere,<br>
-                    también puede llamarnos al <a href="tel:+525512345678" style="color:var(--gold); font-weight:700;">55 1234-5678</a><br>
-                    o escribirnos a <a href="mailto:contacto@ortizlopez.com.mx" style="color:var(--gold); font-weight:700;">contacto@ortizlopez.com.mx</a>
-                </p>
-            </div>`;
-    });
-    </script>
-
-</body>
-</html>
+                <h3 style="color:var(--navy); font-size:1.6rem; margin-bottom:15px;">¡Sol
